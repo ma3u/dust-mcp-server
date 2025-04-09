@@ -113,8 +113,14 @@ export default (server: McpServer) => {
           context
         );
         
+        // Define the result type to match MCP SDK expectations
+        interface McpToolResult {
+          content: Array<{ type: "text"; text: string }>;
+          [key: string]: unknown;
+        }
+        
         // Prepare the result
-        const result = {
+        const result: McpToolResult = {
           content: [{
             type: "text",
             text: `Agent response to query: "${params.query}"\n\n${JSON.stringify(response, null, 2)}`
@@ -129,13 +135,15 @@ export default (server: McpServer) => {
         
         // Include full response if requested
         if (params.includeResponse) {
-          result.metadata['agentResponse'] = response;
+          // Add agentResponse to result with type safety
+          (result as any).agentResponse = response;
         }
         
         return result;
       } catch (error) {
         console.error('Error querying health agent:', error);
-        throw new Error(`Failed to query health agent: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        throw new Error(`Failed to query health agent: ${errorMessage}`);
       }
     }
   );
@@ -265,7 +273,8 @@ export default (server: McpServer) => {
         };
       } catch (error) {
         console.error('Error generating health insights:', error);
-        throw new Error(`Failed to generate health insights: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        throw new Error(`Failed to generate health insights: ${errorMessage}`);
       }
     }
   );

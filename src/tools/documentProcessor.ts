@@ -178,7 +178,8 @@ export default (server: McpServer) => {
         };
       } catch (error) {
         console.error('Error processing document:', error);
-        throw new Error(`Failed to process document: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        throw new Error(`Failed to process document: ${errorMessage}`);
       }
     }
   );
@@ -230,7 +231,14 @@ export default (server: McpServer) => {
         }
         
         // Prepare response
-        const responseData = {
+        const responseData: {
+          documentId: any;
+          fileName: any;
+          fileType: any;
+          processingDate: any;
+          structuredData: any;
+          extractedText?: string;
+        } = {
           documentId: processedData.documentId,
           fileName: processedData.originalName,
           fileType: processedData.fileType,
@@ -240,7 +248,10 @@ export default (server: McpServer) => {
         
         // Include raw text if requested
         if (params.includeRawText) {
-          responseData['extractedText'] = processedData.extractedText;
+          // Add extractedText if it exists
+          if ('extractedText' in processedData) {
+            responseData.extractedText = processedData.extractedText;
+          }
         }
         
         // Return document data
@@ -253,7 +264,8 @@ export default (server: McpServer) => {
         };
       } catch (error) {
         console.error('Error retrieving document:', error);
-        throw new Error(`Failed to retrieve document: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        throw new Error(`Failed to retrieve document: ${errorMessage}`);
       }
     }
   );

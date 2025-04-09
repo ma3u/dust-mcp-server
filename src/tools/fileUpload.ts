@@ -94,7 +94,8 @@ export default (server: McpServer) => {
         };
       } catch (error) {
         console.error('Error uploading document:', error);
-        throw new Error(`Failed to upload document: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        throw new Error(`Failed to upload document: ${errorMessage}`);
       }
     }
   );
@@ -182,7 +183,8 @@ export default (server: McpServer) => {
         };
       } catch (error) {
         console.error('Error listing documents:', error);
-        throw new Error(`Failed to list documents: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        throw new Error(`Failed to list documents: ${errorMessage}`);
       }
     }
   );

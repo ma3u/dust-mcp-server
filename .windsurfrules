@@ -11,6 +11,7 @@
 - Use .env environment variables for sensitive data
 - Use .env.template for environment variables template
 - Use TypeScript for type safety and better code quality
+- Stop after each milestone, build, start, and test
 
 ### Logging Strategy
 - Never use `console.log()` as it breaks STDIO transport of Claude Desktop communication
