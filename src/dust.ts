@@ -2,7 +2,7 @@ import { z } from "zod";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 export default (server: McpServer) => {
-  // Define a calculator tool
+
   server.tool(
     "dust",
     "The dust tool",
