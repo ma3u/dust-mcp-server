@@ -1,8 +1,6 @@
 
 
-Use the MCP tools create and MCP Server
-https://github.com/f/mcptools
-
+# Use the [MCP tools](https://github.com/f/mcptools) create the stub and manage MCP Servers
 
 1. create a new MCP server
 ```bash
@@ -26,7 +24,7 @@ mcp alias list
 ```
 5. call the tool using alias
 ```bash
-mcp call dust --params '{"aNumber": 42, "aString": "hello", "someEnum": "option1"}'
+mcp call dust node build/index.js --params '{"aNumber": 42, "aString": "hello", "someEnum": "option1"}'
 ```
 6. scan all MCP configs on your system
 ```bash
@@ -34,7 +32,7 @@ mcp configs scan
 ```
 7. Setup  Claude Desktop config with the mcp server
 ```bash
-mcp configs set claude-desktop demo /Users/ma3u/.nvm/versions/node/v22.14.0/bin/node /Users/ma3u/projects/mcp-server-new/build/index.js
+mcp configs set claude-desktop dust /Users/ma3u/.nvm/versions/node/v22.14.0/bin/node /Users/ma3u/projects/dust-mcp-server/build/index.js
 ```
 
 8. Call the tool from Claude Desktop

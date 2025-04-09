@@ -8,6 +8,9 @@
   - SSE for real-time updates and streaming
 - Use `modelcontextprotocol/mcp-core` and official TypeScript SDK for protocol compliance
 - Support both current (2024-11-05) and latest (2025-03-26) MCP specifications
+- Use .env environment variables for sensitive data
+- Use .env.template for environment variables template
+- Use TypeScript for type safety and better code quality
 
 ### Logging Strategy
 - Never use `console.log()` as it breaks STDIO transport of Claude Desktop communication
