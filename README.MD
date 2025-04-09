@@ -16,17 +16,17 @@ mcp tools node build/index.js
 
 3. call the tool
 ```bash
-mcp call demo node build/index.js --params '{"aNumber": 42, "aString": "hello", "someEnum": "option1"}'
+mcp call dust node build/index.js --params '{"aNumber": 42, "aString": "hello", "someEnum": "option1"}'
 ```
 
 4. add the tool to the alias and list the aliases
 ```bash
-mcp alias add demo node build/index.js
+mcp alias add dust node build/index.js
 mcp alias list
 ```
 5. call the tool using alias
 ```bash
-mcp call demo --params '{"aNumber": 42, "aString": "hello", "someEnum": "option1"}'
+mcp call dust --params '{"aNumber": 42, "aString": "hello", "someEnum": "option1"}'
 ```
 6. scan all MCP configs on your system
 ```bash
@@ -36,3 +36,5 @@ mcp configs scan
 ```bash
 mcp configs set claude-desktop demo /Users/ma3u/.nvm/versions/node/v22.14.0/bin/node /Users/ma3u/projects/mcp-server-new/build/index.js
 ```
+
+8. Call the tool from Claude Desktop

@@ -1,0 +1,104 @@
+# MCP Server Best Practices for Windsurf
+
+## Server Architecture
+
+### Core Components
+- Implement proper transport handling with dual support:
+  - STDIO for initial connections (Claude Desktop)
+  - SSE for real-time updates and streaming
+- Use `modelcontextprotocol/mcp-core` and official TypeScript SDK for protocol compliance
+- Support both current (2024-11-05) and latest (2025-03-26) MCP specifications
+
+### Logging Strategy
+- Never use `console.log()` as it breaks STDIO transport of Claude Desktop communication
+- Use alternatives:
+  - `console.error()` for basic debugging
+  - Implement a dedicated logger with `logger.debug()`
+- Implement MDC (Mapped Diagnostic Context) for request tracing
+
+## MCP Protocol Implementation
+
+### Session Management
+- Use Map or Redis for tracking active sessions
+- Implement TTL-based session expiration to prevent memory leaks
+- Ensure proper session validation and ownership verification
+- Store session data securely, encrypting sensitive information
+
+### Resource Handling
+- Implement proper path validation to prevent traversal attacks
+- Use asynchronous operations for I/O-bound tasks
+- Set appropriate content types for different resources
+- Implement caching for frequently accessed resources
+
+### Tools Implementation
+- Map MCP tools to Dust agent capabilities
+- Provide clear descriptions and input schemas using Zod
+- Implement proper error handling with standardized McpError
+- Return well-structured responses
+
+## Prompt Implementation Strategy
+
+### Schema Validation
+- Use Zod for argument validation
+
+### Template Management
+- Store prompts in version-controlled JSON files
+- Use Mustache.js for variable substitution
+- Implement caching for frequently accessed templates
+- Performance Optimization
+  - Precompile templates during server startup
+  - Implement LRU cache for prompt responses
+  - Use streaming for long-form prompt outputs
+- Protocol Mapping Updates for following MCP Elements
+    - Prompt Discovery: /prompts/list endpoint with ETag
+    - Prompt Retrieval: GET /prompts/{name} with JWT validation
+    - Prompt Versioning: Semantic versioning in template metadata
+
+## Dust Agent Integration
+
+### Agent Configuration
+- Use the official Dust SDK for TypeScript
+- Configure agents with appropriate capabilities
+- Implement context-aware agent prompting
+- Handle streaming responses correctly
+
+### Error Handling
+- Propagate errors properly between systems
+- Use appropriate error types and codes
+- Avoid exposing sensitive information in error messages
+- Log detailed error information for debugging
+
+## Security Measures
+
+### Data Protection
+- Use environment variables for sensitive data (API keys)
+- Implement regex-based log masking for PII and credentials
+- Validate all user inputs with Zod schemas
+- Secure resource access with proper authentication
+
+### Performance Considerations
+- Implement rate limiting for external API calls
+- Use caching strategies for frequently accessed data
+- Handle timeouts gracefully
+- Test with 100+ concurrent sessions
+
+## Testing and Debugging
+
+### Validation Approach
+- Use MCP Inspector for interactive testing
+- Implement comprehensive unit tests for all components
+- Test both success and error paths
+- Mock external dependencies
+
+### Troubleshooting
+- Check reference implementation for TypeScript
+- Review logs in dedicated log folder
+- Monitor Claude Desktop logs for client-side issues
+- Use health check endpoints (/live, /ready) for monitoring
+
+## Documentation
+- Requirements Analysis and Planning, Architecture and Design document in docs/decision-records. Each decision record should be a markdown file.
+- Document all tools, resources, and prompts in docs/DEVELOPERS.md
+- Provide clear usage examples
+- Include troubleshooting guides
+- Maintain API documentation
