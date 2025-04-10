@@ -47,7 +47,9 @@ mcp tools node build/index.js
 3. Call a specific tool
 
 ```bash
-mcp call query_dust_agent node build/index.js --params '{"agentId": "agent-id", "query": "Your question or prompt here", "documentIds": ["doc-id-1", "doc-id-2"], "context": {"additionalInfo": "Any extra context"}, "conversationId": "optional-conversation-id"}'
+mcp call list_dust_agents node build/index.js --limit 10
+
+mcp call query_dust_agent node build/index.js --params '{"query": "Give me a summary"}'
 ```
 
 4. Add the server to your aliases
@@ -66,6 +68,34 @@ mcp configs set claude-desktop dust /path/to/node /path/to/dust-mcp-server/build
 ## Available MCP Tools
 
 The server provides the following MCP tools for document management and analysis via the Dust.tt platform:
+
+### `list_dust_agents`
+
+Lists available Dust agents.
+
+**Parameters:**
+
+- None
+
+**Returns:**
+
+- List of available Dust agents
+
+### `query_dust_agent`
+
+Queries a Dust agent with context from processed documents.
+
+**Parameters:**
+
+- `agentId` (string, required): ID of the Dust agent to query
+- `query` (string, required): The prompt or question to send to the agent
+- `documentIds` (string[], optional): IDs of processed documents to include as context
+- `context` (object, optional): Optional additional context data to provide to the agent
+- `conversationId` (string, optional): Optional conversation ID for continuing an existing conversation
+
+**Returns:**
+
+- Agent's response to the query with relevant insights
 
 ### `upload_document`
 
@@ -145,22 +175,6 @@ Retrieves a processed document by its ID.
 mcp call get_document node build/index.js --params '{"documentId": "doc-id-123", "includeRawText": true}'
 ```
 
-### `query_dust_agent`
-
-Queries a Dust agent with context from processed documents.
-
-**Parameters:**
-
-- `agentId` (string, required): ID of the Dust agent to query
-- `query` (string, required): The prompt or question to send to the agent
-- `documentIds` (string[], optional): IDs of processed documents to include as context
-- `context` (object, optional): Optional additional context data to provide to the agent
-- `conversationId` (string, optional): Optional conversation ID for continuing an existing conversation
-
-**Returns:**
-
-- Agent's response to the query with relevant insights
-
 ### `generate_insights`
 
 Generates insights and recommendations based on processed documents.
@@ -185,11 +199,9 @@ mcp call generate_insights node build/index.js --params '{"documentIds": ["doc-i
 ## Project Structure
 
 - `/src`: Source code
-  - `/auth`: Authentication modules (placeholder for Milestone 2)
   - `/middleware`: Express middleware including file upload handling
   - `/services`: Service layer for external API integrations
   - `/tools`: MCP tool implementations
-  - `/transport`: Transport layer handling (STDIO and HTTP/SSE)
 - `/build`: Compiled JavaScript code
 - `/uploads`: Directory for uploaded documents
 - `/processed`: Directory for processed document data
@@ -213,3 +225,7 @@ npm run build
 
 After setting up the MCP server, you can use it directly with Claude Desktop:
 npm 
+
+## Architecture
+
+![alt text](image.png)

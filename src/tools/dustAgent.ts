@@ -15,13 +15,29 @@ const PROCESSED_DIR = path.join(process.cwd(), 'processed');
 
 export default (server: McpServer) => {
   // Define agent query tool
+  // Function to get the default agent ID from environment
+  function getDefaultAgentId(): string | null {
+    const agentIdsString = process.env.DUST_AGENT_IDs;
+    if (!agentIdsString) {
+      return null;
+    }
+    
+    // Parse the comma-separated list and get the first agent ID
+    const agentIds = agentIdsString.split(',').map(id => id.trim());
+    if (agentIds.length === 0) {
+      return null;
+    }
+    
+    return agentIds[0];
+  }
+
   server.tool(
     "query_dust_agent",
     "Query a specific Dust agent with a prompt and optional context",
     {
       agentId: z.string({
-        description: "ID of the Dust agent to query"
-      }),
+        description: "ID of the Dust agent to query (optional, will use the first agent from DUST_AGENT_IDs if not provided)"
+      }).optional(),
       query: z.string({
         description: "The prompt or question to send to the agent"
       }),
@@ -65,9 +81,17 @@ export default (server: McpServer) => {
           }));
         }
         
+        // Get the agent ID to use (either provided or default from environment)
+        const agentId = params.agentId || getDefaultAgentId();
+        
+        // Check if we have a valid agent ID
+        if (!agentId) {
+          throw new Error("No agent ID provided and no default agent ID found in DUST_AGENT_IDs environment variable");
+        }
+        
         // Query the Dust agent using our service
         const response = await queryDustAgent(
-          params.agentId,
+          agentId,
           params.query,
           context,
           params.conversationId
@@ -82,7 +106,7 @@ export default (server: McpServer) => {
               : JSON.stringify(response.result, null, 2)
           }],
           metadata: {
-            agentId: params.agentId,
+            agentId: agentId, // Use the resolved agent ID
             query: params.query,
             documentIds: params.documentIds,
             conversationId: response.conversationId,
@@ -234,7 +258,7 @@ export default (server: McpServer) => {
     async (params) => {
       try {
         // Get list of agents
-        const agents = await listDustAgents(params.limit || 10);
+        const agents = await listDustAgents(undefined, params.limit || 10);
         
         if (!agents || agents.length === 0) {
           return {
