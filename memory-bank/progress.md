@@ -47,6 +47,14 @@ This file tracks the project's progress using a task list format.
 * Fixed TypeScript linting issues in the codebase
 * Improved markdown formatting in memory-bank files
 * Documented API integration decisions in decisionLog.md
+* Generalized MCP tools by removing health-specific components:
+  * Renamed `process_health_document` to `process_document`
+  * Renamed `get_health_document` to `get_document`
+  * Renamed `upload_health_document` to `upload_document`
+  * Updated document types to be more general ("report", "correspondence", "data_analysis", "general")
+  * Updated focus areas in `generate_insights` to be more general ("summary", "details", "overview", "trends")
+  * Updated server name from "health-data-mcp-server" to "dust-mcp-server"
+  * Updated README.MD to reflect all changes
 
 ## Next Steps
 

@@ -34,7 +34,7 @@ async function ensureDirectories() {
 
 // Initialize server
 const server = new McpServer({
-  name: "health-data-mcp-server",
+  name: "dust-mcp-server",
   version: "1.0.0"
 });
 

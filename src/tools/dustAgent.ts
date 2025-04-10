@@ -141,7 +141,7 @@ export default (server: McpServer) => {
       documentIds: z.array(z.string(), {
         description: "IDs of processed documents to analyze"
       }),
-      focusArea: z.enum(["nutrition", "lab_results", "overall_health", "trends"], {
+      focusArea: z.enum(["summary", "details", "overview", "trends"], {
         description: "Area to focus the analysis on"
       }).optional(),
       timeframe: z.enum(["recent", "all", "past_month", "past_year"], {
@@ -182,10 +182,10 @@ export default (server: McpServer) => {
         
         // Generate query based on focus area
         let query = "Analyze data and provide insights";
-        if (params.focusArea === "nutrition") {
-          query = "Analyze nutrition logs and provide dietary insights and recommendations";
-        } else if (params.focusArea === "lab_results") {
-          query = "Analyze lab results and identify any concerning values or trends";
+        if (params.focusArea === "summary") {
+          query = "Analyze documents and provide a concise summary";
+        } else if (params.focusArea === "details") {
+          query = "Analyze documents and extract detailed information";
         } else if (params.focusArea === "trends") {
           query = "Identify trends in metrics over time and provide analysis";
         }
@@ -208,7 +208,7 @@ export default (server: McpServer) => {
           }],
           metadata: {
             documentIds: params.documentIds,
-            focusArea: params.focusArea || "overall_health",
+            focusArea: params.focusArea || "overview",
             timeframe: params.timeframe || "all",
             conversationId: response.conversationId,
             timestamp: response.timestamp

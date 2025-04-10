@@ -26,11 +26,11 @@ async function extractTextFromDocument(filePath: string, fileExtension: string):
   
   // For now, we'll return a mock response based on file type
   if (fileExtension.toLowerCase() === '.pdf') {
-    return `[Mock PDF extraction] This document appears to contain lab results for various health metrics including cholesterol, glucose, and vitamin levels.`;
+    return `[Mock PDF extraction] This document appears to contain various metrics, data points, and analysis results.`;
   } else if (['.jpg', '.jpeg', '.png'].includes(fileExtension.toLowerCase())) {
-    return `[Mock image OCR] Medical report showing patient vitals and doctor's notes regarding recent examination.`;
+    return `[Mock image OCR] Document containing text, figures, and tabular data extracted from image.`;
   } else {
-    return `[Mock text extraction] Health document content extracted from ${path.basename(filePath)}.`;
+    return `[Mock text extraction] Document content extracted from ${path.basename(filePath)}.`;
   }
 }
 
@@ -39,14 +39,14 @@ async function classifyDocument(text: string): Promise<string> {
   // In a real implementation, this would use NLP or ML to classify the document
   
   // Simple keyword-based classification for demonstration
-  if (text.includes('lab results') || text.includes('cholesterol') || text.includes('glucose')) {
-    return 'lab_report';
-  } else if (text.includes('medical report') || text.includes('examination') || text.includes('doctor')) {
-    return 'medical_record';
-  } else if (text.includes('nutrition') || text.includes('diet') || text.includes('food')) {
-    return 'nutrition_log';
+  if (text.includes('report') || text.includes('analysis') || text.includes('results')) {
+    return 'report';
+  } else if (text.includes('letter') || text.includes('correspondence') || text.includes('memo')) {
+    return 'correspondence';
+  } else if (text.includes('data') || text.includes('statistics') || text.includes('metrics')) {
+    return 'data_analysis';
   } else {
-    return 'unknown';
+    return 'general';
   }
 }
 
@@ -55,44 +55,38 @@ async function extractInformation(text: string, documentType: string): Promise<a
   // In a real implementation, this would use NLP or ML to extract structured information
   
   // Return different mock data based on document type
-  if (documentType === 'lab_report') {
+  if (documentType === 'report') {
     return {
       metrics: [
-        { name: 'Total Cholesterol', value: '185', unit: 'mg/dL', reference: '< 200 mg/dL' },
-        { name: 'HDL Cholesterol', value: '55', unit: 'mg/dL', reference: '> 40 mg/dL' },
-        { name: 'LDL Cholesterol', value: '110', unit: 'mg/dL', reference: '< 130 mg/dL' },
-        { name: 'Triglycerides', value: '120', unit: 'mg/dL', reference: '< 150 mg/dL' },
-        { name: 'Glucose', value: '95', unit: 'mg/dL', reference: '70-99 mg/dL' }
+        { name: 'Metric 1', value: '85', unit: 'units' },
+        { name: 'Metric 2', value: '55', unit: 'units' },
+        { name: 'Metric 3', value: '110', unit: 'units' },
+        { name: 'Metric 4', value: '120', unit: 'units' },
+        { name: 'Metric 5', value: '95', unit: 'units' }
       ],
       date: '2025-03-15',
-      labName: 'HealthLab Services'
+      author: 'Report Author'
     };
-  } else if (documentType === 'medical_record') {
+  } else if (documentType === 'correspondence') {
     return {
-      vitals: {
-        bloodPressure: '120/80 mmHg',
-        heartRate: '72 bpm',
-        temperature: '98.6 °F',
-        respiratoryRate: '16 breaths/min',
-        oxygenSaturation: '98%'
-      },
-      diagnosis: 'Routine check-up, no significant findings',
-      recommendations: 'Continue current health regimen, follow up in 6 months',
+      sender: 'John Doe',
+      recipient: 'Jane Smith',
+      subject: 'Project Update',
+      body: 'Summary of correspondence content',
       date: '2025-03-20',
-      provider: 'Dr. Smith'
+      attachments: 2
     };
-  } else if (documentType === 'nutrition_log') {
+  } else if (documentType === 'data_analysis') {
     return {
-      meals: [
-        { time: 'Breakfast', foods: ['Oatmeal', 'Blueberries', 'Almond milk'], calories: 320 },
-        { time: 'Lunch', foods: ['Grilled chicken salad', 'Olive oil dressing'], calories: 450 },
-        { time: 'Dinner', foods: ['Salmon', 'Quinoa', 'Steamed vegetables'], calories: 520 }
+      datasets: [
+        { name: 'Dataset 1', count: 320, average: 45.2 },
+        { name: 'Dataset 2', count: 450, average: 62.7 },
+        { name: 'Dataset 3', count: 520, average: 33.9 }
       ],
-      totalCalories: 1290,
-      macros: {
-        protein: '95g',
-        carbs: '120g',
-        fat: '45g'
+      summary: {
+        totalCount: 1290,
+        overallAverage: 47.3,
+        trend: 'upward'
       },
       date: '2025-03-22'
     };
@@ -107,8 +101,8 @@ async function extractInformation(text: string, documentType: string): Promise<a
 export default (server: McpServer) => {
   // Define document processing tool
   server.tool(
-    "process_health_document",
-    "Process a health document to extract and structure its information",
+    "process_document",
+    "Process a document to extract and structure its information",
     {
       documentId: z.string({
         description: "ID of the document to process"
@@ -186,8 +180,8 @@ export default (server: McpServer) => {
 
   // Define document retrieval tool
   server.tool(
-    "get_health_document",
-    "Retrieve a processed health document by ID",
+    "get_document",
+    "Retrieve a processed document by ID",
     {
       documentId: z.string({
         description: "ID of the document to retrieve"

@@ -21,8 +21,8 @@ async function ensureUploadsDir() {
 export default (server: McpServer) => {
   // Define file upload tool
   server.tool(
-    "upload_health_document",
-    "Upload a health document (PDF or image) for processing",
+    "upload_document",
+    "Upload a document (PDF or image) for processing",
     {
       fileContent: z.string({
         description: "Base64-encoded file content"
@@ -30,8 +30,8 @@ export default (server: McpServer) => {
       fileName: z.string({
         description: "Original file name with extension (e.g., 'lab_results.pdf')"
       }),
-      fileType: z.enum(["lab_report", "medical_record", "nutrition_log"], {
-        description: "Type of health document being uploaded"
+      fileType: z.enum(["report", "correspondence", "data_analysis", "general"], {
+        description: "Type of document being uploaded"
       }),
       description: z.string({
         description: "Brief description of the document"
@@ -105,8 +105,8 @@ export default (server: McpServer) => {
     "list_documents",
     "List all uploaded documents",
     {
-      fileType: z.enum(["lab_report", "medical_record", "nutrition_log", "all"], {
-        description: "Type of health documents to list"
+      fileType: z.enum(["report", "correspondence", "data_analysis", "general", "all"], {
+        description: "Type of documents to list"
       }).optional(),
       limit: z.number({
         description: "Maximum number of documents to return"
