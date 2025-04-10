@@ -32,24 +32,27 @@
 - [x] Implement transport handling (STDIO and HTTP/SSE).
 - [x] Set up environment configuration and security.
 
-### Milestone 2: Authentication and Authorization (Not for STDIO transport Claude Desktop)
+### Milestone 2: DUST Integration
 
-- [ ] Implement API key authentication.
-- [ ] Create JWT authentication for web access.
-- [ ] Develop session management.
-- [ ] Implement role-based access control.
-- [ ] Create resource-based permissions.
-- [ ] Develop permission enforcement middleware.
-  
-### Milestone 3: File Upload and Processing
+- [ ] Implement single agent dust query: Enables direct querying of one specific configured Dust agent
+- [ ] Implement Dynamic Agent Discovery
+- [ ] Implement dust queries to multiple agents: Enables querying of multiple Dust agents, choose the right ones by context and prompt of the user 
+- [ ] Implement parallel and Sequential execution with context passing with multiple Dust Agents
+- [ ] Consolidate the results, focus on the reduce duplications  
+- [ ] User can upload files to the Dust agent via MCP Client (Claude Desktop)
+  - [ ] Creates dedicated upload directory
+  - [ ] Enforces security policies via environment variables
+  - [ ] Implement File Handling in Dust Agent
+  - [ ] 
 
-- [ ] Implement file upload endpoints with Multer.
-- [ ] Create document storage and management.
-- [ ] Develop PDF text extraction.
-- [ ] Implement OCR for image processing.
-- [ ] Create document classification logic.
-- [ ] Develop information extraction for different document types.
-- [ ] Implement data structuring and storage.
+### Milestone 3: Advanced MCP capabilituies
+
+- [X] Environment Configuration - Setting up connections to various data sources 
+- [ ] Session State Management - Preserving context across interactions, based on the provided MCP SDK
+- [ ] Use Dust's conversation.sId for session tracking
+- [ ] Context-Aware Multi-Agent Routing
+- [ ] Cache agent configurations (TTL: 5 mins)
+- [ ] Implement agent filtering by capability tags
 
 ## Phase 4: Testing and Quality Assurance
 
