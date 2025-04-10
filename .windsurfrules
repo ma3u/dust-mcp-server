@@ -390,14 +390,7 @@ windsurfrules:
 ### Data Protection
 - Use environment variables for sensitive data (API keys)
 - Implement regex-based log masking for PII and credentials
-- Validate all user inputs with Zod schemas
-- Secure resource access with proper authentication
 
-### Performance Considerations
-- Implement rate limiting for external API calls
-- Use caching strategies for frequently accessed data
-- Handle timeouts gracefully
-- Test with 100+ concurrent sessions
 
 ## Testing and Debugging
 
@@ -414,8 +407,7 @@ windsurfrules:
 - Use health check endpoints (/live, /ready) for monitoring
 
 ## Documentation
-- Requirements Analysis and Planning, Architecture and Design document in docs/decision-records. Each decision record should be a markdown file.
+- Store the Requirements Analysis and Planning, Architecture and Design document in docs/decision-records. Each decision record should be a markdown file.
 - Document all tools, resources, and prompts in docs/DEVELOPERS.md
 - Provide clear usage examples
 - Include troubleshooting guides
-- Maintain API documentation
