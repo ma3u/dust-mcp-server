@@ -8,6 +8,7 @@ It is intended to be updated as the project evolves.
 
 * **TypeScript with Strong Typing**: Using Zod for runtime validation and TypeScript interfaces for static typing
 * **Tool Registration Pattern**: Consistent pattern for registering MCP tools with server
+
   ```typescript
   server.tool(
     "tool_name",
@@ -16,6 +17,7 @@ It is intended to be updated as the project evolves.
     async (params) => { /* Implementation */ }
   );
   ```
+
 * **Async/Await Pattern**: Consistent use of async/await for asynchronous operations
 * **Error Handling**: Try/catch blocks with structured error reporting
 * **Directory Initialization**: Consistent pattern for ensuring directories exist before use

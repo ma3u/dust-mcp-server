@@ -76,8 +76,8 @@ const server = createServer({
 
 // Register tools
 server.tool(
-  'process_health_document',
-  'Process a health document (PDF or image)',
+  'process_document',
+  'Process a document (PDF or image)',
   {
     documentId: z.string({
       description: 'ID of the uploaded document'

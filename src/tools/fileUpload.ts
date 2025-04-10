@@ -102,8 +102,8 @@ export default (server: McpServer) => {
 
   // Define document list tool
   server.tool(
-    "list_health_documents",
-    "List all uploaded health documents",
+    "list_documents",
+    "List all uploaded documents",
     {
       fileType: z.enum(["lab_report", "medical_record", "nutrition_log", "all"], {
         description: "Type of health documents to list"

@@ -1,8 +1,8 @@
 
 
-# Health Data MCP Server
+# Dust Agent MCP Server
 
-A Model Context Protocol (MCP) server for health document processing and analysis, designed to work with Claude Desktop via STDIO transport.
+A Model Context Protocol (MCP) server for  document processing and analysis, designed to work with Claude Desktop via STDIO transport.
 
 ## Setup and Configuration
 
@@ -65,24 +65,24 @@ mcp configs set claude-desktop health /path/to/node /path/to/dust-mcp-server/bui
 
 ## Available Tools
 
-The server provides the following tools for health document management and analysis:
+The server provides the following tools for document management and analysis:
 
-### `upload_health_document`
+### `upload_document`
 
-Uploads a health document (PDF or image) for storage and future processing.
+Uploads a document (PDF or image) for storage and future processing.
 
 **Parameters:**
 
 - `fileContent` (string, required): Base64-encoded content of the file
 - `fileName` (string, required): Name of the file including extension
-- `fileType` (string, required): Type of health document (e.g., "medical_record", "lab_report")
+- `fileType` (string, required): Type of  document (e.g., "medical_record", "lab_report")
 - `description` (string, optional): Additional description of the document
 
 **Returns:**
 
 - Document ID and metadata for the uploaded file
 
-### `list_health_documents`
+### `list_documents`
 
 Lists all uploaded health documents with optional filtering.
 
@@ -96,9 +96,9 @@ Lists all uploaded health documents with optional filtering.
 
 - List of document IDs and metadata
 
-### `process_health_document`
+### `process_document`
 
-Processes a previously uploaded health document to extract and structure its information.
+Processes a previously uploaded document to extract and structure its information.
 
 **Parameters:**
 
@@ -108,9 +108,9 @@ Processes a previously uploaded health document to extract and structure its inf
 
 - Processing status and extracted information
 
-### `get_health_document`
+### `get_document`
 
-Retrieves a processed health document by its ID.
+Retrieves a processed document by its ID.
 
 **Parameters:**
 
@@ -121,9 +121,9 @@ Retrieves a processed health document by its ID.
 
 - Document metadata and structured data
 
-### `query_health_agent`
+### `query_dust_agent`
 
-Queries a Dust health agent with context from processed documents.
+Queries a Dust agent with context from processed documents.
 
 **Parameters:**
 
@@ -136,9 +136,9 @@ Queries a Dust health agent with context from processed documents.
 
 - Agent's response to the query with relevant insights
 
-### `generate_health_insights`
+### `generate_insights`
 
-Generates health insights and recommendations based on processed documents.
+Generates insights and recommendations based on processed documents.
 
 **Parameters:**
 
@@ -148,7 +148,7 @@ Generates health insights and recommendations based on processed documents.
 
 **Returns:**
 
-- Health insights, trends, and recommendations based on the documents
+- Insights, trends, and recommendations based on the documents
 
 ## Project Structure
 
