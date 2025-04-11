@@ -129,7 +129,12 @@ function getDefaultAgentId(): string {
 /**
  * Query a Dust agent with a message and optional context
  * 
- * This implementation aligns with the Dust SDK's createConversation and postUserMessage methods
+ * This implementation follows the exact Dust API structure as demonstrated in the curl command:
+ * curl --request POST \
+ *      --url https://dust.tt/api/v1/w/{workspaceId}/assistant/conversations \
+ *      --header 'accept: application/json' \
+ *      --header 'authorization: Bearer {apiKey}' \
+ *      --header 'content-type: application/json'
  * 
  * @param agentId ID of the agent to query (assistant ID)
  * @param query User message content
@@ -158,17 +163,72 @@ export async function queryDustAgent(
     if (process.env.NODE_ENV === "development") {
       // Simulate different responses based on query type
       let mockResult;
+      const conversationId = uuidv4();
+      
       if (query.toLowerCase().includes('summary') || query.toLowerCase().includes('summarize')) {
         mockResult = {
-          result: "Based on the provided documents, this is a summary of the key information...",
-          conversationId: uuidv4(),
+          result: `# Summary
+
+Based on the available information, here's a comprehensive summary:
+
+## Key Points
+
+1. The Dust MCP Server provides integration with Dust AI agents
+2. It supports file uploads, document processing, and agent querying
+3. The implementation uses direct API calls rather than the Dust SDK
+4. The server includes caching mechanisms for agent configurations
+
+## Current Status
+
+The server is operational and can list available agents. Document processing and agent querying functionality are implemented but may need further refinement.
+
+Would you like more specific information about any particular aspect of the system?`,
+          conversationId: conversationId,
+          agentId,
+          timestamp: new Date().toISOString()
+        };
+      } else if (query.toLowerCase().includes('help') || query.toLowerCase().includes('capabilities')) {
+        mockResult = {
+          result: `# Dust MCP Server Capabilities
+
+This MCP server provides the following capabilities:
+
+## Agent Interaction
+- Query Dust agents with natural language prompts
+- List available agents and their capabilities
+- Maintain conversation context across multiple interactions
+
+## Document Handling
+- Upload documents for processing
+- Extract structured data from documents
+- Include document content as context for agent queries
+
+## Integration
+- Connect with Dust AI through API integration
+- Support for various document types and formats
+- Extensible architecture for additional features
+
+How can I assist you with using these capabilities?`,
+          conversationId: conversationId,
           agentId,
           timestamp: new Date().toISOString()
         };
       } else {
         mockResult = {
-          result: "General analysis of your query: " + query,
-          conversationId: uuidv4(),
+          result: `I've analyzed your query: "${query}"
+
+Based on my understanding, you're asking about ${query.split(' ').slice(0, 3).join(' ')}...
+
+To provide a helpful response, I'd need more specific information about what you're looking for. Could you please provide more details or context about your question?
+
+In the meantime, here are some general points that might be relevant:
+
+1. The Dust MCP Server provides integration with various AI agents
+2. You can upload and process documents for analysis
+3. Conversations maintain context across multiple interactions
+
+Please let me know if you'd like information on a specific topic.`,
+          conversationId: conversationId,
           agentId,
           timestamp: new Date().toISOString()
         };
@@ -179,75 +239,43 @@ export async function queryDustAgent(
     // Normalize the base URL
     const baseUrl = DUST_API_URL.endsWith('/') ? DUST_API_URL.slice(0, -1) : DUST_API_URL;
     
-    // Step 1: Create or get a conversation
+    // For debugging purposes
+    process.stderr.write(`Querying Dust agent ${agentId} with query: ${query}\n`);
+    process.stderr.write(`Using API URL: ${baseUrl}/w/${workspaceId}\n`);
+    
+    // Step 1: Create a new conversation exactly as shown in the curl command
     let conversationSId: string;
     
     if (conversationId) {
       // Use existing conversation
       conversationSId = conversationId;
+      process.stderr.write(`Using existing conversation with ID: ${conversationSId}\n`);
     } else {
-      // Create a new conversation following SDK pattern
+      // Create a new conversation with minimal payload - exactly matching the curl command
       const createConversationUrl = `${baseUrl}/w/${workspaceId}/assistant/conversations`;
       
       try {
-        const createResponse = await axios.post(createConversationUrl, {
-          // Optional title can be provided here
-          // title: "New conversation",
-          // Optional visibility setting
-          // visibility: "unlisted",
-          // We can include the first message directly when creating the conversation
-          message: {
-            assistant: agentId,
-            content: query,
-            mentions: [],
-            context: {
-              username: process.env.DUST_USERNAME || "Anonymous User",
-              timezone: process.env.DUST_TIMEZONE || "UTC",
-              email: process.env.DUST_EMAIL || "",
-              fullname: process.env.DUST_FULLNAME || "",
-              ...context
-            }
-          },
-          // Set to true to wait for the agent's response
-          blocking: true
-        }, {
+        // Simple POST request with empty body - just like the curl command
+        const createResponse = await axios.post(createConversationUrl, {}, {
           headers: {
-            Authorization: `Bearer ${DUST_API_KEY}`,
-            "Content-Type": "application/json"
-          },
-          validateStatus: () => true // Accept all status codes to handle errors properly
+            'Authorization': `Bearer ${DUST_API_KEY}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
         });
         
-        // Handle error responses
-        if (createResponse.status !== 200) {
-          const errorMessage = createResponse.data?.error?.message || 
-            `API error: ${createResponse.status}`;
-          throw new Error(errorMessage);
-        }
+        process.stderr.write(`Create conversation response: ${JSON.stringify(createResponse.data)}\n`);
         
+        // Extract the conversation ID - should be in sId field
         if (!createResponse.data?.conversation?.sId) {
           throw new Error(`Failed to get conversation ID from response: ${JSON.stringify(createResponse.data)}`);
         }
         
         conversationSId = createResponse.data.conversation.sId;
-        
-        // If blocking was true, we already have the agent's response
-        if (createResponse.data.conversation.content && 
-            createResponse.data.conversation.content.length >= 2) {
-          // The first message is the user's, the second is the agent's response
-          const agentMessageVersion = createResponse.data.conversation.content[1];
-          const agentMessage = agentMessageVersion[agentMessageVersion.length - 1];
-          
-          return {
-            result: agentMessage.content,
-            conversationId: conversationSId,
-            messageId: agentMessage.sId,
-            agentId,
-            timestamp: new Date().toISOString()
-          };
-        }
+        process.stderr.write(`Created new conversation with ID: ${conversationSId}\n`);
       } catch (error: any) {
         if (error.response) {
+          process.stderr.write(`Error response: ${JSON.stringify(error.response.data)}\n`);
           throw new Error(`Failed to create conversation: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
         } else {
           throw error;
@@ -255,95 +283,225 @@ export async function queryDustAgent(
       }
     }
     
-    // Step 2: If we didn't get a response yet, send a message to the conversation
-    const messageUrl = `${baseUrl}/w/${workspaceId}/assistant/conversations/${conversationSId}/messages`;
-    
-    // Prepare message payload according to SDK and API documentation
-    const messagePayload = {
-      assistant: agentId,  // ID of the assistant to use
-      content: query,      // Content of the message
-      mentions: [],        // Required field according to API
-      context: {
-        // Required user context fields
-        username: process.env.DUST_USERNAME || "Anonymous User",
-        timezone: process.env.DUST_TIMEZONE || "UTC",
-        email: process.env.DUST_EMAIL || "",
-        fullname: process.env.DUST_FULLNAME || "",
-        // Add any additional context provided
-        ...context
-      }
-    };
-    
-    // Send the message
-    const messageResponse = await axios.post(messageUrl, messagePayload, {
-      headers: {
-        Authorization: `Bearer ${DUST_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      validateStatus: () => true // Accept all status codes to handle errors properly
-    });
-    
-    // Handle error responses
-    if (messageResponse.status !== 200) {
-      const errorMessage = messageResponse.data?.error?.message || 
-        `API error: ${messageResponse.status}`;
-      throw new Error(errorMessage);
-    }
-    
-    // Process and return the response
-    if (messageResponse.data && messageResponse.data.message) {
-      // Extract the relevant information from the response
-      const result = {
-        result: messageResponse.data.message.content || "No content in response",
-        conversationId: conversationSId,
-        messageId: messageResponse.data.message.sId,
-        agentId,
-        timestamp: new Date().toISOString()
+    // Step 2: Send a message to the conversation
+    try {
+      // URL for sending a message to the conversation
+      const messageUrl = `${baseUrl}/w/${workspaceId}/assistant/conversations/${conversationSId}/messages`;
+      
+      // Prepare message payload with required context field
+      const messagePayload = {
+        assistant: agentId,
+        content: query,
+        mentions: [], // Required by the API
+        context: {
+          // Required user context fields
+          username: process.env.DUST_USERNAME || "Anonymous User",
+          timezone: process.env.DUST_TIMEZONE || "UTC",
+          email: process.env.DUST_EMAIL || "",
+          fullname: process.env.DUST_FULLNAME || "",
+          // Add any additional context provided
+          ...context
+        }
       };
       
-      return result;
-    } else {
-      throw new Error(`Unexpected response format: ${JSON.stringify(messageResponse.data)}`);
+      process.stderr.write(`Sending message to conversation ${conversationSId} with payload: ${JSON.stringify(messagePayload)}\n`);
+      
+      // Send the message
+      const messageResponse = await axios.post(messageUrl, messagePayload, {
+        headers: {
+          'Authorization': `Bearer ${DUST_API_KEY}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      
+      process.stderr.write(`Message response: ${JSON.stringify(messageResponse.data)}\n`);
+      
+      // Check if we got a message ID back
+      if (!messageResponse.data?.message?.sId) {
+        throw new Error(`Failed to get message ID from response: ${JSON.stringify(messageResponse.data)}`);
+      }
+      
+      const messageSId = messageResponse.data.message.sId;
+      
+      // Step 3: Wait for the agent's response
+      // Poll the conversation to get the agent's response
+      const conversationUrl = `${baseUrl}/w/${workspaceId}/assistant/conversations/${conversationSId}`;
+      
+      let agentResponse = null;
+      let attempts = 0;
+      const maxAttempts = 60; // Increase max attempts to allow for longer processing time
+      const pollingInterval = 2000; // 2 seconds between polling attempts
+      
+      process.stderr.write(`Starting to poll for agent response at ${new Date().toISOString()}\n`);
+      
+      while (!agentResponse && attempts < maxAttempts) {
+        attempts++;
+        
+        // Wait between polling attempts
+        await new Promise(resolve => setTimeout(resolve, pollingInterval));
+        
+        try {
+          // Get the conversation with its messages
+          const conversationResponse = await axios.get(conversationUrl, {
+            headers: {
+              'Authorization': `Bearer ${DUST_API_KEY}`,
+              'Accept': 'application/json'
+            }
+          });
+          
+          process.stderr.write(`Polling attempt ${attempts}: ${conversationResponse.status}\n`);
+          
+          // Log the full conversation data for debugging (first few attempts)
+          if (attempts <= 3 || attempts % 10 === 0) {
+            process.stderr.write(`Conversation data: ${JSON.stringify(conversationResponse.data, null, 2)}\n`);
+          }
+          
+          // Check if there are messages in the conversation
+          if (conversationResponse.data?.conversation?.content) {
+            process.stderr.write(`Found ${conversationResponse.data.conversation.content.length} message groups in conversation\n`);
+            
+            // Look for the assistant's response message
+            // It might not be at index 1 if there are multiple messages, so we need to check all messages
+            for (let i = 0; i < conversationResponse.data.conversation.content.length; i++) {
+              const messageVersions = conversationResponse.data.conversation.content[i];
+              
+              if (messageVersions && messageVersions.length > 0) {
+                // Get the latest version of the message
+                const latestMessage = messageVersions[messageVersions.length - 1];
+                
+                // Check if this is an assistant message
+                if (latestMessage.type === "assistant_message") {
+                  process.stderr.write(`Found assistant message with status: ${latestMessage.status}\n`);
+                  
+                  // Check if the message is completed
+                  if (latestMessage.status === "completed" || latestMessage.status === "complete") {
+                    agentResponse = latestMessage;
+                    process.stderr.write(`Found completed agent response after ${attempts} attempts\n`);
+                    break;
+                  }
+                }
+              }
+            }
+          }
+          
+          if (!agentResponse) {
+            process.stderr.write(`Waiting for agent response... (attempt ${attempts}/${maxAttempts})\n`);
+          }
+        } catch (pollingError) {
+          process.stderr.write(`Error during polling attempt ${attempts}: ${pollingError}\n`);
+          if (pollingError.response) {
+            process.stderr.write(`Polling error response: ${JSON.stringify(pollingError.response.data)}\n`);
+          }
+          // Continue polling despite errors
+        }
+      }
+      
+      if (!agentResponse) {
+        throw new Error(`Timed out waiting for agent response after ${maxAttempts} attempts`);
+      }
+      
+      // If we found an agent response, return it
+      if (agentResponse) {
+        process.stderr.write(`Successfully received agent response: ${JSON.stringify(agentResponse, null, 2)}\n`);
+        return {
+          result: agentResponse.content || "No content in response",
+          conversationId: conversationSId,
+          messageId: messageSId,
+          agentId,
+          timestamp: new Date().toISOString()
+        };
+      }
+      
+      // If we timed out waiting for a response, return a fallback response
+      process.stderr.write(`Timed out waiting for agent response after ${maxAttempts} attempts\n`);
+      return {
+        result: "The agent is taking longer than expected to respond. Please try again later.",
+        conversationId: conversationSId,
+        messageId: messageSId,
+        agentId,
+        timestamp: new Date().toISOString(),
+        timedOut: true
+      };
+    } catch (error: any) {
+      if (error.response) {
+        throw new Error(`Failed to get agent response: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
+      } else {
+        throw error;
+      }
     }
   } catch (error) {
     console.error(`Error querying Dust agent ${agentId}:`, error);
     
     // For development, return mock response if API call fails
     if (process.env.NODE_ENV === "development") {
+      const mockConversationId = conversationId || uuidv4();
+      
       // Simulate different responses based on query type
-      let mockResult;
+      let mockResponse;
       if (query.toLowerCase().includes('summary') || query.toLowerCase().includes('summarize')) {
-        mockResult = {
-          summary: "Based on the provided documents, this is a summary of the key information...",
-          recommendations: [
-            "Recommendation 1",
-            "Recommendation 2",
-            "Recommendation 3"
-          ]
-        };
+        mockResponse = `# Error Recovery: Summary
+
+I encountered an issue connecting to the Dust API, but I can still provide a summary based on available information:
+
+## Project Overview
+
+The Dust MCP Server is designed to integrate with Dust AI's capabilities through a Model Context Protocol (MCP) interface. It allows for:
+
+1. Document processing and analysis
+2. Agent-based interactions
+3. Conversation management
+4. Structured data extraction
+
+## Technical Implementation
+
+The server uses TypeScript with Express and implements direct API calls to Dust rather than using the SDK. This approach provides greater flexibility but requires careful error handling.
+
+*Note: This is a mock response generated due to API connection issues.*`;
       } else if (query.toLowerCase().includes('trend') || query.toLowerCase().includes('compare')) {
-        mockResult = {
-          trends: {
-            metric1: "Trend analysis for metric 1",
-            metric2: "Trend analysis for metric 2"
-          },
-          analysis: "Overall trend analysis..."
-        };
+        mockResponse = `# Trend Analysis (Mock Response)
+
+I'm currently unable to connect to the Dust API to perform a complete analysis, but I can provide some general information about trend analysis:
+
+## Common Trend Indicators
+
+- **Moving Averages**: Help smooth out data to identify underlying trends
+- **Rate of Change**: Measures the speed at which values are increasing or decreasing
+- **Comparative Analysis**: Examines relationships between different metrics over time
+
+## Best Practices
+
+1. Establish a baseline before analyzing trends
+2. Consider seasonal variations and cyclical patterns
+3. Look for correlation but remember it doesn't imply causation
+4. Use appropriate time intervals for your analysis
+
+*This is a mock response due to API connection issues.*`;
       } else {
-        mockResult = {
-          analysis: "General analysis of the provided information...",
-          insights: [
-            "Insight 1",
-            "Insight 2",
-            "Insight 3"
-          ],
-          recommendations: "General recommendations based on the analysis."
-        };
+        mockResponse = `# Response to Query: "${query}"
+
+I apologize, but I'm currently experiencing difficulties connecting to the Dust API. Here's what I can tell you based on the available information:
+
+## General Information
+
+The Dust MCP Server provides an interface for interacting with Dust AI agents through a standardized protocol. Your query about "${query}" would typically be processed by one of these agents.
+
+## Recommendations
+
+1. Check your network connection and API configuration
+2. Verify that your Dust API key and workspace ID are correctly set
+3. Try again later as the service might be temporarily unavailable
+
+## Next Steps
+
+If you continue to experience issues, you might want to check the server logs for more detailed error information.
+
+*This is a mock response generated due to API connection issues.*`;
       }
       
       return {
-        result: mockResult,
-        conversationId: conversationId || uuidv4(),
+        result: mockResponse,
+        conversationId: mockConversationId,
         agentId,
         timestamp: new Date().toISOString(),
         mock: true
@@ -414,7 +572,8 @@ export async function listDustAgents(
     // Log response for debugging (to stderr to avoid interfering with MCP response)
     if (process.env.NODE_ENV === "development") {
       process.stderr.write(`Agent configurations response status: ${response.status}\n`);
-      process.stderr.write(`Response data: ${JSON.stringify(response.data, null, 2).substring(0, 500)}...\n`);
+      const responseDataStr = response.data ? JSON.stringify(response.data, null, 2) : "";
+      process.stderr.write(`Response data: ${responseDataStr.length > 500 ? responseDataStr.substring(0, 500) + '...' : responseDataStr}\n`);
     }
     
     // Handle error responses
@@ -443,7 +602,8 @@ export async function listDustAgents(
       process.stderr.write(`Found ${agents.length} agents\n`);
       return agents;
     } else {
-      process.stderr.write(`Unexpected response format: ${JSON.stringify(response.data).substring(0, 200)}...\n`);
+      const responseDataStr = response.data ? JSON.stringify(response.data) : "";
+      process.stderr.write(`Unexpected response format: ${responseDataStr.length > 200 ? responseDataStr.substring(0, 200) + '...' : responseDataStr}\n`);
       throw new Error("Unexpected response format from Dust API");
     }
   } catch (error: any) {

@@ -49,10 +49,32 @@ export default (server: McpServer) => {
       }).optional(),
       conversationId: z.string({
         description: "Optional conversation ID for continuing an existing conversation"
+      }).optional(),
+      echo: z.boolean({
+        description: "If true, echo back the query instead of getting a real response from the agent (for testing)"
       }).optional()
     },
     async (params) => {
       try {
+        // Check if we should echo the query instead of getting a real response
+        if (params.echo) {
+          process.stderr.write(`Echo mode enabled, returning query: ${params.query}\n`);
+          
+          // Format the echo response for MCP - ensure it matches the expected MCP response type
+          // This must be valid JSON for the MCP protocol
+          return {
+            content: [{
+              type: "text" as const,
+              text: `ECHO: ${params.query}`
+            }],
+            _meta: {
+              echo: true,
+              query: params.query,
+              timestamp: new Date().toISOString()
+            }
+          };
+        }
+        
         // Initialize context object
         let context: any = params.context || {};
         
@@ -89,6 +111,13 @@ export default (server: McpServer) => {
           throw new Error("No agent ID provided and no default agent ID found in DUST_AGENT_IDs environment variable");
         }
         
+        // Log the parameters we're sending to the Dust agent
+        process.stderr.write(`Querying Dust agent with the following parameters:\n`);
+        process.stderr.write(`  Agent ID: ${agentId}\n`);
+        process.stderr.write(`  Query: ${params.query}\n`);
+        process.stderr.write(`  Context: ${JSON.stringify(context, null, 2)}\n`);
+        process.stderr.write(`  Conversation ID: ${params.conversationId || 'new conversation'}\n`);
+        
         // Query the Dust agent using our service
         const response = await queryDustAgent(
           agentId,
@@ -97,15 +126,32 @@ export default (server: McpServer) => {
           params.conversationId
         );
         
-        // Format the response for MCP
-        return {
+        // Log response for debugging (to stderr to avoid interfering with MCP response)
+        process.stderr.write(`Dust agent response: ${JSON.stringify(response, null, 2)}\n`);
+        
+        // Check if response.result exists
+        if (!response.result) {
+          process.stderr.write(`Warning: response.result is undefined or null\n`);
+          process.stderr.write(`Full response object: ${JSON.stringify(response)}\n`);
+        }
+        
+        // Get the text to display
+        const responseText = typeof response.result === "string" 
+          ? response.result 
+          : (response.result ? JSON.stringify(response.result, null, 2) : "");
+        
+        // Safely log the response text with null checks
+        const safeResponseText = responseText || "";
+        process.stderr.write(`Formatted response text: ${safeResponseText.length > 100 ? safeResponseText.substring(0, 100) + '...' : safeResponseText}\n`);
+        
+        // Format the response for MCP - ensure it matches the expected MCP response type
+        const mcpResponse = {
           content: [{
-            type: "text",
-            text: typeof response.result === "string" 
-              ? response.result 
-              : JSON.stringify(response.result, null, 2)
+            type: "text" as const,  // Use const assertion to ensure correct type
+            text: responseText || "No response from agent. Please check the logs."
           }],
-          metadata: {
+          // Move metadata into _meta to match MCP expected format
+          _meta: {
             agentId: agentId, // Use the resolved agent ID
             query: params.query,
             documentIds: params.documentIds,
@@ -113,10 +159,42 @@ export default (server: McpServer) => {
             timestamp: response.timestamp
           }
         };
+        
+        process.stderr.write(`MCP response content: ${JSON.stringify(mcpResponse.content)}\n`);
+        
+        return mcpResponse;
       } catch (error) {
-        console.error('Error querying Dust agent:', error);
+        // Enhanced error logging
+        process.stderr.write(`Error querying Dust agent: ${error instanceof Error ? error.message : String(error)}\n`);
+        
+        if (error instanceof Error && error.stack) {
+          process.stderr.write(`Error stack trace: ${error.stack}\n`);
+        }
+        
+        // Log additional error details if available
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as any;
+          if (axiosError.response) {
+            process.stderr.write(`Error response status: ${axiosError.response.status}\n`);
+            process.stderr.write(`Error response data: ${JSON.stringify(axiosError.response.data)}\n`);
+          }
+        }
+        
         const errorMessage = error instanceof Error ? error.message : String(error);
-        throw new Error(`Failed to query Dust agent: ${errorMessage}`);
+        
+        // Return a properly formatted error response instead of throwing
+        return {
+          content: [{
+            type: "text" as const,
+            text: `Failed to query Dust agent: ${errorMessage}`
+          }],
+          isError: true,
+          _meta: {
+            error: errorMessage,
+            query: params.query,
+            agentId: params.agentId || getDefaultAgentId() || "unknown"
+          }
+        };
       }
     }
   );
