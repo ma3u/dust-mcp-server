@@ -31,12 +31,6 @@ This file tracks the project's progress using a task list format.
 * Set up environment configuration and security
 * Environment Configuration - Setting up connections to various data sources
 
-## Current Tasks
-
-* Implement dust queries to multiple agents
-* Implement parallel and Sequential execution with context passing
-* Implement Context-Aware Multi-Agent Routing
-
 ## Completed Tasks (Recent)
 
 * Implemented single agent dust query functionality
@@ -55,6 +49,15 @@ This file tracks the project's progress using a task list format.
   * Updated focus areas in `generate_insights` to be more general ("summary", "details", "overview", "trends")
   * Updated server name from "health-data-mcp-server" to "dust-mcp-server"
   * Updated README.MD to reflect all changes
+
+## Current Tasks
+
+* Implement a logger with log levels in directory logs/ align with best practices, NEVER break the MCP STDIO JSON output
+* Implement dust queries to multiple agents
+* Implement parallel and Sequential execution with context passing
+* Implement Context-Aware Multi-Agent Routing
+
+
 
 ## Next Steps
 
