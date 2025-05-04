@@ -1,5 +1,6 @@
 // Test script for MCP tools
-import { McpClient } from "@modelcontextprotocol/sdk/client/mcp.js";
+import { Client } from "@modelcontextprotocol/sdk/dist/cjs/client/index.js";
+import { StreamableHttpTransport } from "@modelcontextprotocol/sdk/dist/cjs/client/streamableHttp.js";
 import fs from "fs";
 import path from "path";
 
@@ -27,12 +28,23 @@ async function testMcpTools() {
     logger('INFO', 'Starting MCP tools test...');
     
     // Create MCP client
-    const client = new McpClient();
+    const client = new Client({
+      name: "Dust MCP Test Client",
+      version: "1.0.0"
+    });
+    
+    // Create HTTP transport and connect to local MCP server
+    const transport = new StreamableHttpTransport({
+      url: "http://localhost:3000"
+    });
+    
+    // Connect client to transport
+    await client.connect(transport);
     
     // Test dust_list_agents tool
     logger('INFO', 'Testing dust_list_agents tool...');
     try {
-      const agentsResponse = await client.request({
+      const agentsResponse = await client.callTool({
         name: "dust_list_agents",
         params: {
           limit: 5
@@ -47,7 +59,7 @@ async function testMcpTools() {
     // Test dust_agent_query tool
     logger('INFO', 'Testing dust_agent_query tool...');
     try {
-      const queryResponse = await client.request({
+      const queryResponse = await client.callTool({
         name: "dust_agent_query",
         params: {
           query: "Give me a summary of the Dust API"
