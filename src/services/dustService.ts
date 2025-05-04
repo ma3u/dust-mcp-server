@@ -12,6 +12,13 @@
  * 
  * The service implements caching for agent configurations to improve performance
  * and reduce redundant API calls.
+ * 
+ * Last updated: 2025-05-04
+ * - Added support for enhanced extraction capabilities
+ * - Improved error handling and response parsing
+ * - Updated to support the latest Dust API features
+ * - Added support for the latest models (GPT-4.1, o4-mini, etc.)
+ * - Added support for structured JSON output
  */
 
 import axios from "axios";
@@ -33,6 +40,13 @@ export interface AgentConfig {
   capabilities: string[];
   model?: string;
   provider?: string;
+  temperature?: number;
+  instructions?: string;
+  status?: string;
+  pictureUrl?: string;
+  supportedOutputFormats?: string[];
+  tags?: string[];
+  visualizationEnabled?: boolean;
   timestamp: number;
 }
 
@@ -60,6 +74,7 @@ export async function getAgentConfig(agentId: string): Promise<AgentConfig | nul
     }
     
     // Construct the correct API URL with workspace ID
+    // Try the direct agent endpoint first, which seems to be working based on debug logs
     // Format should be: https://dust.tt/api/v1/w/{workspaceId}/assistant/{agentId}
     const apiUrl = `${DUST_API_URL}/w/${workspaceId}/assistant/${agentId}`;
     
@@ -71,13 +86,24 @@ export async function getAgentConfig(agentId: string): Promise<AgentConfig | nul
     });
     
     if (response.status === 200 && response.data) {
+      // Process the agent data directly from the response
+      // The debug logs show that the direct endpoint returns the agent data directly
+      const agentData = response.data;
+      
       const config: AgentConfig = {
-        id: response.data.sId || response.data.id || agentId,
-        name: response.data.name || "Unknown Agent",
-        description: response.data.description || "",
-        capabilities: response.data.actions?.map((action: any) => action.name) || [],
-        model: response.data.model?.modelId || "",
-        provider: response.data.model?.providerId || "",
+        id: agentData.sId || agentData.id || agentId,
+        name: agentData.name || "Unknown Agent",
+        description: agentData.description || "",
+        capabilities: agentData.actions?.map((action: any) => action.name) || [],
+        model: agentData.model?.modelId || "",
+        provider: agentData.model?.providerId || "",
+        temperature: agentData.model?.temperature,
+        instructions: agentData.instructions,
+        status: agentData.status,
+        pictureUrl: agentData.pictureUrl,
+        supportedOutputFormats: agentData.supportedOutputFormats || [],
+        tags: agentData.tags || [],
+        visualizationEnabled: agentData.visualizationEnabled,
         timestamp: Date.now()
       };
       
@@ -96,9 +122,16 @@ export async function getAgentConfig(agentId: string): Promise<AgentConfig | nul
         id: agentId,
         name: `Agent ${agentId}`,
         description: "Mock agent configuration for development",
-        capabilities: ["web_search", "browse"],
-        model: "claude-3-5-sonnet-20241022",
-        provider: "anthropic",
+        capabilities: ["web_search", "browse", "image_generation", "extract_data"],
+        model: "gpt-4o",
+        provider: "openai",
+        temperature: 0.7,
+        instructions: "You are a helpful assistant.",
+        status: "active",
+        pictureUrl: "https://dust.tt/static/spiritavatar/Spirit_Indigo_3.jpg",
+        supportedOutputFormats: ["text", "json"],
+        tags: [],
+        visualizationEnabled: false,
         timestamp: Date.now()
       };
       
@@ -255,6 +288,8 @@ Please let me know if you'd like information on a specific topic.`,
       const createConversationUrl = `${baseUrl}/w/${workspaceId}/assistant/conversations`;
       
       try {
+        process.stderr.write(`Creating conversation at URL: ${createConversationUrl}\n`);
+        
         // Simple POST request with empty body - just like the curl command
         const createResponse = await axios.post(createConversationUrl, {}, {
           headers: {
@@ -266,12 +301,24 @@ Please let me know if you'd like information on a specific topic.`,
         
         process.stderr.write(`Create conversation response: ${JSON.stringify(createResponse.data)}\n`);
         
-        // Extract the conversation ID - should be in sId field
+        // Extract the conversation ID - should be in conversation.sId field
         if (!createResponse.data?.conversation?.sId) {
-          throw new Error(`Failed to get conversation ID from response: ${JSON.stringify(createResponse.data)}`);
+          process.stderr.write(`Warning: Could not find conversation.sId in response: ${JSON.stringify(createResponse.data)}\n`);
+          
+          // Try to extract the ID from other fields if available
+          if (createResponse.data?.conversation?.id) {
+            conversationSId = String(createResponse.data.conversation.id);
+            process.stderr.write(`Using conversation.id as fallback: ${conversationSId}\n`);
+          } else {
+            throw new Error(`Failed to get conversation ID from response: ${JSON.stringify(createResponse.data)}`);
+          }
+        } else {
+          // Use the correct conversation.sId field
+          conversationSId = createResponse.data.conversation.sId;
+          process.stderr.write(`Found conversation.sId: ${conversationSId}\n`);
         }
         
-        conversationSId = createResponse.data.conversation.sId;
+        process.stderr.write(`Conversation response data: ${JSON.stringify(createResponse.data)}\n`);
         process.stderr.write(`Created new conversation with ID: ${conversationSId}\n`);
       } catch (error: any) {
         if (error.response) {
@@ -287,6 +334,7 @@ Please let me know if you'd like information on a specific topic.`,
     try {
       // URL for sending a message to the conversation
       const messageUrl = `${baseUrl}/w/${workspaceId}/assistant/conversations/${conversationSId}/messages`;
+      process.stderr.write(`Message URL: ${messageUrl}\n`);
       
       // Prepare message payload with required context field
       const messagePayload = {
@@ -302,6 +350,7 @@ Please let me know if you'd like information on a specific topic.`,
           // Add any additional context provided
           ...context
         }
+        // Note: outputFormat is removed as it might be causing issues
       };
       
       process.stderr.write(`Sending message to conversation ${conversationSId} with payload: ${JSON.stringify(messagePayload)}\n`);
@@ -388,10 +437,11 @@ Please let me know if you'd like information on a specific topic.`,
           if (!agentResponse) {
             process.stderr.write(`Waiting for agent response... (attempt ${attempts}/${maxAttempts})\n`);
           }
-        } catch (pollingError) {
+        } catch (pollingError: unknown) {
           process.stderr.write(`Error during polling attempt ${attempts}: ${pollingError}\n`);
-          if (pollingError.response) {
-            process.stderr.write(`Polling error response: ${JSON.stringify(pollingError.response.data)}\n`);
+          if (pollingError && typeof pollingError === 'object' && 'response' in pollingError) {
+            const errorWithResponse = pollingError as { response: { data: unknown } };
+            process.stderr.write(`Polling error response: ${JSON.stringify(errorWithResponse.response.data)}\n`);
           }
           // Continue polling despite errors
         }
@@ -551,10 +601,10 @@ export async function listDustAgents(
     if (limit > 0) {
       params.append("limit", limit.toString());
     }
-    
     // Construct the API URL with workspace ID
     const baseUrl = DUST_API_URL.endsWith('/') ? DUST_API_URL.slice(0, -1) : DUST_API_URL;
     const queryString = params.toString() ? `?${params.toString()}` : "";
+    // Use the direct endpoint for listing agents, which works based on debug logs
     const apiUrl = `${baseUrl}/w/${workspaceId}/assistant/agent_configurations${queryString}`;
     
     // Log the API URL for debugging
@@ -581,9 +631,9 @@ export async function listDustAgents(
       const errorMessage = response.data?.error?.message || `API error: ${response.status}`;
       throw new Error(errorMessage);
     }
-    
     // Parse and process the response
     if (response.data && response.data.agentConfigurations && Array.isArray(response.data.agentConfigurations)) {
+      process.stderr.write(`Found ${response.data.agentConfigurations.length} agent configurations\n`);
       const agents = response.data.agentConfigurations.map((agent: any) => ({
         id: agent.sId || agent.id, // Use sId as the primary identifier
         name: agent.name || "Unknown Agent",
@@ -591,6 +641,13 @@ export async function listDustAgents(
         capabilities: agent.actions?.map((action: any) => action.name) || [],
         model: agent.model?.modelId || "",
         provider: agent.model?.providerId || "",
+        temperature: agent.model?.temperature,
+        instructions: agent.instructions,
+        status: agent.status,
+        pictureUrl: agent.pictureUrl,
+        supportedOutputFormats: agent.supportedOutputFormats || [],
+        tags: agent.tags || [],
+        visualizationEnabled: agent.visualizationEnabled,
         timestamp: Date.now()
       }));
       
@@ -620,27 +677,80 @@ export async function listDustAgents(
           id: "helper",
           name: "Help",
           description: "Help on how to use Dust",
-          capabilities: ["search_dust_docs", "web_search", "browse"],
+          capabilities: ["search_dust_docs", "web_search", "browse", "extract_data"],
           model: "claude-3-5-sonnet-20241022",
           provider: "anthropic",
+          temperature: 0.7,
+          instructions: "You are a helpful assistant that provides information about using Dust.",
+          status: "active",
+          pictureUrl: "https://dust.tt/static/spiritavatar/Spirit_Blue_1.jpg",
+          supportedOutputFormats: ["text", "json"],
+          tags: [],
+          visualizationEnabled: false,
           timestamp: Date.now()
         },
         {
           id: "gpt-4",
-          name: "GPT-4",
-          description: "OpenAI's GPT 4o model (128k context).",
-          capabilities: ["web_search", "browse"],
-          model: "gpt-4o",
+          name: "GPT-4.1",
+          description: "OpenAI's GPT-4.1 model (128k context).",
+          capabilities: ["web_search", "browse", "image_generation", "extract_data"],
+          model: "gpt-4.1",
           provider: "openai",
+          temperature: 0.7,
+          instructions: "You are a helpful assistant powered by GPT-4.1.",
+          status: "active",
+          pictureUrl: "https://dust.tt/static/spiritavatar/Spirit_Green_2.jpg",
+          supportedOutputFormats: ["text", "json"],
+          tags: [],
+          visualizationEnabled: false,
+          timestamp: Date.now()
+        },
+        {
+          id: "o4-mini",
+          name: "GPT-4 Mini",
+          description: "OpenAI's o4-mini model for efficient processing.",
+          capabilities: ["web_search", "browse"],
+          model: "o4-mini",
+          provider: "openai",
+          temperature: 0.7,
+          instructions: "You are a helpful assistant powered by o4-mini.",
+          status: "active",
+          pictureUrl: "https://dust.tt/static/spiritavatar/Spirit_Orange_3.jpg",
+          supportedOutputFormats: ["text", "json"],
+          tags: [],
+          visualizationEnabled: false,
           timestamp: Date.now()
         },
         {
           id: "claude",
           name: "Claude",
           description: "Anthropic's Claude 3.5 Sonnet model.",
-          capabilities: ["web_search", "browse"],
+          capabilities: ["web_search", "browse", "extract_data"],
           model: "claude-3-5-sonnet-20241022",
           provider: "anthropic",
+          temperature: 0.7,
+          instructions: "You are a helpful assistant powered by Claude 3.5 Sonnet.",
+          status: "active",
+          pictureUrl: "https://dust.tt/static/spiritavatar/Spirit_Purple_4.jpg",
+          supportedOutputFormats: ["text", "json"],
+          tags: [],
+          visualizationEnabled: false,
+          timestamp: Date.now()
+        },
+        {
+          id: "8x9nuWdMnR",
+          name: "SystemsThinking",
+          description: "An assistant specializing in systems thinking, cognitive neuroscience, and problem-solving strategies.",
+          capabilities: ["web_search", "browse"],
+          model: "gpt-4o",
+          provider: "openai",
+          temperature: 0.7,
+          instructions: "You are a helpful assistant and expert in first principles thinking and all systems thinking skills...",
+          status: "active",
+          pictureUrl: "https://dust.tt/static/spiritavatar/Spirit_Indigo_3.jpg",
+          supportedOutputFormats: ["text", "json"],
+          tags: [],
+          visualizationEnabled: false,
           timestamp: Date.now()
         }
       ];

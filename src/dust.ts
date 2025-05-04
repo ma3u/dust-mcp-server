@@ -37,10 +37,18 @@ async function getAgentConfig(agentId: string): Promise<AgentConfig | null> {
       throw new Error("DUST_API_KEY is not set in environment variables");
     }
     
-    const response = await axios.get(`${DUST_API_URL}/agents/${agentId}`, {
+    // Get workspace ID from environment
+    const workspaceId = process.env.DUST_WORKSPACE_ID;
+    if (!workspaceId) {
+      throw new Error("DUST_WORKSPACE_ID is not set in environment variables");
+    }
+    
+    // Use the correct API endpoint format based on debug results
+    const response = await axios.get(`${DUST_API_URL}/w/${workspaceId}/assistant/agent_configurations/${agentId}`, {
       headers: {
         Authorization: `Bearer ${DUST_API_KEY}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Accept": "application/json"
       }
     });
     
@@ -93,28 +101,140 @@ async function queryDustAgent(agentId: string, query: string, context: any = {},
       throw new Error(`Agent with ID ${agentId} not found`);
     }
     
-    // Generate conversation ID if not provided
-    const sId = conversationId || uuidv4();
+    // Get workspace ID from environment
+    const workspaceId = process.env.DUST_WORKSPACE_ID;
+    if (!workspaceId) {
+      throw new Error("DUST_WORKSPACE_ID is not set in environment variables");
+    }
     
-    // Prepare request payload
-    const payload = {
-      query,
-      context,
-      conversationId: sId
+    // Step 1: Create a new conversation if not provided
+    let conversationSId = conversationId;
+    
+    if (!conversationSId) {
+      console.log("Creating new conversation...");
+      const createConversationUrl = `${DUST_API_URL}/w/${workspaceId}/assistant/conversations`;
+      
+      try {
+        // Simple POST request with empty body
+        const createResponse = await axios.post(createConversationUrl, {}, {
+          headers: {
+            'Authorization': `Bearer ${DUST_API_KEY}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        
+        // Extract the conversation ID
+        if (!createResponse.data?.conversation?.sId) {
+          throw new Error(`Failed to get conversation ID from response: ${JSON.stringify(createResponse.data)}`);
+        }
+        
+        conversationSId = createResponse.data.conversation.sId;
+        console.log(`Created new conversation with ID: ${conversationSId}`);
+      } catch (error: any) {
+        if (error.response) {
+          throw new Error(`Failed to create conversation: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
+        } else {
+          throw error;
+        }
+      }
+    }
+    
+    // Step 2: Send a message to the conversation
+    // Prepare message payload with required context field
+    const messagePayload = {
+      assistant: agentId,
+      content: query,
+      mentions: [], // Required by the API
+      context: {
+        // Required user context fields
+        username: process.env.DUST_USERNAME || "Anonymous User",
+        timezone: process.env.DUST_TIMEZONE || "UTC",
+        email: process.env.DUST_EMAIL || "",
+        fullname: process.env.DUST_FULLNAME || "",
+        // Add any additional context provided
+        ...context
+      }
     };
     
-    // Make API request to Dust
-    const response = await axios.post(`${DUST_API_URL}/agents/${agentId}/run`, payload, {
+    // Send the message
+    const messageUrl = `${DUST_API_URL}/w/${workspaceId}/assistant/conversations/${conversationSId}/messages`;
+    const response = await axios.post(messageUrl, messagePayload, {
       headers: {
         Authorization: `Bearer ${DUST_API_KEY}`,
         "Content-Type": "application/json"
       }
     });
     
+    // Step 3: Wait for the agent's response
     if (response.status === 200 && response.data) {
+      // Get the message ID
+      const messageSId = response.data.message?.sId;
+      if (!messageSId) {
+        throw new Error(`Failed to get message ID from response: ${JSON.stringify(response.data)}`);
+      }
+      
+      // Poll the conversation to get the agent's response
+      const conversationUrl = `${DUST_API_URL}/w/${workspaceId}/assistant/conversations/${conversationSId}`;
+      
+      let agentResponse = null;
+      let attempts = 0;
+      const maxAttempts = 30; // 1 minute with 2-second intervals
+      const pollingInterval = 2000; // 2 seconds between polling attempts
+      
+      console.log(`Polling for agent response...`);
+      
+      while (!agentResponse && attempts < maxAttempts) {
+        attempts++;
+        
+        // Wait between polling attempts
+        await new Promise(resolve => setTimeout(resolve, pollingInterval));
+        
+        try {
+          // Get the conversation with its messages
+          const conversationResponse = await axios.get(conversationUrl, {
+            headers: {
+              'Authorization': `Bearer ${DUST_API_KEY}`,
+              'Accept': 'application/json'
+            }
+          });
+          
+          // Check if there are messages in the conversation
+          if (conversationResponse.data?.conversation?.content) {
+            // Look for the assistant's response message
+            for (let i = 0; i < conversationResponse.data.conversation.content.length; i++) {
+              const messageVersions = conversationResponse.data.conversation.content[i];
+              
+              if (messageVersions && messageVersions.length > 0) {
+                // Get the latest version of the message
+                const latestMessage = messageVersions[messageVersions.length - 1];
+                
+                // Check if this is an assistant message
+                if (latestMessage.type === "assistant_message") {
+                  // Check if the message is completed
+                  if (latestMessage.status === "completed" || latestMessage.status === "complete") {
+                    agentResponse = latestMessage;
+                    console.log(`Found completed agent response after ${attempts} attempts`);
+                    break;
+                  }
+                }
+              }
+            }
+          }
+        } catch (pollingError) {
+          console.error(`Error during polling attempt ${attempts}:`, pollingError);
+          // Continue polling despite errors
+        }
+      }
+      
+      if (!agentResponse) {
+        throw new Error(`Timed out waiting for agent response after ${maxAttempts} attempts`);
+      }
+      
       return {
-        result: response.data.result,
-        conversationId: sId,
+        result: agentResponse.content || "No content in response",
+        conversationId: conversationSId,
+        messageId: messageSId,
         agentId,
         timestamp: new Date().toISOString()
       };

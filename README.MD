@@ -47,7 +47,7 @@ mcp tools node build/index.js
 3. Call a specific tool
 
 ```bash
-mcp call list_dust_agents node build/index.js --limit 10
+mcp call list_dust_agents node build/index.js --params '{"limit": 10}'
 
 mcp call query_dust_agent node build/index.js --params '{"query": "Give me a summary"}'
 ```
