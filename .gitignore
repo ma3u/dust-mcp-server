@@ -9,6 +9,14 @@ build/
 dist/
 out/
 
+# Logs and debug output
+logs/
+*.log
+*.log.*
+debug/
+*.debug.js
+*.debug.ts
+
 # Environment variables
 .env
 .env.local

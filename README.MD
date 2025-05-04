@@ -1,8 +1,8 @@
 
 
-# Dust Agent MCP Server
+# Dust MCP Server
 
-A Model Context Protocol (MCP) server for document processing and analysis, designed to work with Claude Desktop via STDIO transport.
+A Model Context Protocol (MCP) server for interacting with Dust.tt agents, designed to work with Claude Desktop via STDIO transport. This server provides tools for querying Dust agents, listing available agents, and retrieving agent configurations.
 
 ## Setup and Configuration
 
@@ -23,9 +23,26 @@ npm install
 
 # Build the project
 npm run build
+```
 
-# Start the server
-npm start
+### Environment Configuration
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+DUST_API_KEY=your_dust_api_key
+DUST_WORKSPACE_ID=your_workspace_id
+DUST_AGENT_IDs=comma,separated,agent,ids
+DUST_USERNAME=your_username
+DUST_EMAIL=your_email
+DUST_FULLNAME=Your Full Name
+DUST_API_URL=https://dust.tt/api/v1
+```
+
+### Running the Server
+
+```bash
+node start-server.js
 ```
 
 ### Using MCP Tools
@@ -41,172 +58,124 @@ npm install -g mcptools
 2. List available tools in the server
 
 ```bash
-mcp tools node build/index.js
+mcp tools node build/dust.js
 ```
 
 3. Call a specific tool
 
 ```bash
-mcp call list_dust_agents node build/index.js --params '{"limit": 10}'
+mcp call dust_list_agents node build/dust.js --params '{"limit": 10}'
 
-mcp call query_dust_agent node build/index.js --params '{"query": "Give me a summary"}'
+mcp call dust_agent_query node build/dust.js --params '{"query": "Give me a summary"}'
 ```
 
 4. Add the server to your aliases
 
 ```bash
-mcp alias add query node build/index.js
+mcp alias add dust node build/dust.js
 mcp alias list
 ```
 
 5. Configure with Claude Desktop
 
 ```bash
-mcp configs set claude-desktop dust /path/to/node /path/to/dust-mcp-server/build/index.js
+mcp configs set claude-desktop dust /path/to/node /path/to/dust-mcp-server/build/dust.js
 ```
 
 ## Available MCP Tools
 
-The server provides the following MCP tools for document management and analysis via the Dust.tt platform:
+The server provides the following MCP tools for interacting with Dust.tt agents:
 
-### `list_dust_agents`
+### `dust_list_agents`
 
-Lists available Dust agents.
-
-**Parameters:**
-
-- None
-
-**Returns:**
-
-- List of available Dust agents
-
-### `query_dust_agent`
-
-Queries a Dust agent with context from processed documents.
+Lists available Dust agents in your workspace.
 
 **Parameters:**
 
-- `agentId` (string, required): ID of the Dust agent to query
-- `query` (string, required): The prompt or question to send to the agent
-- `documentIds` (string[], optional): IDs of processed documents to include as context
-- `context` (object, optional): Optional additional context data to provide to the agent
-- `conversationId` (string, optional): Optional conversation ID for continuing an existing conversation
+- `view` (optional): View type for filtering agents
+- `limit` (optional): Maximum number of agents to return
 
 **Returns:**
 
-- Agent's response to the query with relevant insights
-
-### `upload_document`
-
-Uploads a document (PDF or image) for storage and future processing.
-
-**Parameters:**
-
-- `fileContent` (string, required): Base64-encoded content of the file
-- `fileName` (string, required): Name of the file including extension
-- `fileType` (string, required): Type of document (e.g., "report", "correspondence", "data_analysis", "general")
-- `description` (string, optional): Additional description of the document
-
-**Returns:**
-
-- Document ID and metadata for the uploaded file
+- Markdown formatted list of available Dust agents with their capabilities
+- JSON data of all agent configurations
 
 **Example:**
 
 ```bash
-mcp call upload_document node build/index.js --params '{"fileContent": "base64-encoded-content", "fileName": "report.pdf", "fileType": "report", "description": "Quarterly analysis report"}'
+mcp call dust_list_agents node build/dust.js --params '{"limit": 10}'
 ```
 
-### `list_documents`
+### `dust_agent_query`
 
-Lists all uploaded documents with optional filtering.
+Queries a Dust agent with a natural language prompt.
 
 **Parameters:**
 
-- `fileType` (string, optional): Filter by document type ("report", "correspondence", "data_analysis", "general", "all")
-- `limit` (number, optional): Maximum number of documents to return
-- `sortBy` (string, optional): Field to sort by (e.g., "uploadDate", "fileName", "fileSize")
+- `agent_id` (optional): ID of the agent to query (will use default if not provided)
+- `query` (required): Message to send to the agent
+- `conversation_id` (optional): ID of an existing conversation to continue
+- `context` (optional): Additional context for the agent
 
 **Returns:**
 
-- List of document IDs and metadata
+- Agent's response to the query
+- Conversation and message IDs for future reference
 
 **Example:**
 
 ```bash
-mcp call list_documents node build/index.js --params '{"fileType": "report", "limit": 10, "sortBy": "uploadDate"}'
+mcp call dust_agent_query node build/dust.js --params '{"query": "Give me a summary of the Dust API"}'
 ```
 
-### `process_document`
+### `dust_get_agent_config`
 
-Processes a previously uploaded document to extract and structure its information.
+Get detailed configuration for a specific Dust agent.
 
 **Parameters:**
 
-- `documentId` (string, required): ID of the document to process
+- `agent_id` (required): ID of the agent to get configuration for
 
 **Returns:**
 
-- Processing status and extracted information based on document type
+- Markdown formatted agent configuration details
+- JSON data of the complete agent configuration
 
 **Example:**
 
 ```bash
-mcp call process_document node build/index.js --params '{"documentId": "doc-id-123"}'
-```
-
-### `get_document`
-
-Retrieves a processed document by its ID.
-
-**Parameters:**
-
-- `documentId` (string, required): ID of the document to retrieve
-- `includeRawText` (boolean, optional): Whether to include the raw extracted text
-
-**Returns:**
-
-- Document metadata and structured data based on document type
-
-**Example:**
-
-```bash
-mcp call get_document node build/index.js --params '{"documentId": "doc-id-123", "includeRawText": true}'
-```
-
-### `generate_insights`
-
-Generates insights and recommendations based on processed documents.
-
-**Parameters:**
-
-- `documentIds` (string[], required): IDs of processed documents to analyze
-- `focusArea` (string, optional): Area to focus the analysis on ("summary", "details", "overview", "trends")
-- `timeframe` (string, optional): Timeframe to consider ("recent", "all", "past_month", "past_year")
-- `conversationId` (string, optional): Optional conversation ID for continuing an existing analysis
-
-**Returns:**
-
-- Insights, trends, and analysis based on the documents
-
-**Example:**
-
-```bash
-mcp call generate_insights node build/index.js --params '{"documentIds": ["doc-id-1", "doc-id-2"], "focusArea": "summary", "timeframe": "past_month", "conversationId": "optional-conversation-id"}'
+mcp call dust_get_agent_config node build/dust.js --params '{"agent_id": "agent-id-123"}'
 ```
 
 ## Project Structure
 
 - `/src`: Source code
-  - `/middleware`: Express middleware including file upload handling
-  - `/services`: Service layer for external API integrations
-  - `/tools`: MCP tool implementations
+  - `/services`: Service layer for Dust API integration
+  - `/tools`: MCP tool implementations (deprecated, now using direct import)
 - `/build`: Compiled JavaScript code
-- `/uploads`: Directory for uploaded documents
-- `/processed`: Directory for processed document data
 - `/logs`: Application logs
+  - `/debug`: Debug logs for API interactions
+- `/.env`: Environment configuration
 - `/memory-bank`: Project memory and context tracking
+
+## Testing
+
+### Test Scripts
+
+The repository includes a test script to verify MCP functionality:
+
+```bash
+# Test MCP tools functionality
+node test-mcp-tools.js
+```
+
+## Debugging
+
+Logs are stored in the `logs` directory:
+
+- `app-YYYY-MM-DD.log`: Application logs
+- `server-YYYY-MM-DD.log`: Server logs
+- `test-mcp-YYYY-MM-DD.log`: MCP tools test logs
 
 ## Development
 
@@ -214,18 +183,19 @@ mcp call generate_insights node build/index.js --params '{"documentIds": ["doc-i
 # Run in development mode with auto-reload
 npm run dev
 
-# Run tests
-npm test
-
-# Build for production
+# Build the project
 npm run build
 ```
 
-## Using with Claude Desktop
+## API Documentation
 
-After setting up the MCP server, you can use it directly with Claude Desktop:
-npm 
+For more information about the Dust API, see the official documentation:
 
-## Architecture
+- [Dust API Documentation](https://docs.dust.tt/reference/openapi)
+- [Agent Configurations](https://docs.dust.tt/reference/get_api-v1-w-wid-assistant-agent-configurations-sid)
+- [Conversations](https://docs.dust.tt/reference/post_api-v1-w-wid-assistant-conversations)
+- [Messages](https://docs.dust.tt/reference/post_api-v1-w-wid-assistant-conversations-cid-messages)
 
-![alt text](image.png)
+## License
+
+MIT
