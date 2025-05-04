@@ -196,3 +196,23 @@
 [2025-05-04T13:55:45.083Z] [ERROR] Timed out waiting for agent response after 60 attempts
 [2025-05-04T13:55:45.083Z] [ERROR] Error querying Dust agent 8x9nuWdMnR {}
 [2025-05-04T13:55:45.084Z] [ERROR] Error in queryDustAgent: Timed out waiting for agent response after 60 attempts
+[2025-05-04T20:20:51.856Z] [INFO] Directory created: processed
+[2025-05-04T20:20:51.857Z] [INFO] Directory created: logs
+[2025-05-04T20:20:51.857Z] [INFO] Starting MCP server with STDIO transport (authentication not required)
+[2025-05-04T20:21:02.465Z] [INFO] Directory created: processed
+[2025-05-04T20:21:02.466Z] [INFO] Directory created: logs
+[2025-05-04T20:21:02.466Z] [INFO] Starting MCP server with STDIO transport (authentication not required)
+[2025-05-04T20:30:35.901Z] [INFO] Directory created: uploads
+[2025-05-04T20:30:35.901Z] [INFO] Directory created: processed
+[2025-05-04T20:30:35.902Z] [INFO] Directory created: logs
+[2025-05-04T20:30:35.903Z] [WARN] Authentication not implemented yet (Milestone 2)
+[2025-05-04T20:30:35.903Z] [WARN] Authentication not implemented yet (Milestone 2)
+[2025-05-04T20:30:35.904Z] [INFO] Starting MCP server with STDIO transport (HTTP/SSE transport will be implemented in future versions)
+[2025-05-04T20:30:35.904Z] [INFO] HTTP server listening on port 3000
+[2025-05-04T20:31:58.878Z] [INFO] Directory created: uploads
+[2025-05-04T20:31:58.878Z] [INFO] Directory created: processed
+[2025-05-04T20:31:58.878Z] [INFO] Directory created: logs
+[2025-05-04T20:31:58.879Z] [WARN] Authentication not implemented yet (Milestone 2)
+[2025-05-04T20:31:58.879Z] [WARN] Authentication not implemented yet (Milestone 2)
+[2025-05-04T20:31:58.880Z] [INFO] Starting MCP server with STDIO transport (HTTP/SSE transport will be implemented in future versions)
+[2025-05-04T20:31:58.880Z] [INFO] HTTP server listening on port 3000

@@ -1,6 +1,7 @@
-// Test script for MCP tools
-import { Client } from "@modelcontextprotocol/sdk/dist/esm/client/index.js";
-import { StreamableHttpTransport } from "@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.js";
+// Test script for Dust MCP server using STDIO transport
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 
@@ -16,16 +17,16 @@ function logger(level, message, data) {
   const logMessage = `[${timestamp}] [${level}] ${message}${data ? ' ' + JSON.stringify(data) : ''}`;
   
   // Write to log file
-  fs.appendFileSync(path.join(LOG_DIR, `test-mcp-${new Date().toISOString().split('T')[0]}.log`), logMessage + '\n');
+  fs.appendFileSync(path.join(LOG_DIR, `test-stdio-${new Date().toISOString().split('T')[0]}.log`), logMessage + '\n');
   
   // Also output to console
   console.log(logMessage);
 }
 
-// Test MCP tools
-async function testMcpTools() {
+// Test Dust MCP server using STDIO transport
+async function testStdioTransport() {
   try {
-    logger('INFO', 'Starting MCP tools test...');
+    logger('INFO', 'Starting STDIO transport test...');
     
     // Create MCP client
     const client = new Client({
@@ -33,13 +34,22 @@ async function testMcpTools() {
       version: "1.0.0"
     });
     
-    // Create HTTP transport and connect to local MCP server
-    const transport = new StreamableHttpTransport({
-      url: "http://localhost:3000"
+    // Spawn the server process
+    const serverProcess = spawn('node', ['build/dust.js'], {
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
+    
+    // Create STDIO transport
+    const transport = new StdioClientTransport({
+      stdin: serverProcess.stdin,
+      stdout: serverProcess.stdout,
+      stderr: serverProcess.stderr
     });
     
     // Connect client to transport
     await client.connect(transport);
+    
+    logger('INFO', 'Connected to MCP server using STDIO transport');
     
     // Test dust_list_agents tool
     logger('INFO', 'Testing dust_list_agents tool...');
@@ -71,11 +81,14 @@ async function testMcpTools() {
       logger('ERROR', 'Error testing dust_agent_query:', error);
     }
     
-    logger('INFO', 'MCP tools test completed');
+    logger('INFO', 'STDIO transport test completed');
+    
+    // Clean up
+    serverProcess.kill();
   } catch (error) {
-    logger('ERROR', 'Error testing MCP tools:', error);
+    logger('ERROR', 'Error testing STDIO transport:', error);
   }
 }
 
 // Run the test
-testMcpTools();
+testStdioTransport();

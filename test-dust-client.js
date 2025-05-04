@@ -1,8 +1,8 @@
-// Test script for MCP tools
-import { Client } from "@modelcontextprotocol/sdk/dist/esm/client/index.js";
-import { StreamableHttpTransport } from "@modelcontextprotocol/sdk/dist/esm/client/streamableHttp.js";
-import fs from "fs";
-import path from "path";
+// Simple test script for Dust MCP client
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StreamableHttpTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import fs from 'fs';
+import path from 'path';
 
 // Setup logging directory
 const LOG_DIR = path.join(process.cwd(), 'logs');
@@ -16,16 +16,16 @@ function logger(level, message, data) {
   const logMessage = `[${timestamp}] [${level}] ${message}${data ? ' ' + JSON.stringify(data) : ''}`;
   
   // Write to log file
-  fs.appendFileSync(path.join(LOG_DIR, `test-mcp-${new Date().toISOString().split('T')[0]}.log`), logMessage + '\n');
+  fs.appendFileSync(path.join(LOG_DIR, `test-dust-${new Date().toISOString().split('T')[0]}.log`), logMessage + '\n');
   
   // Also output to console
   console.log(logMessage);
 }
 
-// Test MCP tools
-async function testMcpTools() {
+// Test Dust MCP client
+async function testDustClient() {
   try {
-    logger('INFO', 'Starting MCP tools test...');
+    logger('INFO', 'Starting Dust MCP client test...');
     
     // Create MCP client
     const client = new Client({
@@ -38,8 +38,12 @@ async function testMcpTools() {
       url: "http://localhost:3000"
     });
     
+    logger('INFO', 'Connecting to MCP server...');
+    
     // Connect client to transport
     await client.connect(transport);
+    
+    logger('INFO', 'Connected to MCP server');
     
     // Test dust_list_agents tool
     logger('INFO', 'Testing dust_list_agents tool...');
@@ -56,26 +60,11 @@ async function testMcpTools() {
       logger('ERROR', 'Error testing dust_list_agents:', error);
     }
     
-    // Test dust_agent_query tool
-    logger('INFO', 'Testing dust_agent_query tool...');
-    try {
-      const queryResponse = await client.callTool({
-        name: "dust_agent_query",
-        params: {
-          query: "Give me a summary of the Dust API"
-        }
-      });
-      
-      logger('INFO', 'dust_agent_query response:', queryResponse);
-    } catch (error) {
-      logger('ERROR', 'Error testing dust_agent_query:', error);
-    }
-    
-    logger('INFO', 'MCP tools test completed');
+    logger('INFO', 'Dust MCP client test completed');
   } catch (error) {
-    logger('ERROR', 'Error testing MCP tools:', error);
+    logger('ERROR', 'Error testing Dust MCP client:', error);
   }
 }
 
 // Run the test
-testMcpTools();
+testDustClient();

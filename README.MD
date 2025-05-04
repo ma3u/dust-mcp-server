@@ -39,6 +39,47 @@ DUST_FULLNAME=Your Full Name
 DUST_API_URL=https://dust.tt/api/v1
 ```
 
+### Claude Desktop Configuration
+
+This MCP server is designed to work with Claude Desktop via STDIO transport. Follow these steps to configure Claude Desktop to use your Dust MCP server:
+
+1. Make sure you have built the project with `npm run build`
+
+2. Install MCP Tools globally if you haven't already:
+
+   ```bash
+   npm install -g mcptools
+   ```
+
+3. Configure Claude Desktop to use your Dust MCP server:
+
+   ```bash
+   # Replace with your actual paths
+   mcp configs set claude-desktop dust /path/to/node /path/to/dust-mcp-server/build/dust.js
+
+   # Example with typical paths
+   mcp configs set claude-desktop dust /Users/username/.nvm/versions/node/v18.16.0/bin/node /Users/username/projects/dust-mcp-server/build/dust.js
+   ```
+
+4. Verify the configuration was saved:
+
+   ```bash
+   mcp configs list
+   ```
+
+   The configuration will be saved to `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS.
+
+5. Restart Claude Desktop for the changes to take effect
+
+![alt text](image-1.png)
+
+6. In Claude Desktop, you can now use the Dust MCP tools by asking Claude to:
+   - "List my available Dust agents"
+   - "Query my Dust agent with [your question]"
+   - "Get configuration for my Dust agent [agent_id]"
+
+![alt text](image-2.png)
+
 ### Running the Server
 
 ```bash
