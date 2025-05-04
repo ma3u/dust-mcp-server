@@ -1,4 +1,3 @@
-[2025-05-04T13:14:11.688Z] [INFO] Directory created: uploads
-[2025-05-04T13:14:11.689Z] [INFO] Directory created: processed
-[2025-05-04T13:14:11.689Z] [INFO] Directory created: logs
-[2025-05-04T13:14:11.689Z] [INFO] Starting MCP server with STDIO transport (authentication not required)
+[2025-05-04T13:20:15.052Z] [INFO] Directory created: processed
+[2025-05-04T13:20:15.052Z] [INFO] Directory created: logs
+[2025-05-04T13:20:15.052Z] [INFO] Starting MCP server with STDIO transport (authentication not required)
