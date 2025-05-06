@@ -1,6 +1,29 @@
-
-
 # Dust MCP Server
+
+## Table of Contents
+- [User Guide](#user-guide)
+  - [Overview](#overview)
+  - [Setup and Configuration](#setup-and-configuration)
+  - [Environment Configuration](#environment-configuration)
+  - [Claude Desktop Configuration](#claude-desktop-configuration)
+  - [Running the Server](#running-the-server)
+  - [Using MCP Tools](#using-mcp-tools)
+  - [Available MCP Tools](#available-mcp-tools)
+- [Developer Guide](#developer-guide)
+  - [Architecture Diagram](#architecture-diagram-mcp-client-mcp-server-and-dust-agent)
+  - [Project Structure](#project-structure)
+  - [Memory Bank System](#memory-bank-system)
+  - [Testing](#testing)
+  - [Debugging](#debugging)
+  - [Development](#development)
+  - [API Documentation](#api-documentation)
+  - [License](#license)
+
+---
+
+# User Guide
+
+## Overview
 
 A Model Context Protocol (MCP) server for interacting with Dust.tt agents, designed to work with Claude Desktop via STDIO transport. This server provides tools for querying Dust agents, listing available agents, and retrieving agent configurations.
 
@@ -135,19 +158,6 @@ sequenceDiagram
     Dust-->>MCP: Respond with agent data/result
     MCP-->>Claude: Return response via STDIO or HTTP/SSE
 ```
-
-**Legend:**
-- MCP Client (Claude Desktop) communicates with the MCP Server via STDIO (for desktop) or HTTP/SSE (for remote/web).
-- MCP Server routes the request and interacts with the Dust Agent using OpenAPI.
-- All agent queries and results are handled through the MCP protocol.
-
----
-
-
-You can verify the server is running by checking for the process:
-
-```bash
-ps aux | grep "node.*dust-mcp-server" | grep -v grep
 ```
 
 To stop the server, you can use Ctrl+C in the terminal where it's running, or kill the process:

@@ -39,6 +39,7 @@ This file tracks the project's progress using a task list format.
 * Created list_dust_agents tool for agent discovery
 * Added conversation ID support for stateful interactions
 * Fixed TypeScript linting issues in the codebase
+* [2025-05-06 20:30:21] Fixed Jest ESM syntax errors, closed all test blocks, ensured all MCP unit/integration tests pass.
 * Improved markdown formatting in memory-bank files
 * Documented API integration decisions in decisionLog.md
 * Generalized MCP tools by removing health-specific components:

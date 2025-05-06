@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.1] - 2025-05-06
+
+### Fixed
+- Resolved Jest ESM syntax errors in unit and integration test files.
+- Closed all test and describe blocks in dust_get_agent_config.test.js to fix test runner errors.
+- Ensured all MCP test files only mock client.callTool.
+- All MCP unit and integration tests now pass successfully.
+
 ## [1.1.0] - 2025-05-04
 
 ### Fixed
