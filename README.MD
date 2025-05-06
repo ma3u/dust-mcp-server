@@ -82,8 +82,78 @@ This MCP server is designed to work with Claude Desktop via STDIO transport. Fol
 
 ### Running the Server
 
+You can run the MCP server in two different modes: HTTP mode or STDIO mode.
+
+#### HTTP Mode
+
+You can start the MCP server in HTTP mode using the provided start-server.js script:
+
 ```bash
+# Start the server in HTTP mode
 node start-server.js
+```
+
+The server will start and display a message: "Dust MCP Server started successfully. Waiting for connections..."
+
+The server automatically:
+
+- Sets up logging to the logs directory (creating it if needed)
+- Registers all available Dust tools
+- Listens for incoming MCP connections
+
+#### STDIO Mode
+
+STDIO mode is used when you want the server to communicate through standard input/output streams rather than HTTP. This is the mode used by Claude Desktop and other MCP clients that communicate via STDIO.
+
+To start the server in STDIO mode:
+
+```bash
+# Start the server in STDIO mode
+node build/dust.js
+```
+
+When running in STDIO mode:
+- The server doesn't produce any output to stdout by design, as this channel is reserved for MCP protocol communication
+- Any logs or error messages are directed to the logs directory and stderr
+- The server is immediately ready to accept MCP client connections
+
+#### Managing the Server
+
+---
+
+### Architecture Diagram: MCP Client, MCP Server, and Dust Agent
+
+```mermaid
+sequenceDiagram
+    participant Claude as MCP Client (Claude Desktop)
+    participant MCP as MCP Server (STDIO / HTTP / SSE)
+    participant Dust as DUST Agent (OpenAPI)
+
+    Claude->>MCP: Tool call (STDIO or HTTP/SSE)
+    MCP->>MCP: Route request to appropriate tool
+    MCP->>Dust: Query via OpenAPI (HTTP)
+    Dust-->>MCP: Respond with agent data/result
+    MCP-->>Claude: Return response via STDIO or HTTP/SSE
+```
+
+**Legend:**
+- MCP Client (Claude Desktop) communicates with the MCP Server via STDIO (for desktop) or HTTP/SSE (for remote/web).
+- MCP Server routes the request and interacts with the Dust Agent using OpenAPI.
+- All agent queries and results are handled through the MCP protocol.
+
+---
+
+
+You can verify the server is running by checking for the process:
+
+```bash
+ps aux | grep "node.*dust-mcp-server" | grep -v grep
+```
+
+To stop the server, you can use Ctrl+C in the terminal where it's running, or kill the process:
+
+```bash
+pkill -f "node.*dust-mcp-server"
 ```
 
 ### Using MCP Tools
@@ -188,6 +258,18 @@ Get detailed configuration for a specific Dust agent.
 mcp call dust_get_agent_config node build/dust.js --params '{"agent_id": "agent-id-123"}'
 ```
 
+## Memory Bank System
+
+This project uses a memory-bank system for maintaining project context and persistent storage instead of built-in memories. The memory-bank system consists of several markdown files that track different aspects of the project:
+
+- `/memory-bank/productContext.md`: High-level overview of the project and product
+- `/memory-bank/activeContext.md`: Current status, recent changes, and open questions
+- `/memory-bank/progress.md`: Task tracking in a list format
+- `/memory-bank/decisionLog.md`: Record of architectural and implementation decisions
+- `/memory-bank/systemPatterns.md`: Documentation of recurring patterns and standards
+
+The memory-bank system provides a clear separation between the project's persistent storage and any external memory systems.
+
 ## Project Structure
 
 - `/src`: Source code
@@ -201,13 +283,54 @@ mcp call dust_get_agent_config node build/dust.js --params '{"agent_id": "agent-
 
 ## Testing
 
-### Test Scripts
+The project includes a comprehensive test suite for all MCP methods using Jest. The tests are organized into unit tests and integration tests.
 
-The repository includes a test script to verify MCP functionality:
+### Test Structure
+
+- **Unit Tests**: Individual tests for each MCP method
+  - `dust_agent_query.test.js` - Tests for querying Dust agents
+  - `dust_list_agents.test.js` - Tests for listing available agents
+  - `dust_get_agent_config.test.js` - Tests for retrieving agent configurations
+
+- **Integration Tests**: Tests that verify the complete flow
+  - `dust_mcp_integration.test.js` - Tests the end-to-end flow of listing agents, getting configuration, and querying an agent
+
+### Running Tests
+
+You can run the tests using npm scripts:
+
+```bash
+# Install dependencies first (if not already installed)
+npm install
+
+# Run all tests
+npm test
+
+# Run only unit tests
+npm run test:unit
+
+# Run only integration tests
+npm run test:integration
+```
+
+### Test Features
+
+- **Mocking**: Tests use Jest mocking to isolate the MCP methods from actual API calls
+- **STDIO Transport**: Tests use the STDIO transport to communicate with the MCP server
+- **Error Handling**: Tests verify proper error handling for various scenarios
+- **Parameter Validation**: Tests verify that parameters are correctly validated
+- **Complete Coverage**: Tests cover all parameters and response formats
+
+### Manual Testing
+
+You can also manually test the MCP functionality using the provided test scripts:
 
 ```bash
 # Test MCP tools functionality
 node test-mcp-tools.js
+
+# Test STDIO transport
+node test-stdio.js
 ```
 
 ## Debugging

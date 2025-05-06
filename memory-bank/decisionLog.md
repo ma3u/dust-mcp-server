@@ -2,6 +2,37 @@
 
 This file records architectural and implementation decisions using a list format.
 
+"2025-05-06 20:15:03" - Added Jest Test Plan and Strategy for MCP Server.
+
+## Decision 4: Jest Test Plan and Strategy for MCP Server
+
+* All unit and integration tests for the MCP Server use Jest with ES module support.
+* Service calls (e.g., Dust agent methods) are always mocked via `client.callTool` to ensure isolation.
+* No direct mocks of service-layer functions like `listDustAgents`, `getAgentConfig`, or `queryDustAgent`.
+* Each test file validates MCP methods by mocking and verifying `client.callTool` responses only.
+* Tests are written to be compatible with ES modules and avoid common pitfalls with Jest and ESM.
+* All previous test errors (TypeError, syntax errors, reference errors) were addressed by focusing on proper mocking and import order.
+* Test plan includes:
+  - `dust_list_agents.test.js`: Tests listing agents via mocked client.
+  - `dust_agent_query.test.js`: Tests agent querying logic with mocked client.
+  - `dust_get_agent_config.test.js`: Tests agent config retrieval with mocked client.
+* Test suite is run using `npm test` with `NODE_OPTIONS=--experimental-vm-modules` for ESM compatibility.
+* Test strategy and approach are documented for future contributors.
+
+### Decision 4 Rationale
+
+* Mocking at the client layer ensures tests are independent of backend or service changes.
+* ES module compatibility avoids future migration issues and leverages modern JavaScript features.
+* Clear, modular test files improve maintainability and onboarding for new developers.
+* Addressing previous errors increases test reliability and developer confidence.
+
+### Decision 4 Implementation
+
+* Updated all test files to mock only `client.callTool`.
+* Removed all direct references and mocks to service-layer functions.
+* Ensured all tests pass with Jest and ESM configuration.
+* Documented the test plan and strategy in this decision log for future reference.
+
 "2025-04-10 17:06:31" - Updated based on code review and todo.md analysis.
 
 ## Decision 1: MCP Server Architecture
