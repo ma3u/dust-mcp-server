@@ -1,19 +1,34 @@
 # Dust MCP Server
 
+A Model Context Protocol (MCP) server for Dust.tt agents, designed for seamless integration with Claude Desktop via STDIO. Provides robust agent querying, listing, and configuration tools.
+
 ## Table of Contents
+- [Dust MCP Server](#dust-mcp-server)
+  - [Table of Contents](#table-of-contents)
 - [User Guide](#user-guide)
   - [Overview](#overview)
   - [Setup and Configuration](#setup-and-configuration)
-  - [Environment Configuration](#environment-configuration)
-  - [Claude Desktop Configuration](#claude-desktop-configuration)
-  - [Running the Server](#running-the-server)
-  - [Using MCP Tools](#using-mcp-tools)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Environment Configuration](#environment-configuration)
+    - [Claude Desktop Configuration](#claude-desktop-configuration)
+    - [Running the Server](#running-the-server)
+      - [HTTP Mode](#http-mode)
+      - [STDIO Mode](#stdio-mode)
+      - [Managing the Server](#managing-the-server)
+    - [Architecture Diagram](#architecture-diagram)
+    - [Using MCP Tools](#using-mcp-tools)
   - [Available MCP Tools](#available-mcp-tools)
-- [Developer Guide](#developer-guide)
-  - [Architecture Diagram](#architecture-diagram-mcp-client-mcp-server-and-dust-agent)
-  - [Project Structure](#project-structure)
+    - [`dust_list_agents`](#dust_list_agents)
+    - [`dust_agent_query`](#dust_agent_query)
+    - [`dust_get_agent_config`](#dust_get_agent_config)
   - [Memory Bank System](#memory-bank-system)
+  - [Project Structure](#project-structure)
   - [Testing](#testing)
+    - [Test Structure](#test-structure)
+    - [Running Tests](#running-tests)
+    - [Test Features](#test-features)
+    - [Manual Testing](#manual-testing)
   - [Debugging](#debugging)
   - [Development](#development)
   - [API Documentation](#api-documentation)
@@ -22,6 +37,8 @@
 ---
 
 # User Guide
+
+---
 
 ## Overview
 
@@ -94,14 +111,14 @@ This MCP server is designed to work with Claude Desktop via STDIO transport. Fol
 
 5. Restart Claude Desktop for the changes to take effect
 
-![alt text](image-1.png)
+![Claude Desktop Configuration Screenshot](docs/image-1.png)
 
 6. In Claude Desktop, you can now use the Dust MCP tools by asking Claude to:
    - "List my available Dust agents"
    - "Query my Dust agent with [your question]"
    - "Get configuration for my Dust agent [agent_id]"
 
-![alt text](image-2.png)
+![Claude Desktop Dust MCP Usage](docs/image-2.png)
 
 ### Running the Server
 
@@ -140,11 +157,17 @@ When running in STDIO mode:
 - Any logs or error messages are directed to the logs directory and stderr
 - The server is immediately ready to accept MCP client connections
 
-#### Managing the Server
+#### Stopping the Server
+
+To stop the server, you can use Ctrl+C in the terminal where it's running, or kill the process:
+
+```bash
+pkill -f "node.*dust-mcp-server"
+```
 
 ---
 
-### Architecture Diagram: MCP Client, MCP Server, and Dust Agent
+### Architecture Diagram
 
 ```mermaid
 sequenceDiagram
@@ -158,13 +181,7 @@ sequenceDiagram
     Dust-->>MCP: Respond with agent data/result
     MCP-->>Claude: Return response via STDIO or HTTP/SSE
 ```
-```
 
-To stop the server, you can use Ctrl+C in the terminal where it's running, or kill the process:
-
-```bash
-pkill -f "node.*dust-mcp-server"
-```
 
 ### Using MCP Tools
 
@@ -282,14 +299,22 @@ The memory-bank system provides a clear separation between the project's persist
 
 ## Project Structure
 
-- `/src`: Source code
-  - `/services`: Service layer for Dust API integration
-  - `/tools`: MCP tool implementations (deprecated, now using direct import)
-- `/build`: Compiled JavaScript code
-- `/logs`: Application logs
-  - `/debug`: Debug logs for API interactions
-- `/.env`: Environment configuration
-- `/memory-bank`: Project memory and context tracking
+```
+root/
+├── src/                # Main source code
+│   ├── services/       # Dust API integration layer
+│   └── tools/          # (Deprecated) MCP tool implementations
+├── build/              # Compiled JavaScript output
+├── logs/               # Application and debug logs
+│   └── debug/
+├── memory-bank/        # Project context and memory files
+├── docs/               # Documentation, images, and moved test/demo scripts
+├── .env                # Environment configuration (not committed)
+├── .env.example        # Example environment file
+├── package.json        # Project manifest
+├── README.md           # Main documentation (this file)
+└── ...
+```
 
 ## Testing
 
@@ -333,20 +358,19 @@ npm run test:integration
 
 ### Manual Testing
 
-You can also manually test the MCP functionality using the provided test scripts:
+You can also manually test the MCP functionality using the scripts in `docs/`:
 
 ```bash
 # Test MCP tools functionality
-node test-mcp-tools.js
+node docs/test-mcp-tools.js
 
 # Test STDIO transport
-node test-stdio.js
+node docs/test-stdio.js
 ```
 
 ## Debugging
 
-Logs are stored in the `logs` directory:
-
+Logs are stored in the `logs/` directory:
 - `app-YYYY-MM-DD.log`: Application logs
 - `server-YYYY-MM-DD.log`: Server logs
 - `test-mcp-YYYY-MM-DD.log`: MCP tools test logs
