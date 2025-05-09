@@ -1,3 +1,5 @@
 version: 1
-buildCommand: npm run build
-startCommand: npm start
+buildCommand:
+  command: npm run build
+startCommand:
+  command: npm start
