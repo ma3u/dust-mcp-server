@@ -116,6 +116,27 @@ This file records architectural and implementation decisions using a list format
 * Created dustService.ts for all Dust API interactions
 * Implemented agent configuration caching with TTL
 * Added support for document context in agent queries
-* Created tools for agent discovery and document analysis
+* Updated test strategy to mock at the client layer only
+
+"2025-05-09 14:06:30" - Added HTTP/SSE mode and Smithery build support.
+
+## Decision 5: HTTP/SSE Mode and Smithery Support
+
+* Implemented HTTP/SSE mode for MCP server using Express and Server-Sent Events (SSE)
+* Added /events SSE endpoint for real-time event streaming
+* Preserved STDIO transport for Claude Desktop compatibility
+* Added Smithery build and deployment support with smithery.yaml
+
+### Decision 5 Rationale
+
+* HTTP/SSE enables web-based clients and real-time updates
+* Maintaining STDIO ensures backward compatibility
+* Smithery support streamlines builds and deployment
+
+### Decision 5 Implementation Details
+
+* Added sseBroadcaster utility and integrated with Express
+* Updated index.ts to provide /events SSE endpoint and event broadcasting
+* Created and validated smithery.yaml for Smithery deployment
 * Added TypeScript interfaces for API responses
 * Structured response format to match MCP requirements

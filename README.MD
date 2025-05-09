@@ -15,6 +15,8 @@ A Model Context Protocol (MCP) server for Dust.tt agents, designed for seamless 
     - [Running the Server](#running-the-server)
       - [HTTP Mode](#http-mode)
       - [STDIO Mode](#stdio-mode)
+      - [SSE Events](#sse-events)
+      - [Smithery Build & Deploy](#smithery-build--deploy)
       - [Managing the Server](#managing-the-server)
     - [Architecture Diagram](#architecture-diagram)
     - [Using MCP Tools](#using-mcp-tools)
@@ -126,20 +128,26 @@ You can run the MCP server in two different modes: HTTP mode or STDIO mode.
 
 #### HTTP Mode
 
-You can start the MCP server in HTTP mode using the provided start-server.js script:
+To run the server in HTTP mode (for web-based clients):
 
 ```bash
-# Start the server in HTTP mode
-node start-server.js
+npm run build
+npm start -- --http
 ```
 
-The server will start and display a message: "Dust MCP Server started successfully. Waiting for connections..."
+The server will listen on the port specified by the `PORT` environment variable (default: 3000).
 
-The server automatically:
+You can interact with the API at `http://localhost:3000/api`.
 
-- Sets up logging to the logs directory (creating it if needed)
-- Registers all available Dust tools
-- Listens for incoming MCP connections
+#### SSE Events
+
+The server supports real-time event streaming via Server-Sent Events (SSE).
+
+- Connect to `http://localhost:3000/events` with an SSE-compatible client to receive server events (e.g., health, agent updates).
+- Example using `curl`:
+  ```bash
+  curl -N http://localhost:3000/events
+  ```
 
 #### STDIO Mode
 

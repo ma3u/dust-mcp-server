@@ -33,6 +33,8 @@ This file tracks the project's progress using a task list format.
 
 ## Completed Tasks (Recent)
 
+* Implemented HTTP/SSE mode for MCP server (added /events SSE endpoint, integrated event broadcasting, preserved STDIO fallback)
+* Added Smithery build and deployment support (created smithery.yaml with buildCommand/startCommand, fixed config errors)
 * Implemented single agent dust query functionality
 * Created dustService.ts for direct Dust API interactions (decided against using SDK)
 * Implemented agent configuration caching to improve performance

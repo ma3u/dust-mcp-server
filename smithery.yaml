@@ -2,4 +2,6 @@ version: 1
 buildCommand:
   command: npm run build
 startCommand:
+  type: http
   command: npm start
+  commandFunction: default

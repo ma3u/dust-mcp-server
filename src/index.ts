@@ -58,6 +58,8 @@ const useHttpTransport = process.env.USE_HTTP_TRANSPORT === 'true' ||
 // Authentication will be implemented in Milestone 2
 const useAuthentication = false; // Disabled until Milestone 2 is implemented
 
+import { addClient, removeClient, broadcast } from './utils/sseBroadcaster.js';
+
 if (useHttpTransport) {
   // Setup Express app for HTTP transport
   const app = express();
@@ -70,6 +72,18 @@ if (useHttpTransport) {
   // Health check endpoint
   app.get('/health', (req, res) => {
     res.status(200).json({ status: 'ok', uptime: process.uptime() });
+    broadcast('health', { status: 'ok', uptime: process.uptime() }); // Example broadcast
+  });
+
+  // SSE endpoint
+  app.get('/events', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.flushHeaders();
+    addClient(res);
+    res.write('event: connected\ndata: {}\n\n');
+    req.on('close', () => removeClient(res));
   });
   
   // API routes (authentication will be added in Milestone 2)
