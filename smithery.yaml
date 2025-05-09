@@ -1,0 +1,4 @@
+version: 1
+build:
+  language: node
+  entry: src/index.ts
