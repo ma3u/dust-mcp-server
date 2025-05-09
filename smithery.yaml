@@ -1,4 +1,3 @@
 version: 1
-build:
-  language: node
-  entry: src/index.ts
+buildCommand: npm run build
+startCommand: npm start
