@@ -364,6 +364,13 @@ windsurfrules:
 - Use TypeScript for type safety and better code quality
 - Stop after each milestone, build, start, and test
 
+### Atlassian Integration
+
+- Work with the Atllasian MCP Server and use the project P4XAI
+- Each new decision in decisionLog.md should be sent to Atlassian Jira as a new issue.
+- All architectural changes in systemPatterns.md should be sent to Atlassian Confluence
+- Each fix in progress.md should be sent to Atlassian Jira as a new issue.
+
 ### Logging Strategy
 - Never use `console.log()` as it breaks STDIO transport of Claude Desktop communication
 - Use alternatives:

@@ -1,6 +1,7 @@
 version: 1
 buildCommand:
   command: npm run build
+  dockerfile: ./Dockerfile
 startCommand:
   type: http
   command: npm start

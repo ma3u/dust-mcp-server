@@ -2,6 +2,7 @@
 
 This file records architectural and implementation decisions using a list format.
 
+---
 "2025-05-06 20:15:03" - Added Jest Test Plan and Strategy for MCP Server.
 
 ## Decision 4: Jest Test Plan and Strategy for MCP Server
@@ -33,6 +34,8 @@ This file records architectural and implementation decisions using a list format
 * Ensured all tests pass with Jest and ESM configuration.
 * Documented the test plan and strategy in this decision log for future reference.
 
+---
+
 "2025-04-10 17:06:31" - Updated based on code review and todo.md analysis.
 
 ## Decision 1: MCP Server Architecture
@@ -55,6 +58,8 @@ This file records architectural and implementation decisions using a list format
 * Express.js server for HTTP transport (currently commented out but prepared)
 * Implemented tool registration pattern for all functionality
 
+---
+
 ## Decision 2: Document Processing Pipeline
 
 * Three-stage pipeline: Upload → Process → Query
@@ -74,6 +79,8 @@ This file records architectural and implementation decisions using a list format
 * Document processor extracts and structures information
 * Dust agent tools query processed documents
 
+---
+
 ## Decision 3: Dust Agent Integration
 
 * Mock implementation for initial development
@@ -90,6 +97,8 @@ This file records architectural and implementation decisions using a list format
 
 * Created mock queryDustAgent function
 * Implemented tool interfaces that match expected Dust functionality
+
+---
 
 ## Decision 4: Dust API Integration
 
@@ -117,6 +126,8 @@ This file records architectural and implementation decisions using a list format
 * Implemented agent configuration caching with TTL
 * Added support for document context in agent queries
 * Updated test strategy to mock at the client layer only
+
+---
 
 "2025-05-09 14:06:30" - Added HTTP/SSE mode and Smithery build support.
 
