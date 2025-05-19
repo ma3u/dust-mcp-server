@@ -198,7 +198,111 @@ export default (server: McpServer) => {
       }
     }
   );
-  
+
+  // Tool: Query multiple Dust agents in parallel
+  server.tool(
+    "query_multiple_dust_agents",
+    "Query multiple Dust agents with the same prompt and optional context. Returns an array of responses, one per agent.",
+    {
+      agentIds: z.array(z.string(), {
+        description: "IDs of the Dust agents to query. If omitted or empty, will use all available agents."
+      }).optional(),
+      query: z.string({
+        description: "The prompt or question to send to the agents"
+      }),
+      documentIds: z.array(z.string(), {
+        description: "Optional IDs of processed documents to include as context"
+      }).optional(),
+      context: z.record(z.any(), {
+        description: "Optional additional context data to provide to the agents"
+      }).optional(),
+      conversationId: z.string({
+        description: "Optional conversation ID for continuing an existing conversation (applies to all agents)"
+      }).optional(),
+      echo: z.boolean({
+        description: "If true, echo back the query instead of getting a real response from the agents (for testing)"
+      }).optional()
+    },
+    async (params) => {
+      // Determine which agents to query
+      let agentIds = params.agentIds && params.agentIds.length > 0 ? params.agentIds : undefined;
+      if (!agentIds) {
+        // Get all available agents
+        const allAgents = await listDustAgents();
+        agentIds = allAgents.map(agent => agent.id);
+      }
+
+      // Prepare context (including documents if provided)
+      let context: any = params.context || {};
+      if (params.documentIds && params.documentIds.length > 0) {
+        const documentContexts = await Promise.all(
+          params.documentIds.map(async (docId) => {
+            const processedPath = path.join(PROCESSED_DIR, `${docId}.json`);
+            try {
+              const processedContent = await fs.readFile(processedPath, 'utf8');
+              return JSON.parse(processedContent);
+            } catch (error) {
+              console.error(`Error loading document ${docId}:`, error);
+              throw new Error(`Document with ID ${docId} not found or not processed`);
+            }
+          })
+        );
+        context.documents = documentContexts.map(doc => ({
+          id: doc.documentId,
+          name: doc.originalName,
+          type: doc.fileType,
+          data: doc.structuredData,
+          text: doc.extractedText
+        }));
+      }
+
+      // Query each agent in parallel
+      const results = await Promise.all(agentIds.map(async (agentId) => {
+        try {
+          // Optionally echo
+          if (params.echo) {
+            return {
+              agentId,
+              content: [{ type: "text" as const, text: `ECHO: ${params.query}` }],
+              _meta: { echo: true, query: params.query, agentId, timestamp: new Date().toISOString() }
+            };
+          }
+          const response = await queryDustAgent(
+            agentId,
+            params.query,
+            context,
+            params.conversationId
+          );
+          return {
+            agentId,
+            ...response
+          };
+        } catch (error) {
+          return {
+            agentId,
+            content: [{ type: "text" as const, text: `Failed to query agent ${agentId}: ${error instanceof Error ? error.message : String(error)}` }],
+            isError: true,
+            _meta: { error: error instanceof Error ? error.message : String(error), agentId, query: params.query }
+          };
+        }
+      }));
+
+      // Return all responses in a single MCP response
+      return {
+        content: [{
+          type: "json" as const,
+          json: results
+        }],
+        _meta: {
+          agentIds,
+          query: params.query,
+          documentIds: params.documentIds,
+          timestamp: new Date().toISOString()
+        }
+      };
+    }
+  );
+
   // Add a tool to get information about a Dust agent
   server.tool(
     "get_dust_agent_info",

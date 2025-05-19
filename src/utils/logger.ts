@@ -35,7 +35,8 @@ interface LoggerConfig {
 const DEFAULT_CONFIG: LoggerConfig = {
   level: LogLevel.INFO,
   logToFile: true,
-  logToConsole: true,
+  // WARNING: NEVER enable logToConsole in MCP STDIO JSON environments! Only set to true for local debugging.
+  logToConsole: false,
   logDir: path.join(process.cwd(), 'logs'),
   logFilePrefix: 'app',
   maxLogFileSizeBytes: 5 * 1024 * 1024, // 5MB
@@ -49,6 +50,10 @@ class Logger {
 
   constructor(config: Partial<LoggerConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
+    // MCP STDIO JSON best practice: logToConsole must remain false in production environments to prevent breaking JSON output.
+    if (this.config.logToConsole) {
+      console.error('[LOGGER WARNING] logToConsole is enabled. NEVER enable this in MCP STDIO JSON production environments.');
+    }
     this.currentLogFile = this.getLogFilePath();
     this.initializeLogger();
   }
