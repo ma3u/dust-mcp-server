@@ -6,7 +6,7 @@ This file provides a high-level overview of the project and the expected product
 
 ## Project Goal
 
-The Dust MCP Server project is a server implementation for integrating with Dust AI services using the Model Context Protocol (MCP). It serves as a middleware connector between client applications (particularly Claude Desktop) and Dust AI agents, enabling health data processing, analysis, and insights generation through AI agents.
+The Dust MCP Server project is a server implementation for integrating with Dust AI services using the Model Context Protocol (MCP). It serves as a middleware connector between client applications (particularly Claude Desktop) and Dust AI agents, enabling data processing, analysis, and insights generation through AI agents. The implementation includes a comprehensive test suite covering unit, integration, and end-to-end testing scenarios.
 
 ## Key Features
 
@@ -24,17 +24,26 @@ The project follows a TypeScript-based server architecture with modular componen
 
 - **Core Server**: Express.js-based server with MCP SDK integration
 - **Transport Layer**: Support for both STDIO (for Claude Desktop) and HTTP/SSE
+- **Testing Framework**: Comprehensive test suite with Jest for unit, integration, and end-to-end tests
 - **Tool Components**:
   - File Upload: Handles document uploads with metadata tracking
   - Document Processor: Extracts and structures information from documents
   - Dust Agent: Interfaces with Dust AI services for data analysis
+  - Agent Service: Manages agent lifecycle and session state
 - **Directory Structure**:
   - `/src`: Source code with modular components
-  - `/uploads`: Storage for uploaded documents
-  - `/processed`: Storage for processed document data
-  - `/logs`: Application logs
+    - `/api`: API routes, controllers, and middleware
+    - `/services`: Business logic and service layer
+    - `/types`: TypeScript type definitions
+    - `/utils`: Utility functions and helpers
+    - `/__tests__/unit`: Unit tests
+    - `/__tests__/integration`: Integration tests
+    - `/__tests__/e2e`: End-to-end tests
+  - `/docs`: Documentation including API specs and user guides
+  - `/logs`: Application logs (not version controlled)
+  - `/.github`: GitHub workflows and templates
 
-The system is designed to process documents, extract relevant information, and use Dust AI agents to analyze and generate insights from the data.
+The system is designed to process documents, extract relevant information, and use Dust AI agents to analyze and generate insights from the data. The implementation includes a comprehensive test suite that validates all critical paths and edge cases, ensuring reliability and maintainability.
 
 ## User Journey: Multi-Agent Interaction
 
