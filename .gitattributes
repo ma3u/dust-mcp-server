@@ -1,0 +1,97 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.sh text eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Declare files that will always have CRLF line endings on checkout.
+*.sln text eol=crlf
+*.csproj text eol=crlf
+*.vbproj text eol=crlf
+*.fsproj text eol=crlf
+
+# Denote all files that are truly binary and should not be modified.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.eot binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.tar binary
+*.dmg binary
+*.app binary
+*.dll binary
+*.exe binary
+*.msi binary
+*.msm binary
+*.msp binary
+*.msix binary
+*.msixbundle binary
+*.appx binary
+*.appxbundle binary
+*.cab binary
+*.iso binary
+*.img binary
+*.dmg binary
+*.pkg binary
+*.deb binary
+*.rpm binary
+*.snap binary
+*.flatpak binary
+*.apk binary
+*.aab binary
+*.ipa binary
+*.xcarchive binary
+*.xcodeproj binary
+*.xcworkspacedata binary
+*.xcscheme binary
+*.xcuserstate binary
+*.xcworkspacedata binary
+*.xcscheme binary
+*.xcuserstate binary
+*.xcuserdatad binary
+*.xccheckout binary
+*.xccheckout binary
+*.xcodeproj binary
+*.xcworkspacedata binary
+*.xcscheme binary
+*.xcuserstate binary
+*.xcworkspacedata binary
+*.xcscheme binary
+*.xcuserstate binary
+*.xcuserdatad binary
+*.xccheckout binary
+*.xccheckout binary
+*.xcuserdatad/* binary
+*.xcuserstate
+*.xccheckout
+*.xccheckout
+*.xcworkspace/*
+!*.xcworkspace/contents.xcworkspacedata
+!*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+!*.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

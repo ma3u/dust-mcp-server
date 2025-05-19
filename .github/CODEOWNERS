@@ -1,0 +1,24 @@
+# Default owners for everything in the repo
+*       @Ma3u
+
+# Documentation
+/docs/  @Ma3u
+
+# Configuration files
+/.github/ @Ma3u
+/.editorconfig @Ma3u
+/.eslint* @Ma3u
+/.prettier* @Ma3u
+/tsconfig*.json @Ma3u
+
+# Source code
+/src/    @Ma3u
+
+# Tests
+/tests/  @Ma3u
+
+# Build files
+/build/  @Ma3u
+
+# Add team ownership for specific paths
+# /path/to/dir/ @org/team1 @org/team2

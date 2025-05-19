@@ -1,5 +1,4 @@
 # Project-Specific Windsurf Rules
-
 memory_bank:
   autoUpdate: true
   autoSync: true
@@ -23,6 +22,7 @@ memory_bank:
     For each new product context, update productContext.md.
     Always update documentation when making changes.
 
+# Memory System Rules
 memory_system_rules:
   primary_system: memory-bank
   restrictions:
@@ -37,6 +37,33 @@ memory_system_rules:
     - Use GitHub for version control and collaboration
     - Reference systemPatterns.md for implementation patterns
 
+# Memory Bank Integration
+memory_integration:
+  internal:
+    - decisionLog.md         # Project decisions
+    - progress.md           # Progress tracking
+    - systemPatterns.md     # System patterns
+    - activeContext.md      # Active context
+    - productContext.md     # Product context
+
+  external:
+    github: "Ma3u/dust-mcp-server"
+    sync: true
+    paths:
+      - ".github/**/*"      # Workflows and templates
+      - "docs/**/*"         # Public documentation
+      - "src/**/*"          # Source code
+      - "*.md"              # Markdown files
+      - "package*.json"     # Dependencies
+      - "tsconfig*.json"    # TypeScript configs
+
+  rules:
+    - "Always update internal memory first"
+    - "Sync with GitHub after internal updates"
+    - "Reference systemPatterns.md for patterns"
+    - "Document all memory interactions"
+
+# GitHub Integration
 github:
   # Repository settings
   repo: "Ma3u/dust-mcp-server"
@@ -95,7 +122,7 @@ development:
     max_length: 72
     require_emoji: true
     template: |
-      :emoji: [JIRA-123] Concise summary under 50 chars
+      :emoji: Concise summary under 50 chars
       
       More detailed explanation of changes if needed.
       - Bullet points for multiple changes
@@ -123,22 +150,3 @@ documentation:
     - "Configuration changes"
     - "Bug fixes"
     - "Dependency updates"
-
-# Memory Bank Integration
-memory_integration:
-  internal:
-    - decisionLog.md
-    - systemPatterns.md
-    - progress.md
-  external:
-    - github: "Ma3u/dust-mcp-server"
-      sync: true
-      paths:
-        - "docs/**/*"
-        - "README.md"
-        - "CHANGELOG.md"
-  rules:
-    - "Always update internal memory first"
-    - "Sync with GitHub after internal updates"
-    - "Reference systemPatterns.md for patterns"
-    - "Document all memory interactions"
