@@ -1,4 +1,5 @@
-# Project-Specific Windsurf Rules
+# Project-Specific Windsurf Rules for 
+# Version 2.0.0
 memory_bank:
   autoUpdate: true
   autoSync: true
@@ -150,3 +151,51 @@ documentation:
     - "Configuration changes"
     - "Bug fixes"
     - "Dependency updates"
+
+    # Automation Rules
+automation:
+  # Auto-commit settings
+  auto_commit:
+    enabled: true
+    on_success:
+      - cascade_run
+      - test_run
+    branch: "feature/auto-commit"  # Branch for auto-commits
+    commit_message: |
+      :robot: Automated commit after successful {event_type}
+      
+      Changes made during the {event_type}:
+      - {timestamp}
+      - {changed_files_count} files modified
+      - {test_results_summary}
+      
+      {additional_notes}
+    push_to_remote: true
+    create_pr: true  # Create PR if not on main branch
+    pr_template: |
+      ## Changes
+      Automated changes from {event_type} at {timestamp}
+      
+      ### Modified Files
+      {file_changes}
+      
+      ### Test Results
+      {test_results}
+  
+  # Auto-test settings
+  auto_test:
+    run_on_change: true
+    required: true
+    commands:
+      - npm test
+    coverage_threshold: 80%
+  
+  rules:
+    - "Auto-commit after successful Cascade runs and test executions"
+    - "Include detailed commit messages with context"
+    - "Create PRs for non-main branch changes"
+    - "Run tests before committing"
+    - "Only commit if tests pass"
+    - "Include test coverage in commit message"
+    - "Push changes to remote repository"
+    - "Update related documentation automatically"
