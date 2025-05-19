@@ -26,7 +26,9 @@ debug/
 
 # IDE and editor files
 .idea/
-.vscode/
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
 *.swp
 *.swo
 .DS_Store

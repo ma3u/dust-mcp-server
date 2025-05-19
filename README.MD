@@ -3,124 +3,374 @@
 A Model Context Protocol (MCP) server for Dust.tt agents, designed for seamless integration with Claude Desktop via STDIO. Provides robust agent querying, listing, and configuration tools.
 
 ## Table of Contents
-- [Dust MCP Server](#dust-mcp-server)
-  - [Table of Contents](#table-of-contents)
 - [User Guide](#user-guide)
   - [Overview](#overview)
+  - [Quick Start](#quick-start)
   - [Setup and Configuration](#setup-and-configuration)
-    - [Prerequisites](#prerequisites)
-    - [Installation](#installation)
-    - [Environment Configuration](#environment-configuration)
-    - [Claude Desktop Configuration](#claude-desktop-configuration)
-    - [Running the Server](#running-the-server)
-      - [HTTP Mode](#http-mode)
-      - [STDIO Mode](#stdio-mode)
-      - [SSE Events](#sse-events)
-      - [Smithery Build & Deploy](#smithery-build--deploy)
-      - [Managing the Server](#managing-the-server)
-    - [Architecture Diagram](#architecture-diagram)
-    - [Using MCP Tools](#using-mcp-tools)
   - [Available MCP Tools](#available-mcp-tools)
-    - [`dust_list_agents`](#dust_list_agents)
-    - [`dust_agent_query`](#dust_agent_query)
-    - [`dust_get_agent_config`](#dust_get_agent_config)
   - [Memory Bank System](#memory-bank-system)
+- [Developer Guide](#developer-guide)
   - [Project Structure](#project-structure)
+  - [Development Setup](#development-setup)
   - [Testing](#testing)
-    - [Test Structure](#test-structure)
-    - [Running Tests](#running-tests)
-    - [Test Features](#test-features)
-    - [Manual Testing](#manual-testing)
-  - [Debugging](#debugging)
-  - [Development](#development)
+  - [Logging and Debugging](#logging-and-debugging)
   - [API Documentation](#api-documentation)
+  - [Deployment](#deployment)
+  - [Contributing](#contributing)
   - [License](#license)
-
----
+  - [Related Resources](#related-resources)
 
 # User Guide
 
----
-
 ## Overview
 
-A Model Context Protocol (MCP) server for interacting with Dust.tt agents, designed to work with Claude Desktop via STDIO transport. This server provides tools for querying Dust agents, listing available agents, and retrieving agent configurations.
+The Dust MCP Server provides a standardized interface for interacting with Dust.tt agents through the Model Context Protocol (MCP). It enables seamless integration with Claude Desktop and other MCP-compatible clients, offering features like agent discovery, session management, and message handling.
 
-## Setup and Configuration
+## Quick Start
 
 ### Prerequisites
 
-- Node.js v18+
-- npm
+- Node.js v18 or later
+- npm 9.x or later
+- A Dust.tt account with API access
 
 ### Installation
 
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/Ma3u/dust-mcp-server.git
+   cd dust-mcp-server
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env` file in the root directory with your configuration:
+
+   ```env
+   # Required
+   DUST_API_KEY=your_dust_api_key
+   DUST_WORKSPACE_ID=your_workspace_id
+   
+   # Optional
+   PORT=3000
+   NODE_ENV=development
+   LOG_LEVEL=info
+   
+   # Advanced Configuration
+   DUST_AGENT_IDS=agent1,agent2,agent3
+   MAX_SESSIONS=100
+   SESSION_TIMEOUT=3600
+   ```
+
+4. Build the project:
+
+   ```bash
+   npm run build
+   ```
+
+5. Start the server:
+
+   ```bash
+   # For development
+   npm run dev
+   
+   # For production
+   npm start
+   ```
+
+## Setup and Configuration
+
+### Environment Variables
+
+| Variable | Required | Description | Default |
+|----------|----------|-------------|---------|
+| `DUST_API_KEY` | Yes | Your Dust.tt API key | - |
+| `DUST_WORKSPACE_ID` | Yes | Your Dust.tt workspace ID | - |
+| `PORT` | No | Port to run the server on | `3000` |
+| `NODE_ENV` | No | Node environment (`development`/`production`) | `development` |
+| `LOG_LEVEL` | No | Logging level (`error`, `warn`, `info`, `debug`) | `info` |
+| `DUST_AGENT_IDS` | No | Comma-separated list of agent IDs to load | - |
+| `MAX_SESSIONS` | No | Maximum number of concurrent sessions | `100` |
+| `SESSION_TIMEOUT` | No | Session timeout in seconds | `3600` (1 hour) |
+
+### Claude Desktop Integration
+
+To use with Claude Desktop:
+
+1. Install MCP Tools globally:
+   ```bash
+   npm install -g @modelcontextprotocol/tools
+   ```
+
+2. Configure Claude Desktop to use your MCP server:
+   ```bash
+   mcp configs set claude-desktop dust $(which node) $(pwd)/build/dust.js
+   ```
+
+3. Restart Claude Desktop and start interacting with your Dust agents.
+
+## Available MCP Tools
+
+The following MCP tools are available for interacting with Dust agents:
+
+### `dust_list_agents`
+
+List all available Dust agents in the configured workspace.
+
+**Parameters:**
+
+- `includeDetails` (boolean, optional): Whether to include detailed agent information
+
+**Example:**
+
+```json
+{
+  "includeDetails": true
+}
+```
+
+### `dust_agent_query`
+
+Send a query to a Dust agent.
+
+**Parameters:**
+
+- `agentId` (string, required): The ID of the agent to query
+- `query` (string, required): The query to send to the agent
+- `sessionId` (string, optional): Session ID for continuing a conversation
+- `context` (object, optional): Additional context for the query
+
+**Example:**
+
+```json
+{
+  "agentId": "agent123",
+  "query": "What is the weather today?",
+  "sessionId": "session_456"
+}
+```
+
+## Memory Bank System
+
+The Memory Bank system provides persistent storage for agent state and configuration:
+
+- **Active Context**: Tracks the current state of all active agent sessions
+- **Decision Log**: Records all agent decisions and actions
+- **Progress Tracking**: Monitors task progress and completion status
+- **System Patterns**: Defines reusable interaction patterns
+- **Product Context**: Stores product-specific configurations and data
+
+---
+
+# Developer Guide
+
+## Project Structure
+
+```text
+dust-mcp-server/
+├── src/
+│   ├── __tests__/           # Test files
+│   │   ├── e2e/             # End-to-end tests
+│   │   ├── integration/     # Integration tests
+│   │   └── unit/            # Unit tests
+│   ├── agents/              # Agent implementations
+│   ├── api/                 # API routes and controllers
+│   ├── middleware/          # Express middleware
+│   ├── services/            # Business logic services
+│   ├── tools/               # MCP tool implementations
+│   ├── types/               # TypeScript type definitions
+│   └── utils/               # Utility functions
+├── memory-bank/             # Persistent storage for agent state
+│   ├── activeContext.md     # Current state of active sessions
+│   ├── decisionLog.md       # Log of agent decisions
+│   ├── progress.md          # Task progress tracking
+│   ├── systemPatterns.md    # Reusable interaction patterns
+│   └── productContext.md    # Product-specific configurations
+├── docs/                    # Documentation files
+├── tests/                   # Additional test resources
+├── .env.example             # Example environment variables
+├── .eslintrc.json           # ESLint configuration
+├── .gitignore               # Git ignore rules
+├── jest.config.ts           # Jest test configuration
+├── package.json             # Project dependencies and scripts
+├── README.md                # This file
+└── tsconfig.json            # TypeScript configuration
+```
+
+## Development Setup
+
+1. Clone the repository and install dependencies:
+
+   ```bash
+   git clone https://github.com/Ma3u/dust-mcp-server.git
+   cd dust-mcp-server
+   npm install
+   ```
+
+2. Set up your development environment:
+
+   ```bash
+   # Install development dependencies
+   npm install -D typescript ts-node ts-jest @types/jest @types/node
+   
+   # Set up pre-commit hooks
+   npm run prepare
+   ```
+
+3. Configure your environment:
+
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+4. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+## Testing
+
+The project includes a comprehensive test suite:
+
+### Running Tests
+
 ```bash
-# Clone the repository
-git clone https://github.com/Ma3u/dust-mcp-server.git
-cd dust-mcp-server
+# Run all tests
+npm test
 
-# Install dependencies
-npm install
+# Run unit tests
+npm run test:unit
 
-# Build the project
+# Run integration tests
+npm run test:integration
+
+# Run end-to-end tests
+npm run test:e2e
+
+# Run tests with coverage
+npm run test:coverage
+```
+
+### Test Structure
+
+- **Unit Tests**: Test individual functions and classes in isolation
+- **Integration Tests**: Test interactions between components
+- **E2E Tests**: Test complete user flows
+
+### Test Features
+
+- Mock implementations for external services
+- Test database with sample data
+- API request/response validation
+- Snapshot testing for UI components
+
+## Logging and Debugging
+
+The application uses Winston for logging with the following log levels:
+
+- `error`: Errors that cause the application to fail
+- `warn`: Potentially harmful situations
+- `info`: General application flow information
+- `debug`: Detailed debugging information
+- `silly`: Very detailed debugging information
+
+### Debugging in VS Code
+
+Add this configuration to your `.vscode/launch.json`:
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Tests",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "test:debug"],
+      "port": 9229,
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}
+```
+
+### Common Issues
+
+1. **TypeScript Errors**: Run `npm run lint:fix` to automatically fix common issues
+2. **Test Failures**: Clear the test database with `npm run test:reset`
+3. **Dependency Issues**: Delete `node_modules` and run `npm install`
+
+## API Documentation
+
+API documentation is available in the `docs` directory and can be generated using:
+
+```bash
+npm run docs:generate
+```
+
+The API is documented using OpenAPI (Swagger) and can be viewed at `/api-docs` when running in development mode.
+
+## Deployment
+
+### Prerequisites
+
+- Node.js 18+
+- npm 9+
+- Docker (optional)
+
+### Production Build
+
+```bash
+# Install production dependencies
+npm ci --only=production
+
+# Build the application
 npm run build
+
+# Start the server
+NODE_ENV=production npm start
 ```
 
-### Environment Configuration
+### Docker
 
-Create a `.env` file in the root directory with the following variables:
+```bash
+# Build the Docker image
+docker build -t dust-mcp-server .
 
-```env
-DUST_API_KEY=your_dust_api_key
-DUST_WORKSPACE_ID=your_workspace_id
-DUST_AGENT_IDs=comma,separated,agent,ids
-DUST_USERNAME=your_username
-DUST_EMAIL=your_email
-DUST_FULLNAME=Your Full Name
-DUST_API_URL=https://dust.tt/api/v1
+# Run the container
+docker run -p 3000:3000 --env-file .env dust-mcp-server
 ```
 
-### Claude Desktop Configuration
+## Contributing
 
-This MCP server is designed to work with Claude Desktop via STDIO transport. Follow these steps to configure Claude Desktop to use your Dust MCP server:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-1. Make sure you have built the project with `npm run build`
+## License
 
-2. Install MCP Tools globally if you haven't already:
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-   ```bash
-   npm install -g mcptools
-   ```
+## Related Resources
 
-3. Configure Claude Desktop to use your Dust MCP server:
-
-   ```bash
-   # Replace with your actual paths
-   mcp configs set claude-desktop dust /path/to/node /path/to/dust-mcp-server/build/dust.js
-
-   # Example with typical paths
-   mcp configs set claude-desktop dust /Users/username/.nvm/versions/node/v18.16.0/bin/node /Users/username/projects/dust-mcp-server/build/dust.js
-   ```
-
-4. Verify the configuration was saved:
-
-   ```bash
-   mcp configs list
-   ```
-
-   The configuration will be saved to `~/Library/Application Support/Claude/claude_desktop_config.json` on macOS.
-
-5. Restart Claude Desktop for the changes to take effect
-
-![Claude Desktop Configuration Screenshot](docs/image-1.png)
-
-6. In Claude Desktop, you can now use the Dust MCP tools by asking Claude to:
-   - "List my available Dust agents"
-   - "Query my Dust agent with [your question]"
-   - "Get configuration for my Dust agent [agent_id]"
-
-![Claude Desktop Dust MCP Usage](docs/image-2.png)
+- [Dust.tt Documentation](https://docs.dust.tt)
+- [Model Context Protocol](https://github.com/modelcontextprotocol/spec)
+- [Claude Desktop](https://claude.ai/desktop)
+- [Node.js Documentation](https://nodejs.org/en/docs/)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+- [Express.js Documentation](https://expressjs.com/)
+- [Jest Testing Framework](https://jestjs.io/)
+- [Winston Logging](https://github.com/winstonjs/winston)
 
 ### Running the Server
 
@@ -173,22 +423,91 @@ To stop the server, you can use Ctrl+C in the terminal where it's running, or ki
 pkill -f "node.*dust-mcp-server"
 ```
 
----
-
-### Architecture Diagram
+## Architecture Diagram
 
 ```mermaid
-sequenceDiagram
-    participant Claude as MCP Client (Claude Desktop)
-    participant MCP as MCP Server (STDIO / HTTP / SSE)
-    participant Dust as DUST Agent (OpenAPI)
+flowchart TD
+    subgraph Client["Client Layer"]
+        A[Claude Desktop] -- "MCP Protocol" --> B[MCP Server]
+    end
 
-    Claude->>MCP: Tool call (STDIO or HTTP/SSE)
-    MCP->>MCP: Route request to appropriate tool
-    MCP->>Dust: Query via OpenAPI (HTTP)
-    Dust-->>MCP: Respond with agent data/result
-    MCP-->>Claude: Return response via STDIO or HTTP/SSE
+    subgraph Server["Dust MCP Server"]
+        B --> C[Request Handler]
+        C --> D[Auth Middleware]
+        D --> E[Windsurf Rules Engine]
+        E --> F[Tool Router]
+        
+        subgraph Tools["MCP Tools"]
+            F --> G[dust_list_agents]
+            F --> H[dust_agent_query]
+            F --> I[dust_create_session]
+            F --> J[dust_end_session]
+            F --> K[dust_get_session]
+            F --> L[dust_get_agent]
+        end
+        
+        subgraph Services["Core Services"]
+            M[DustApiService] <--> N[AgentService]
+            N <--> O[SessionManager]
+            O <--> P[MemoryBank]
+        end
+    end
+    
+    subgraph External["External Services"]
+        Q[(Dust AI Platform)]
+    end
+    
+    subgraph Memory["Memory Bank"]
+        R[productContext.md]
+        S[systemPatterns.md]
+        T[activeContext.md]
+        U[decisionLog.md]
+        V[progress.md]
+    end
+    
+    Tools --> Services
+    Services --> Q
+    Services --> Memory
+    
+    %% Styling
+    classDef client fill:#e1f5fe,stroke:#01579b,color:#01579b
+    classDef server fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+    classDef external fill:#f3e5f5,stroke:#4a148c,color:#4a148c
+    classDef memory fill:#fff3e0,stroke:#e65100,color:#e65100
+    
+    class A,Client client
+    class B,C,D,E,F,G,H,I,J,K,L,Server server
+    class Q,External external
+    class R,S,T,U,V,Memory memory
 ```
+
+### Key Components
+
+1. **Client Layer**:
+   - Claude Desktop communicates with the MCP Server using the MCP protocol
+
+2. **MCP Server**:
+   - **Request Handler**: Processes incoming MCP requests
+   - **Auth Middleware**: Validates API keys and permissions
+   - **Windsurf Rules Engine**: Enforces project-specific rules and workflows
+   - **Tool Router**: Routes requests to the appropriate MCP tool
+   - **MCP Tools**: Individual tools for agent interaction and session management
+
+3. **Core Services**:
+   - **DustApiService**: Handles communication with the Dust AI platform
+   - **AgentService**: Manages agent lifecycle and interactions
+   - **SessionManager**: Maintains session state and context
+   - **MemoryBank**: Manages persistent storage using the memory-bank system
+
+4. **Memory Bank**:
+   - `productContext.md`: Project goals and high-level architecture
+   - `systemPatterns.md`: Design patterns and implementation details
+   - `activeContext.md`: Current status and recent changes
+   - `decisionLog.md`: Architectural and implementation decisions
+   - `progress.md`: Task tracking and milestones
+
+5. **External Services**:
+   - Dust AI Platform: External service for agent execution and processing
 
 
 ### Using MCP Tools
@@ -234,63 +553,163 @@ The server provides the following MCP tools for interacting with Dust.tt agents:
 
 ### `dust_list_agents`
 
-Lists available Dust agents in your workspace.
+List all available Dust agents in the configured workspace.
 
 **Parameters:**
 
-- `view` (optional): View type for filtering agents
-- `limit` (optional): Maximum number of agents to return
+- `query` (string, optional): Filter agents by name or description
+- `view` (string, optional): View type for filtering agents
+- `limit` (number, optional): Maximum number of agents to return (default: 10)
+
+**Example Request:**
+
+```bash
+mcp call dust_list_agents node build/dust.js --params '{"limit": 10}'
+```
+
+**Response:**
+
+```typescript
+interface AgentDescriptor {
+  id: string;
+  name: string;
+  description: string;
+  capabilities: string[];
+  isActive?: boolean;
+  lastUsed?: string;
+}
+```
 
 **Returns:**
 
 - Markdown formatted list of available Dust agents with their capabilities
 - JSON data of all agent configurations
 
-**Example:**
-
-```bash
-mcp call dust_list_agents node build/dust.js --params '{"limit": 10}'
-```
-
 ### `dust_agent_query`
 
-Queries a Dust agent with a natural language prompt.
+Query a Dust agent within a session.
 
 **Parameters:**
 
-- `agent_id` (optional): ID of the agent to query (will use default if not provided)
-- `query` (required): Message to send to the agent
-- `conversation_id` (optional): ID of an existing conversation to continue
-- `context` (optional): Additional context for the agent
+- `agentId` (string, required): ID of the agent to query
+- `message` (string, required): The message to send to the agent
+- `files` (Array<{ name: string; content: string }>, optional): Files to include with the message
+- `sessionId` (string, optional): Existing session ID to continue conversation
 
-**Returns:**
+**Example Request:**
 
-- Agent's response to the query
-- Conversation and message IDs for future reference
-
-**Example:**
-
-```bash
-mcp call dust_agent_query node build/dust.js --params '{"query": "Give me a summary of the Dust API"}'
+```json
+{
+  "agentId": "agent_123",
+  "message": "What's the weather like?",
+  "files": [
+    {
+      "name": "location.txt",
+      "content": "San Francisco"
+    }
+  ]
+}
 ```
 
-### `dust_get_agent_config`
+**Response:**
 
-Get detailed configuration for a specific Dust agent.
+```typescript
+interface DustMessageResponse {
+  response: string;
+  context: Record<string, any>;
+}
+```
+
+### `dust_create_session`
+
+Create a new session with a Dust agent.
 
 **Parameters:**
 
-- `agent_id` (required): ID of the agent to get configuration for
+- `agentId` (string, required): ID of the agent to create a session with
+- `context` (object, optional): Initial context for the session
 
-**Returns:**
-
-- Markdown formatted agent configuration details
-- JSON data of the complete agent configuration
-
-**Example:**
+**Example Request:**
 
 ```bash
-mcp call dust_get_agent_config node build/dust.js --params '{"agent_id": "agent-id-123"}'
+mcp call dust_create_session node build/dust.js --params '{
+  "agentId": "agent_123",
+  "context": {
+    "userPreferences": {
+      "language": "en-US"
+    }
+  }
+}'
+```
+
+**Response:**
+
+```typescript
+interface SessionDescriptor {
+  id: string;
+  agentId: string;
+  context: Record<string, any>;
+  isActive: boolean;
+  createdAt: string;
+  lastActivity: string;
+}
+```
+
+### `dust_end_session`
+
+End an active session.
+
+**Parameters:**
+
+- `sessionId` (string, required): ID of the session to end
+
+**Example Request:**
+
+```bash
+mcp call dust_end_session node build/dust.js --params '{"sessionId": "sess_123"}'
+```
+
+### `dust_get_session`
+
+Get details of a specific session.
+
+**Parameters:**
+
+- `sessionId` (string, required): ID of the session to retrieve
+
+**Example Request:**
+
+```bash
+mcp call dust_get_session node build/dust.js --params '{"sessionId": "sess_123"}'
+```
+
+### `dust_get_agent`
+
+Get details of a specific agent.
+
+**Parameters:**
+
+- `agentId` (string, required): ID of the agent to retrieve
+
+**Example Request:**
+
+```bash
+mcp call dust_get_agent node build/dust.js --params '{"agentId": "agent_123"}'
+```
+
+**Response:**
+
+```typescript
+interface AgentDescriptor {
+  id: string;
+  name: string;
+  description: string;
+  capabilities: string[];
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  configuration: Record<string, any>;
+}
 ```
 
 ## Memory Bank System
@@ -377,6 +796,42 @@ node docs/test-stdio.js
 ```
 
 ## Debugging
+
+### VS Code Debugging
+
+The project includes VS Code debugging configurations for both the server and tests. You can use these configurations to debug the application directly from VS Code.
+
+#### Available Debug Configurations
+
+1. **Debug Server (HTTP)**
+   - Starts the server in HTTP mode
+   - Access the API at `http://localhost:3000/api`
+   - Supports breakpoints and step-through debugging
+
+2. **Debug Server (STDIO)**
+   - Starts the server in STDIO mode (for MCP clients like Claude Desktop)
+   - No HTTP server, communicates via standard input/output
+   - Use this for testing MCP protocol integration
+
+3. **Debug Current Test File**
+   - Runs the currently open test file with the debugger attached
+   - Automatically detects and runs tests in the active editor
+   - Supports breakpoints in test files and source code
+
+4. **Debug All Tests**
+   - Runs all tests in the project with the debugger attached
+   - Useful for debugging test suites or integration tests
+   - Supports breakpoints in test files and source code
+
+#### How to Use
+
+1. Open the project in VS Code
+2. Set breakpoints in your code by clicking in the gutter next to the line numbers
+3. Open the Run and Debug view (Ctrl+Shift+D or Cmd+Shift+D)
+4. Select a debug configuration from the dropdown
+5. Click the green play button or press F5 to start debugging
+
+### Log Files
 
 Logs are stored in the `logs/` directory:
 - `app-YYYY-MM-DD.log`: Application logs

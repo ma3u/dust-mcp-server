@@ -2,7 +2,9 @@
 
 This file documents recurring patterns and standards used in the project.
 It is intended to be updated as the project evolves.
-"2025-04-10 17:06:31" - Updated based on code review and todo.md analysis.
+
+- "2025-04-10 17:06:31" - Updated based on code review and todo.md analysis.
+- "2025-05-19 10:45:00" - Added VS Code debugging configuration and patterns.
 
 ## Coding Patterns
 
@@ -50,35 +52,24 @@ It is intended to be updated as the project evolves.
 - **Validate inputs** using Zod schemas as demonstrated in the [TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 
 ## Specifications
-- **MCP Protocol 2025-03-26** - Latest specification supporting JSON-RPC 2.0 with extensions ([ma3u/mcp-dust-server](https://github.com/ma3u/mcp-dust-server), [MCP-Mirror/ma3u_mcp-dust-server](https://github.com/MCP-Mirror/ma3u_mcp-dust-server))
-- **Dust API Integration** - Standardized agent communication using workspace/agent ID context ([ma3u/mcp-dust-server](https://github.com/ma3u/mcp-dust-server), [MCP-Mirror/ma3u_mcp-dust-server](https://github.com/MCP-Mirror/ma3u_mcp-dust-server))
-- **HTTP Stream Transport** - Custom extension for direct tool execution via POST /mcp/run ([ma3u/mcp-dust-server](https://github.com/ma3u/mcp-dust-server), [DEVELOPERS.md](https://github.com/ma3u/mcp-dust-server/blob/main/public/DEVELOPERS.md))
+- **MCP Protocol 2025-03-26** - Latest specification supporting JSON-RPC 2.0 with extensions: https://modelcontextprotocol.io/specification/2025-03-26
+- **Dust API Integration** - Standardized agent communication using workspace/agent ID context: https://dust.tt/swagger.json
 
 ## SDKs
 - **[@modelcontextprotocol/sdk](https://github.com/modelcontextprotocol/typescript-sdk)** - Official TypeScript SDK for MCP server/client development
   - Implements full protocol lifecycle
   - Supports stdio and HTTP transports
   - Includes Zod validation for tool arguments
-- **MCP Dust Server SDK** - Reference implementation with Dust-specific extensions ([ma3u/mcp-dust-server](https://github.com/ma3u/mcp-dust-server), [MCP-Mirror/ma3u_mcp-dust-server](https://github.com/MCP-Mirror/ma3u_mcp-dust-server))
+- **MCP Dust Server SDK** - Reference implementation limited to Dust API integration
+  - Use the SDK as blue print https://github.com/dust-tt/dust-sdk-js and https://github.com/dust-tt/dust/tree/main/sdks/js
+  - Use the original DUST API to access and test the Dust API: https://dust.tt/swagger.json
+  - Use the Postman collection for testing: https://www.postman.com/dust33/dust/collection/6nvk011/dust-api-documentation
+  - Use the scripts as blue print: https://github.com/dust-tt/dust-labs
   - Preconfigured Dust API client
   - Session management utilities
   - Secure logging middleware
-
-## REST APIs
-**Core MCP Endpoints** ([ma3u/mcp-dust-server](https://github.com/ma3u/mcp-dust-server), [MCP-Mirror/ma3u_mcp-dust-server](https://github.com/MCP-Mirror/ma3u_mcp-dust-server), [DEVELOPERS.md](https://github.com/ma3u/mcp-dust-server/blob/main/public/DEVELOPERS.md)):
-| Endpoint          | Method | Description                          |
-|-------------------|--------|--------------------------------------|
-| `/mcp/initialize` | POST   | Start new MCP session                |
-| `/mcp/message`    | POST   | Send message to agent                | 
-| `/mcp/terminate`  | POST   | End session                          |
-| `/mcp/run`        | POST   | Direct tool execution (HTTP Stream) |
 
 **Monitoring Endpoints**:
 - `GET /status` - Server health check
 - `GET /metrics` - Prometheus-style metrics
 - `GET /sessions` - Active session list
-
-## Additional Resources
-- **[MCP Inspector Tool](https://github.com/ma3u/mcp-dust-server/blob/main/public/DEVELOPERS.md)** - Debugging utility for protocol compliance testing
-- **HTTP Stream Transport** - Custom implementation for low-latency tool execution ([ma3u/mcp-dust-server](https://github.com/ma3u/mcp-dust-server), [DEVELOPERS.md](https://github.com/ma3u/mcp-dust-server/blob/main/public/DEVELOPERS.md))
-- **Session Manager** - Reference implementation for context preservation ([ma3u/mcp-dust-server](https://github.com/ma3u/mcp-dust-server), [DEVELOPERS.md](https://github.com/ma3u/mcp-dust-server/blob/main/public/DEVELOPERS.md))

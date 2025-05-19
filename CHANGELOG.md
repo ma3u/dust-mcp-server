@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.2.0] - 2025-05-19
+
+### Added
+
+- Comprehensive documentation split into User Guide and Developer Guide
+- VS Code debugging configuration for both server and tests
+- Detailed project structure documentation
+- Enhanced test documentation with examples
+- Debugging guide with VS Code launch configurations
+- VS Code tasks.json for build automation
+- Launch configurations for HTTP and STDIO server modes
+- Debug configurations for test files and test suites
+
+### Fixed
+
+- Linting issues in documentation
+- Markdown formatting for better readability
+- Code block language specifications
+- Duplicate headings in documentation
+
+### Changed
+
+- Updated README organization for better navigation
+- Improved code examples with proper syntax highlighting
+- Enhanced test documentation with clear examples
+
 ## [1.1.1] - 2025-05-06
 
 ### Fixed
