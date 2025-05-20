@@ -1,9 +1,13 @@
 import express from 'express';
 import { createServer } from 'http';
-import { Server } from '@modelcontextprotocol/sdk';
-import { registerAgentTools } from './agents/agentTools';
-import agentRoutes from './api/routes/agentRoutes';
-import { logger } from './utils/logger';
+import { randomUUID } from 'node:crypto';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
+import { debugIsInitializeRequest, logMcpRequest } from './debug-mcp-utils.js';
+import { registerAgentTools } from './agents/agentTools.js';
+import agentRoutes from './api/routes/agentRoutes.js';
+import logger from './utils/logger.js';
 
 // Environment variables
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -25,26 +29,117 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Create MCP server
-const mcpServer = new Server({
-  name: 'dust-mcp-server',
-  version: '1.0.0',
-  capabilities: ['tools'],
-});
+// Map to store transports by session ID
+const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
 
-// Register MCP tools
-registerAgentTools(mcpServer);
+// Create and configure MCP server once
+const createMcpServer = () => {
+  const mcpServer = new McpServer({
+    name: 'dust-mcp-server',
+    version: '1.0.0',
+    capabilities: ['tools'],
+  });
+
+  // Register MCP tools
+  registerAgentTools(mcpServer);
+  return mcpServer;
+};
 
 // Handle MCP protocol over HTTP/SSE
+// Reusable handler for GET and DELETE requests
+const handleSessionRequest = async (req: express.Request, res: express.Response) => {
+  const sessionId = req.headers['mcp-session-id'] as string | undefined;
+  if (!sessionId || !transports[sessionId]) {
+    res.status(400).send('Invalid or missing session ID');
+    return;
+  }
+  
+  const transport = transports[sessionId];
+  await transport.handleRequest(req, res);
+};
+
+// Handle GET requests for server-to-client notifications via SSE
+app.get('/mcp', handleSessionRequest);
+
+// Handle DELETE requests for session termination
+app.delete('/mcp', handleSessionRequest);
+
+// Handle POST requests for client-to-server communication
 app.post('/mcp', async (req, res) => {
   try {
-    const result = await mcpServer.handleRequest(req.body);
-    res.json(result);
+    // Log the incoming request for debugging
+    logMcpRequest(req);
+    
+    // Check for existing session ID
+    const sessionId = req.headers['mcp-session-id'] as string | undefined;
+    let transport: StreamableHTTPServerTransport;
+
+    if (sessionId && transports[sessionId]) {
+      // Reuse existing transport
+      logger.info(`Using existing session: ${sessionId}`);
+      transport = transports[sessionId];
+    } else if (!sessionId) {
+      // Use our enhanced debugging version of isInitializeRequest
+      const isInit = debugIsInitializeRequest(req.body);
+      
+      if (isInit) {
+        // New initialization request
+        transport = new StreamableHTTPServerTransport({
+          sessionIdGenerator: () => randomUUID(),
+          onsessioninitialized: (sessionId) => {
+            // Store the transport by session ID
+            transports[sessionId] = transport;
+            logger.info(`New MCP session initialized: ${sessionId}`);
+          }
+        });
+
+        // Clean up transport when closed
+        transport.onclose = () => {
+          if (transport.sessionId) {
+            delete transports[transport.sessionId];
+            logger.info(`MCP session closed: ${transport.sessionId}`);
+          }
+        };
+        
+        // Create and connect to a new MCP server
+        const server = createMcpServer();
+        await server.connect(transport);
+      } else {
+        // Invalid request - not an initialization request
+        res.status(400).json({
+          jsonrpc: '2.0',
+          error: {
+            code: -32000,
+            message: 'Bad Request: Not a valid initialization request',
+          },
+          id: null,
+        });
+        return;
+      }
+    } else {
+      // Invalid request - has session ID but not found
+      res.status(400).json({
+        jsonrpc: '2.0',
+        error: {
+          code: -32000,
+          message: 'Bad Request: Invalid session ID provided',
+        },
+        id: null,
+      });
+      return;
+    }
+
+    // Handle the request
+    await transport.handleRequest(req, res, req.body);
   } catch (error) {
     logger.error('Failed to handle MCP request', { error });
     res.status(500).json({
-      error: 'Failed to process request',
-      details: error.message,
+      jsonrpc: '2.0',
+      error: {
+        code: -32000,
+        message: error instanceof Error ? error.message : String(error)
+      },
+      id: null
     });
   }
 });
@@ -95,8 +190,12 @@ const gracefulShutdown = async () => {
   }
 };
 
-// Start the server if this file is run directly
-if (require.main === module) {
+// Start the server if this file is being run directly
+// Using ES modules pattern instead of require.main === module
+import { fileURLToPath } from 'url';
+const isMainModule = process.argv[1] === fileURLToPath(import.meta.url);
+
+if (isMainModule) {
   startServer().catch((error) => {
     logger.error('Unhandled error during server startup', { error });
     process.exit(1);

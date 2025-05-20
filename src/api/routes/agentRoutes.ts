@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import agentService from '../../services/agentService';
-import { logger } from '../../utils/logger';
+import { agentService } from '../../services/agentService.js';
+import logger from '../../utils/logger.js';
 
 const router = Router();
 
@@ -36,7 +36,7 @@ const SendMessageSchema = z.object({
  */
 router.get('/agents', async (req, res) => {
   try {
-    const agents = await agentService.listAgents();
+    const agents = await agentService.getAgents();
     res.json(agents);
   } catch (error) {
     logger.error('Failed to list agents', { error });
@@ -170,10 +170,10 @@ router.post('/sessions/:sessionId/messages', async (req, res) => {
     const { sessionId } = req.params;
     const { message, files = [] } = SendMessageSchema.parse(req.body);
     
-    // Convert base64 file content to Buffer if needed
+    // Convert base64 file content to string as required by the AgentService
     const processedFiles = files.map(file => ({
       name: file.name,
-      content: Buffer.from(file.content, 'base64'),
+      content: Buffer.from(file.content, 'base64').toString('utf-8'),
     }));
     
     const result = await agentService.sendMessage(sessionId, message, processedFiles);

@@ -1,11 +1,10 @@
-// Import any test setup code here
-import 'jest-extended';
+import { expect } from '@jest/globals';
+import { jest } from '@jest/globals';
 
 // Global test timeout
 jest.setTimeout(30000);
 
 // Mock any global objects needed for testing
-// For example, if you're using environment variables in your tests
 process.env.NODE_ENV = 'test';
 
 // Add global test utilities
@@ -17,4 +16,7 @@ global.console = {
   // info: jest.fn(),
   // debug: jest.fn(),
   // log: jest.fn(),
-};
+} as Console;
+
+// Add any additional global setup here
+export {}; // This file needs to be a module

@@ -5,9 +5,10 @@ A Model Context Protocol (MCP) server for Dust.tt agents, designed for seamless 
 ## Table of Contents
 - [User Guide](#user-guide)
   - [Overview](#overview)
+  - [User Journey](#user-journey)
   - [Quick Start](#quick-start)
   - [Setup and Configuration](#setup-and-configuration)
-  - [Available MCP Tools](#available-mcp-tools)
+  - [MCP Tools Reference](#mcp-tools-reference)
   - [Memory Bank System](#memory-bank-system)
 - [Developer Guide](#developer-guide)
   - [Project Structure](#project-structure)
@@ -25,6 +26,71 @@ A Model Context Protocol (MCP) server for Dust.tt agents, designed for seamless 
 ## Overview
 
 The Dust MCP Server provides a standardized interface for interacting with Dust.tt agents through the Model Context Protocol (MCP). It enables seamless integration with Claude Desktop and other MCP-compatible clients, offering features like agent discovery, session management, and message handling.
+
+## User Journey
+
+This section outlines the typical user journey when interacting with the Dust MCP Server and its integrated agents.
+
+### 1. Initial Setup and Agent Discovery
+
+- **Entry Point**: User logs into the Dust platform
+- **Agent Discovery**:
+  - Views available agents in the Agent Marketplace
+  - Filters agents by category (e.g., Data Analysis, Content Creation, Research)
+  - Reviews agent capabilities, ratings, and documentation
+- **Agent Selection**:
+  - Selects multiple agents based on task requirements
+  - Creates a new workspace or selects existing one
+
+### 2. Workspace Configuration
+
+- **Layout Setup**:
+  - Arranges agent panels in a custom layout
+  - Configures agent-specific settings and permissions
+- **Context Sharing**:
+  - Enables/disables context sharing between agents
+  - Sets up data flow between agents
+- **File Management**:
+  - Uploads files to shared workspace
+  - Organizes files in project folders
+  - Sets file access permissions per agent
+
+### 3. Multi-Agent Collaboration
+
+- **Conversation Flow**:
+  - Initiates chat with primary agent
+  - @mentions other agents to bring them into conversation
+  - Views inter-agent communication in dedicated threads
+- **Task Delegation**:
+  - Assigns specific tasks to specialized agents
+  - Monitors task progress across agents
+  - Views task dependencies and status
+- **File Collaboration**:
+  - Shares files with specific agents
+  - Tracks file access and modifications
+  - Views version history and agent contributions
+
+### 4. Advanced Interactions
+
+- **Agent Chaining**:
+  - Creates workflows by chaining agents
+  - Sets up conditional logic for agent handoffs
+  - Configures automatic triggers between agents
+- **Context Management**:
+  - Reviews and edits shared context
+  - Resolves context conflicts between agents
+  - Saves context snapshots for future reference
+
+### 5. Reporting and Analysis
+
+- **Report Generation**:
+  - Requests reports from analysis agents
+  - Customizes report templates and parameters
+  - Exports reports in multiple formats (PDF, Markdown, HTML)
+- **Insight Visualization**:
+  - Views interactive dashboards
+  - Filters and drills down into data visualizations
+  - Compares outputs from different agents
 
 ## Quick Start
 
@@ -114,7 +180,7 @@ To use with Claude Desktop:
 
 3. Restart Claude Desktop and start interacting with your Dust agents.
 
-## Available MCP Tools
+## MCP Tools Reference
 
 The following MCP tools are available for interacting with Dust agents:
 
@@ -547,13 +613,13 @@ mcp alias list
 mcp configs set claude-desktop dust /path/to/node /path/to/dust-mcp-server/build/dust.js
 ```
 
-## Available MCP Tools
+## MCP Tools Reference
 
 The server provides the following MCP tools for interacting with Dust.tt agents:
 
 ### `dust_list_agents`
 
-List all available Dust agents in the configured workspace.
+List all available agents in the workspace.
 
 **Parameters:**
 
@@ -580,12 +646,7 @@ interface AgentDescriptor {
 }
 ```
 
-**Returns:**
-
-- Markdown formatted list of available Dust agents with their capabilities
-- JSON data of all agent configurations
-
-### `dust_agent_query`
+#### `dust_agent_query`
 
 Query a Dust agent within a session.
 
@@ -620,7 +681,7 @@ interface DustMessageResponse {
 }
 ```
 
-### `dust_create_session`
+#### `dust_create_session`
 
 Create a new session with a Dust agent.
 
@@ -655,7 +716,7 @@ interface SessionDescriptor {
 }
 ```
 
-### `dust_end_session`
+#### `dust_end_session`
 
 End an active session.
 
@@ -669,7 +730,7 @@ End an active session.
 mcp call dust_end_session node build/dust.js --params '{"sessionId": "sess_123"}'
 ```
 
-### `dust_get_session`
+#### `dust_get_session`
 
 Get details of a specific session.
 
@@ -683,7 +744,7 @@ Get details of a specific session.
 mcp call dust_get_session node build/dust.js --params '{"sessionId": "sess_123"}'
 ```
 
-### `dust_get_agent`
+#### `dust_get_agent`
 
 Get details of a specific agent.
 
@@ -712,21 +773,9 @@ interface AgentDescriptor {
 }
 ```
 
-## Memory Bank System
-
-This project uses a memory-bank system for maintaining project context and persistent storage instead of built-in memories. The memory-bank system consists of several markdown files that track different aspects of the project:
-
-- `/memory-bank/productContext.md`: High-level overview of the project and product
-- `/memory-bank/activeContext.md`: Current status, recent changes, and open questions
-- `/memory-bank/progress.md`: Task tracking in a list format
-- `/memory-bank/decisionLog.md`: Record of architectural and implementation decisions
-- `/memory-bank/systemPatterns.md`: Documentation of recurring patterns and standards
-
-The memory-bank system provides a clear separation between the project's persistent storage and any external memory systems.
-
 ## Project Structure
 
-```
+```text
 root/
 ├── src/                # Main source code
 │   ├── services/       # Dust API integration layer
@@ -739,23 +788,19 @@ root/
 ├── .env                # Environment configuration (not committed)
 ├── .env.example        # Example environment file
 ├── package.json        # Project manifest
-├── README.md           # Main documentation (this file)
-└── ...
+└── README.md           # Main documentation (this file)
 ```
 
 ## Testing
 
-The project includes a comprehensive test suite for all MCP methods using Jest. The tests are organized into unit tests and integration tests.
+### Test Features
 
-### Test Structure
+The test suite includes the following features:
 
-- **Unit Tests**: Individual tests for each MCP method
-  - `dust_agent_query.test.js` - Tests for querying Dust agents
-  - `dust_list_agents.test.js` - Tests for listing available agents
-  - `dust_get_agent_config.test.js` - Tests for retrieving agent configurations
-
-- **Integration Tests**: Tests that verify the complete flow
-  - `dust_mcp_integration.test.js` - Tests the end-to-end flow of listing agents, getting configuration, and querying an agent
+- **Mocking**: Tests use Jest mocking to isolate the MCP methods from actual API calls
+- **Test Data**: Sample agent configurations and responses are provided in `test/fixtures/`
+- **Parameter Validation**: Tests verify that parameters are correctly validated
+- **Complete Coverage**: Tests cover all parameters and response formats
 
 ### Running Tests
 
@@ -775,14 +820,6 @@ npm run test:unit
 npm run test:integration
 ```
 
-### Test Features
-
-- **Mocking**: Tests use Jest mocking to isolate the MCP methods from actual API calls
-- **STDIO Transport**: Tests use the STDIO transport to communicate with the MCP server
-- **Error Handling**: Tests verify proper error handling for various scenarios
-- **Parameter Validation**: Tests verify that parameters are correctly validated
-- **Complete Coverage**: Tests cover all parameters and response formats
-
 ### Manual Testing
 
 You can also manually test the MCP functionality using the scripts in `docs/`:
@@ -801,21 +838,21 @@ node docs/test-stdio.js
 
 The project includes VS Code debugging configurations for both the server and tests. You can use these configurations to debug the application directly from VS Code.
 
-#### Available Debug Configurations
+### Available Debug Configurations
 
 1. **Debug Server (HTTP)**
-   - Starts the server in HTTP mode
-   - Access the API at `http://localhost:3000/api`
-   - Supports breakpoints and step-through debugging
+   - Launches the server in debug mode with auto-reload
+   - Attaches to the running Node.js process
+   - Supports breakpoints and step debugging
 
-2. **Debug Server (STDIO)**
-   - Starts the server in STDIO mode (for MCP clients like Claude Desktop)
-   - No HTTP server, communicates via standard input/output
-   - Use this for testing MCP protocol integration
+2. **Debug Tests**
+   - Runs the test suite in debug mode
+   - Supports breakpoints in test files
+   - Shows detailed test output
 
 3. **Debug Current Test File**
    - Runs the currently open test file with the debugger attached
-   - Automatically detects and runs tests in the active editor
+   - Useful for focusing on a specific test case
    - Supports breakpoints in test files and source code
 
 4. **Debug All Tests**

@@ -1,7 +1,6 @@
 import type { Config } from '@jest/types';
 
 const config: Config.InitialOptions = {
-  preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: [
@@ -9,11 +8,26 @@ const config: Config.InitialOptions = {
     '**/?(*.)+(spec|test).+(ts|tsx|js)'
   ],
   transform: {
-    '^.+\.(ts|tsx)$': 'ts-jest'
+    '^.+\\.(t|j)sx?$': ['@swc/jest', {
+      sourceMaps: true,
+      module: {
+        type: 'es6',
+      },
+      jsc: {
+        parser: {
+          syntax: 'typescript',
+          tsx: true,
+          decorators: true,
+        },
+        target: 'es2020',
+      },
+    }],
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
+  extensionsToTreatAsEsm: ['.ts'],
   collectCoverage: true,
   coverageDirectory: 'coverage',
   coveragePathIgnorePatterns: [
@@ -24,6 +38,15 @@ const config: Config.InitialOptions = {
   ],
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   verbose: true,
+  transformIgnorePatterns: [
+    'node_modules/(?!(node-fetch|@modelcontextprotocol)/)',
+  ],
+  moduleFileExtensions: ['js', 'json', 'jsx', 'ts', 'tsx', 'node'],
+  globals: {
+    'ts-jest': {
+      useESM: true,
+    },
+  },
 };
 
 export default config;

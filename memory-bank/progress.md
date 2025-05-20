@@ -52,6 +52,16 @@ This file tracks the project's progress using a task list format.
   * Updated focus areas in `generate_insights` to be more general ("summary", "details", "overview", "trends")
   * Updated server name from "health-data-mcp-server" to "dust-mcp-server"
   * Updated README.MD to reflect all changes
+* Added VS Code debugging configuration:
+  * Created launch.json with debug configurations for server and tests
+  * Added tasks.json for build automation
+  * Updated README with debugging instructions
+* Implemented test infrastructure:
+  * Added Jest configuration with TypeScript support
+  * Set up unit and integration test directories
+  * Implemented AgentService and DustApiService
+  * Added API routes for agent operations
+  * Created comprehensive test coverage
 
 ## Current Tasks
 

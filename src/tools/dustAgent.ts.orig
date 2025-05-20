@@ -388,15 +388,13 @@ const dustAgentTool = (server: McpServer) => {
           timestamp: new Date().toISOString()
         }
       };
-    }
-  );
 
   // Define the schema for getting agent information
-    const getAgentInfoSchema = {
-      agentId: z.string({
-        description: "ID of the Dust agent to get information about"
-      })
-    };
+  const getAgentInfoSchema = {
+    agentId: z.string({
+      description: "ID of the Dust agent to get information about"
+    })
+  };
 
   // Define the schema for listing available agents
   const listAgentsSchema = {

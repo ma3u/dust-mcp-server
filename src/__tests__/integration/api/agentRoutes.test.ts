@@ -1,39 +1,52 @@
 import request from 'supertest';
 import { Server } from 'http';
-import { app } from '../../../server';
-import { AgentService } from '../../../services/agentService';
+import { app } from '../../../server.js';
+import { agentService, type AgentDescriptor, type SessionDescriptor } from '../../../services/agentService.js';
 
-// Mock the AgentService
-jest.mock('../../../services/agentService');
+// Mock the agentService
+const mockGetAgents = jest.fn();
+const mockCreateSession = jest.fn();
+const mockSendMessage = jest.fn();
 
-const MockedAgentService = AgentService as jest.MockedClass<typeof AgentService>;
+jest.mock('../../../services/agentService.js', () => ({
+  __esModule: true,
+  agentService: {
+    getAgents: mockGetAgents,
+    createSession: mockCreateSession,
+    sendMessage: mockSendMessage,
+    // Add other methods as needed
+  }
+}));
 
 describe('Agent API Routes', () => {
   let server: Server;
-  let agentService: jest.Mocked<AgentService>;
 
   beforeAll(() => {
     server = app.listen(0); // Use dynamic port
-    agentService = new MockedAgentService() as jest.Mocked<AgentService>;
   });
 
   afterAll((done) => {
     server.close(done);
   });
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('GET /api/agents', () => {
     it('should return a list of agents', async () => {
       const mockAgents = [
         { id: 'agent1', name: 'Agent 1', description: 'Test Agent', capabilities: ['test'] }
-      ];
+      ] as AgentDescriptor[];
       
-      agentService.listAgents.mockResolvedValue(mockAgents as any);
+      mockGetAgents.mockResolvedValue(mockAgents);
       
       const response = await request(server)
         .get('/api/agents')
         .expect(200);
       
       expect(response.body).toEqual(mockAgents);
+      expect(mockGetAgents).toHaveBeenCalled();
     });
   });
 
@@ -43,11 +56,12 @@ describe('Agent API Routes', () => {
         id: 'session1',
         agentId: 'agent1',
         context: { test: 'context' },
-        createdAt: new Date(),
-        lastActivity: new Date()
-      };
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        lastActivity: new Date().toISOString()
+      } as SessionDescriptor;
       
-      agentService.createSession.mockResolvedValue(mockSession as any);
+      mockCreateSession.mockResolvedValue(mockSession);
       
       const response = await request(server)
         .post('/api/sessions')
@@ -57,26 +71,33 @@ describe('Agent API Routes', () => {
       expect(response.body).toMatchObject({
         id: 'session1',
         agentId: 'agent1',
-        context: { test: 'context' }
+        context: { test: 'context' },
+        isActive: true
       });
+      expect(mockCreateSession).toHaveBeenCalledWith('agent1', { test: 'context' });
     });
   });
 
   describe('POST /api/sessions/:sessionId/messages', () => {
     it('should send a message to an agent', async () => {
       const mockResponse = {
-        response: 'Test response',
-        context: { lastMessage: 'Hello' }
+        messageId: 'msg1',
+        content: 'Test response',
+        timestamp: new Date().toISOString()
       };
       
-      agentService.sendMessage.mockResolvedValue(mockResponse);
+      mockSendMessage.mockResolvedValue(mockResponse);
       
       const response = await request(server)
         .post('/api/sessions/session1/messages')
-        .send({ message: 'Hello' })
+        .send({ message: 'Hello', files: [] })
         .expect(200);
       
-      expect(response.body).toEqual(mockResponse);
+      expect(response.body).toMatchObject({
+        messageId: 'msg1',
+        content: 'Test response'
+      });
+      expect(mockSendMessage).toHaveBeenCalledWith('session1', 'Hello', []);
     });
   });
 });

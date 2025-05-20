@@ -109,6 +109,23 @@ github:
 
 # Development Standards
 development:
+  guidelines:
+    mcp_implementation:
+      - "Before implementing MCP specific features, always consult the SDK source code examples: https://github.com/modelcontextprotocol/typescript-sdk/tree/main/src"
+      - "Follow official MCP patterns and conventions from example code"
+      - "Use proper import paths with .js extensions as required by ESM"
+      - "Always check the MCP types in SDK source rather than relying on TypeScript inference"
+
+  code_practices:
+    typescript:
+      - "Add .js extension to all ESM imports when using NodeNext module resolution"
+      - "Properly handle Buffer to string conversions when needed"
+      - "Use SDK-provided types rather than creating custom ones when available"
+    
+    patterns:
+      - "Follow the McpServer and StreamableHTTPServerTransport patterns from examples"
+      - "Implement proper session handling for stateful servers"
+      
   pre_commit:
     enabled: true
     hooks:
@@ -151,6 +168,7 @@ documentation:
     - "Configuration changes"
     - "Bug fixes"
     - "Dependency updates"
+
 
     # Automation Rules
 automation:

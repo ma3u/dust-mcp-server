@@ -3,6 +3,36 @@
 This file records architectural and implementation decisions using a list format.
 
 ---
+"2025-05-19 10:55:00" - Added VS Code Debugging and Testing Infrastructure
+
+## Decision 5: VS Code Debugging and Testing Infrastructure
+
+* Implemented comprehensive VS Code debugging configurations
+* Set up Jest testing infrastructure with TypeScript support
+* Added test coverage reporting
+* Documented testing and debugging patterns
+
+### Decision 5 Rationale
+
+* VS Code debugging improves developer productivity
+* Jest provides a robust testing framework with good TypeScript support
+* Test coverage reporting ensures code quality
+* Documentation ensures consistency across the team
+
+### Decision 5 Implementation
+
+* Created `.vscode/launch.json` with debug configurations:
+  - Debug Server (HTTP/STDIO)
+  - Debug Current Test File
+  - Debug All Tests
+* Added `.vscode/tasks.json` for build automation
+* Configured Jest with TypeScript support
+* Set up code coverage reporting
+* Documented testing patterns in `systemPatterns.md`
+* Updated README with debugging instructions
+
+---
+
 "2025-05-06 20:15:03" - Added Jest Test Plan and Strategy for MCP Server.
 
 ## Decision 4: Jest Test Plan and Strategy for MCP Server

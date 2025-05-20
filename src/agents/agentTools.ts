@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { Tool } from '@modelcontextprotocol/sdk';
-import agentService from '../services/agentService';
-import { logger } from '../utils/logger';
+import { agentService } from '../services/agentService.js';
+import logger from '../utils/logger.js';
 
 /**
  * Tool to list all available agents
@@ -12,7 +12,7 @@ export const listAgentsTool: Tool = {
   parameters: z.object({}),
   handler: async () => {
     try {
-      const agents = await agentService.listAgents();
+      const agents = await agentService.getAgents();
       return { agents };
     } catch (error) {
       logger.error('Failed to list agents', { error });
