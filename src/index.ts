@@ -20,6 +20,15 @@ import dustAgent from "./tools/dustAgent.js";
 // Load environment variables
 dotenv.config();
 
+// Debug environment variables
+console.log('=== Environment Variables ===');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('DUST_API_KEY:', process.env.DUST_API_KEY ? '***' + process.env.DUST_API_KEY.slice(-4) : 'not set');
+console.log('DUST_WORKSPACE_ID:', process.env.DUST_WORKSPACE_ID || 'not set');
+console.log('DUST_AGENT_ID:', process.env.DUST_AGENT_ID || 'not set');
+console.log('LOGS_DIR:', process.env.LOGS_DIR || 'not set');
+console.log('===========================');
+
 // Configure logger based on environment
 const logLevel = process.env.LOG_LEVEL || 'INFO';
 logger.setLevel(LogLevel[logLevel as keyof typeof LogLevel] || LogLevel.INFO);
@@ -38,15 +47,24 @@ async function ensureDirectories() {
 }
 
 // Initialize server
+console.log('Initializing MCP server...');
 const server = new McpServer({
   name: "dust-mcp-server",
   version: "1.0.0"
 });
+console.log('MCP server instance created');
 
 // Initialize all tools
-fileUpload(server);
-documentProcessor(server);
-dustAgent(server);
+console.log('Initializing tools...');
+try {
+  fileUpload(server);
+  documentProcessor(server);
+  dustAgent(server);
+  console.log('All tools initialized');
+} catch (error) {
+  console.error('Error initializing tools:', error);
+  process.exit(1);
+}
 
 // Create directories
 await ensureDirectories();
