@@ -34,13 +34,24 @@ import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 
-// Setup logger
-const LOG_DIR = path.join(process.cwd(), 'logs');
+// Setup logger using environment variable or default to project logs directory
+const LOG_DIR = process.env.LOGS_DIR || path.join(process.cwd(), 'logs');
 const LOG_FILE = path.join(LOG_DIR, `app-${new Date().toISOString().split('T')[0]}.log`);
 
 // Ensure log directory exists
-if (!fs.existsSync(LOG_DIR)) {
-  fs.mkdirSync(LOG_DIR, { recursive: true });
+try {
+  if (!fs.existsSync(LOG_DIR)) {
+    fs.mkdirSync(LOG_DIR, { recursive: true });
+    console.log(`Created logs directory: ${LOG_DIR}`);
+  }
+} catch (error) {
+  console.error(`Failed to create logs directory at ${LOG_DIR}:`, error);
+  // Fallback to a safe location
+  const fallbackDir = path.join(process.cwd(), 'logs');
+  if (LOG_DIR !== fallbackDir) {
+    console.log(`Falling back to: ${fallbackDir}`);
+    fs.mkdirSync(fallbackDir, { recursive: true });
+  }
 }
 
 // Logger function to replace console.log

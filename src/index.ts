@@ -29,49 +29,150 @@ console.log('DUST_AGENT_ID:', process.env.DUST_AGENT_ID || 'not set');
 console.log('LOGS_DIR:', process.env.LOGS_DIR || 'not set');
 console.log('===========================');
 
-// Configure logger based on environment
-const logLevel = process.env.LOG_LEVEL || 'INFO';
-logger.setLevel(LogLevel[logLevel as keyof typeof LogLevel] || LogLevel.INFO);
+// Create a simple JSON logger for MCP protocol
+const mcpLogger = {
+  log: (level: string, message: string, data: any = {}) => {
+    const logEntry = JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level,
+      message,
+      ...data
+    });
+    process.stderr.write(`${logEntry}\n`);
+  },
+  info: (message: string, data?: any) => {
+    mcpLogger.log('INFO', message, data);
+  },
+  error: (message: string, error?: any) => {
+    const errorData = error instanceof Error
+      ? { error: { message: error.message, stack: error.stack } }
+      : error ? { error } : {};
+    mcpLogger.log('ERROR', message, errorData);
+  },
+  debug: (message: string, data?: any) => {
+    if (process.env.NODE_ENV === 'development') {
+      mcpLogger.log('DEBUG', message, data);
+    }
+  }
+};
+
+// Replace console methods to ensure JSON output
+const originalConsole = { ...console };
+
+console.log = (...args) => {
+  mcpLogger.info(args[0], args.length > 1 ? { data: args.slice(1) } : undefined);
+};
+
+console.error = (...args) => {
+  mcpLogger.error(args[0], args.length > 1 ? { data: args.slice(1) } : undefined);
+};
+
+console.debug = (...args) => {
+  mcpLogger.debug(args[0], args.length > 1 ? { data: args.slice(1) } : undefined);
+};
+
+// Disable default logger file output
+logger['config'] = {
+  ...logger['config'],
+  logToFile: false,
+  logToConsole: false
+};
 
 // Create directories if they don't exist
 async function ensureDirectories() {
-  const dirs = ['uploads', 'processed', 'logs'];
-  for (const dir of dirs) {
+  try {
+    // Use __dirname to get the directory of the current module
+    const baseDir = __dirname;
+    const logsDir = process.env.LOGS_DIR || path.join(baseDir, '..', 'logs');
+    
+    // Ensure logs directory exists and is writable
     try {
-      await fs.mkdir(path.join(process.cwd(), dir), { recursive: true });
-      logger.info(`Directory created: ${dir}`);
-    } catch (error) {
-      logger.error(`Error creating directory ${dir}:`, error);
+      await fs.mkdir(logsDir, { recursive: true });
+      await fs.access(logsDir, fs.constants.W_OK);
+      mcpLogger.info('Logs directory verified', { path: logsDir });
+    } catch (error: any) {
+      mcpLogger.error('Failed to access logs directory', error);
+      throw new Error(`Logs directory ${logsDir} is not writable: ${error.message}`);
     }
+    
+    // Set LOGS_DIR in process.env early so other parts can use it
+    process.env.LOGS_DIR = logsDir;
+    
+    const dirs = [
+      path.join(baseDir, '..', 'uploads'),
+      path.join(baseDir, '..', 'processed')
+    ];
+
+    mcpLogger.info('Ensuring required directories exist');
+    
+    for (const dir of dirs) {
+      try {
+        await fs.mkdir(dir, { recursive: true });
+        mcpLogger.info('Directory ready', { path: dir });
+      } catch (error: any) {
+        if (error.code !== 'EEXIST') {
+          mcpLogger.error('Failed to create directory', { 
+            path: dir,
+            error: error.message
+          });
+          throw error;
+        }
+        mcpLogger.debug('Directory already exists', { path: dir });
+      }
+    }
+    
+    mcpLogger.info('All directories ready');
+    return true;
+    
+  } catch (error: any) {
+    mcpLogger.error('Failed to create directories', error);
+    throw error;
   }
 }
 
 // Initialize server
-console.log('Initializing MCP server...');
-const server = new McpServer({
-  name: "dust-mcp-server",
-  version: "1.0.0"
-});
-console.log('MCP server instance created');
+mcpLogger.info('Initializing MCP server...');
+let server: McpServer;
+try {
+  server = new McpServer({
+    name: "dust-mcp-server",
+    version: "1.0.0"
+  });
+  mcpLogger.info('MCP server instance created');
+} catch (error) {
+  mcpLogger.error('Failed to create MCP server instance:', error);
+  process.exit(1);
+}
 
 // Initialize all tools
-console.log('Initializing tools...');
+mcpLogger.info('Initializing tools...');
 try {
   fileUpload(server);
+  mcpLogger.info('- fileUpload tool initialized');
   documentProcessor(server);
+  mcpLogger.info('- documentProcessor tool initialized');
   dustAgent(server);
-  console.log('All tools initialized');
+  mcpLogger.info('- dustAgent tool initialized');
+  mcpLogger.info('All tools initialized successfully');
 } catch (error) {
-  console.error('Error initializing tools:', error);
+  mcpLogger.error('Error initializing tools:', error);
   process.exit(1);
 }
 
 // Create directories
-await ensureDirectories();
+console.log('Ensuring directories exist...');
+try {
+  await ensureDirectories();
+  console.log('Directories ready');
+} catch (error) {
+  console.error('Failed to create directories:', error);
+  process.exit(1);
+}
 
 // Determine transport mode from environment or command line args
 const useHttpTransport = process.env.USE_HTTP_TRANSPORT === 'true' || 
-                         process.argv.includes('--http');
+                       process.argv.includes('--http');
+console.log(`Transport mode: ${useHttpTransport ? 'HTTP' : 'STDIO'}`);
 
 // Authentication will be implemented in Milestone 2
 const useAuthentication = false; // Disabled until Milestone 2 is implemented

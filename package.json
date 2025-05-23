@@ -3,9 +3,14 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "rm -rf build && tsc && cp -r src/__tests__/fixtures build/__tests__/ 2>/dev/null || :",
+    "clean": "rm -rf build",
+    "build:ts": "tsc",
+    "build:copy": "cp -r src/__tests__/fixtures build/__tests__/ 2>/dev/null || :",
+    "build": "npm run clean && npm run build:ts && npm run build:copy",
     "start": "node build/server.js",
     "dev": "tsc-watch --onSuccess \"node build/server.js\"",
+    "start:dev": "NODE_ENV=development node --no-warnings --experimental-specifier-resolution=node build/index.js",
+    "start:claude": "NODE_ENV=development node --no-warnings --experimental-specifier-resolution=node build/index.js",
     "test": "jest",
     "test:unit": "jest --testPathPattern=__tests__/unit",
     "test:integration": "jest --testPathPattern=__tests__/integration",
@@ -58,7 +63,7 @@
     "@types/jest": "^29.5.12",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/multer": "^1.4.11",
-    "@types/node": "^22.14.0",
+    "@types/node": "^22.15.21",
     "@types/socket.io": "^3.0.1",
     "@types/socket.io-client": "^1.4.36",
     "@types/supertest": "^6.0.3",
@@ -84,7 +89,7 @@
     "ts-node": "^10.9.2",
     "tsc-watch": "^6.0.4",
     "tsx": "^4.19.4",
-    "typescript": "^5.3.3"
+    "typescript": "^5.8.3"
   },
   "lint-staged": {
     "*.{js,ts}": [
