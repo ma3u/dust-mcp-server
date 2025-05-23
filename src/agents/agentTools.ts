@@ -117,17 +117,32 @@ export const endSessionTool: Tool = {
   },
 };
 
+// Track registered tools to prevent duplicates
+const registeredTools = new Set<string>();
+
 /**
  * Register all agent tools with the MCP server
  */
-export const registerAgentTools = (server: any) => {
-  server.tool(listAgentsTool);
-  server.tool(getAgentTool);
-  server.tool(createSessionTool);
-  server.tool(sendMessageTool);
-  server.tool(endSessionTool);
+export function registerAgentTools(server: any) {
+  const tools = [
+    listAgentsTool,
+    getAgentTool,
+    createSessionTool,
+    sendMessageTool,
+    endSessionTool
+  ];
+
+  tools.forEach(tool => {
+    if (!registeredTools.has(tool.name)) {
+      server.tool(tool);
+      registeredTools.add(tool.name);
+      logger.debug(`Registered tool: ${tool.name}`);
+    } else {
+      logger.debug(`Tool already registered, skipping: ${tool.name}`);
+    }
+  });
   
-  logger.info('Registered agent tools');
+  logger.info(`Registered ${registeredTools.size} agent tools`);
 };
 
 export const agentTools = {

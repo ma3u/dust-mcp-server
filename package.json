@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf build && tsc && cp -r src/__tests__/fixtures build/__tests__/ 2>/dev/null || :",
     "start": "node build/server.js",
     "dev": "tsc-watch --onSuccess \"node build/server.js\"",
     "test": "jest",
@@ -15,6 +15,7 @@
     "test:ci": "jest --ci --runInBand --coverage",
     "start:stdio": "node build/index.js",
     "start:http": "USE_HTTP_TRANSPORT=true node build/index.js",
+    "dev:cli": "tsc-watch --onSuccess \"node build/cli.js\"",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
@@ -33,6 +34,7 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "node-fetch": "^3.3.2",
+    "source-map-support": "^0.5.21",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "uuid": "^9.0.1",
@@ -81,6 +83,7 @@
     "supertest": "^6.3.4",
     "ts-node": "^10.9.2",
     "tsc-watch": "^6.0.4",
+    "tsx": "^4.19.4",
     "typescript": "^5.3.3"
   },
   "lint-staged": {
