@@ -52,7 +52,8 @@ class Logger {
     this.config = { ...DEFAULT_CONFIG, ...config };
     // MCP STDIO JSON best practice: logToConsole must remain false in production environments to prevent breaking JSON output.
     if (this.config.logToConsole) {
-      console.error('[LOGGER WARNING] logToConsole is enabled. NEVER enable this in MCP STDIO JSON production environments.');
+      // [MCP POLICY] STDIO logging is disabled. No warning to console.
+      // Optionally, could log to file or ignore.
     }
     this.currentLogFile = this.getLogFilePath();
     this.initializeLogger();
@@ -76,9 +77,8 @@ class Logger {
     this.writeStream = fs.createWriteStream(this.currentLogFile, { flags: 'a' });
     
     this.writeStream.on('error', (err) => {
-      // If we have an error writing to the log file, log to stderr
-      // but use a special format to avoid breaking JSON output
-      console.error(`[LOGGER_ERROR] Failed to write to log file: ${err.message}`);
+      // [MCP POLICY] STDIO logging is disabled. Silently fail or handle as needed.
+      // Optionally, could buffer errors to memory or ignore.
     });
   }
 
@@ -126,7 +126,7 @@ class Logger {
       }
     } catch (err) {
       // If we can't rotate logs, just continue with the current file
-      console.error(`[LOGGER_ERROR] Failed to rotate logs: ${(err as Error).message}`);
+      // [MCP POLICY] STDIO logging is disabled. Log rotation errors are ignored or handled silently.
     }
   }
 
@@ -161,7 +161,7 @@ class Logger {
     // Log to console if enabled, but use stderr to avoid breaking STDIO JSON output
     if (this.config.logToConsole) {
       // Using stderr to avoid breaking STDIO JSON protocol
-      console.error(logMessage);
+      // [MCP POLICY] STDIO logging is disabled. This log is ignored.
     }
   }
 

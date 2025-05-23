@@ -22,10 +22,7 @@ function logger(level: string, message: string, data?: any): void {
   // Write to log file
   fs.appendFileSync(path.join(LOG_DIR, `mcp-${new Date().toISOString().split('T')[0]}.log`), logMessage + '\n');
   
-  // Also output to stderr for debugging (doesn't interfere with STDIO transport)
-  if (level === 'ERROR') {
-    process.stderr.write(logMessage + '\n');
-  }
+  // [MCP POLICY] STDIO logging is disabled. Only log to file.
 }
 
 export default (server: McpServer) => {

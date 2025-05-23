@@ -18,23 +18,64 @@ interface MockAgent {
 }
 
 // Mock the Dust service with proper typing
-const mockQueryDustAgent = jest.fn<Promise<{
+const mockQueryDustAgent = jest.fn().mockImplementation((): Promise<{
   agentId: string;
   conversationId: string;
   messageId: string;
   result: string;
   timestamp: string;
-}>, [string | null, string, any, string | undefined]>();
+}> => {
+  return Promise.resolve({
+    agentId: 'agent1',
+    conversationId: 'conv1',
+    messageId: 'msg1',
+    result: 'Test response',
+    timestamp: new Date().toISOString()
+  });
+});
 
-const mockListDustAgents = jest.fn<Promise<MockAgent[]>, [string | undefined, number | undefined]>();
+const mockListDustAgents = jest.fn().mockImplementation((): Promise<MockAgent[]> => {
+  return Promise.resolve([{
+    id: 'agent1',
+    name: 'Test Agent',
+    description: 'A test agent',
+    capabilities: ['test'],
+    model: 'test-model',
+    provider: 'test-provider',
+    temperature: 0.7,
+    status: 'active',
+    pictureUrl: 'http://example.com/agent.jpg',
+    supportedOutputFormats: ['text'],
+    tags: ['test'],
+    visualizationEnabled: true
+  }]);
+});
 
-const mockGetAgentConfig = jest.fn<Promise<MockAgent | null>, [string]>();
+const mockGetAgentConfig = jest.fn().mockImplementation((agentId: string): Promise<MockAgent | null> => {
+  if (agentId === 'agent1') {
+    return Promise.resolve({
+      id: 'agent1',
+      name: 'Test Agent',
+      description: 'A test agent',
+      capabilities: ['test'],
+      model: 'test-model',
+      provider: 'test-provider',
+      temperature: 0.7,
+      status: 'active',
+      pictureUrl: 'http://example.com/agent.jpg',
+      supportedOutputFormats: ['text'],
+      tags: ['test'],
+      visualizationEnabled: true
+    });
+  }
+  return Promise.resolve(null);
+});
 
 // Mock the dustService module with proper typing
 jest.mock('../../../src/services/dustService', () => ({
-  queryDustAgent: jest.fn((...args: any[]) => mockQueryDustAgent(...args as [string | null, string, any, string | undefined])),
-  listDustAgents: jest.fn((...args: any[]) => mockListDustAgents(...args as [string | undefined, number | undefined])),
-  getAgentConfig: jest.fn((...args: any[]) => mockGetAgentConfig(...args as [string])),
+  queryDustAgent: jest.fn((...args: any[]) => mockQueryDustAgent(...args)),
+  listDustAgents: jest.fn((...args: any[]) => mockListDustAgents(...args)),
+  getAgentConfig: jest.fn((...args: any[]) => mockGetAgentConfig(...args)),
 }));
 
 describe('Dust MCP Tools', () => {
@@ -106,8 +147,7 @@ describe('Dust MCP Tools', () => {
       const response = await listAgentsHandler({});
       
       // Verify the response
-      expect(response.content[0].text).toContain('Test Agent');
-      expect(response.content[0].text).toContain('A test agent');
+      expect(response.content[0].text).toBe(JSON.stringify(mockAgents, null, 2));
       expect(mockListDustAgents).toHaveBeenCalled();
     });
   });
@@ -129,8 +169,7 @@ describe('Dust MCP Tools', () => {
       const response = await getAgentConfigHandler({ agent_id: 'agent1' });
       
       // Verify the response
-      expect(response.content[0].text).toContain(mockAgents[0].name);
-      expect(response.content[0].text).toContain(mockAgents[0].description);
+      expect(response.content[0].text).toBe(JSON.stringify(mockAgents[0], null, 2));
       expect(mockGetAgentConfig).toHaveBeenCalledWith('agent1');
     });
   });
@@ -145,16 +184,6 @@ describe('Dust MCP Tools', () => {
     });
 
     it('should query an agent and return a response', async () => {
-      // Mock the queryDustAgent function to return a successful response
-      const mockResponse = {
-        agentId: 'agent1',
-        conversationId: 'conv1',
-        messageId: 'msg1',
-        result: 'Test response',
-        timestamp: new Date().toISOString()
-      };
-      mockQueryDustAgent.mockResolvedValue(mockResponse);
-
       // Call the handler
       const response = await agentQueryHandler({
         agent_id: 'agent1',
@@ -164,9 +193,9 @@ describe('Dust MCP Tools', () => {
       });
       
       // Verify the response
-      expect(response.content[0].text).toBe(mockResponse.result);
-      expect(response.conversation_id).toBe(mockResponse.conversationId);
-      expect(response.agent_id).toBe(mockResponse.agentId);
+      expect(response.content[0].text).toBe('Test response');
+      expect(response.conversation_id).toBe('conv1');
+      expect(response.agent_id).toBe('agent1');
       expect(mockQueryDustAgent).toHaveBeenCalledWith(
         'agent1',
         'Hello, agent!',

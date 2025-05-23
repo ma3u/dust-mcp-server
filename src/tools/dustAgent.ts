@@ -156,7 +156,8 @@ const dustAgentTool = (server: McpServer) => {
       try {
         // Check if we should echo the query instead of getting a real response
         if (params.echo) {
-          process.stderr.write(`Echo mode enabled, returning query: ${params.query}\n`);
+          // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+// process.stderr.write(`Echo mode enabled, returning query: ${params.query}\n`);
           
           // Format the echo response for MCP
           return createTextResponse(`ECHO: ${params.query}`, {
@@ -201,11 +202,16 @@ const dustAgentTool = (server: McpServer) => {
         }
         
         // Log the parameters we're sending to the Dust agent
-        process.stderr.write(`Querying Dust agent with the following parameters:\n`);
-        process.stderr.write(`  Agent ID: ${agentId}\n`);
-        process.stderr.write(`  Query: ${params.query}\n`);
-        process.stderr.write(`  Context: ${JSON.stringify(context, null, 2)}\n`);
-        process.stderr.write(`  Conversation ID: ${params.conversationId || 'new conversation'}\n`);
+        // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+// process.stderr.write(`Querying Dust agent with the following parameters:\n`);
+        // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+// process.stderr.write(`  Agent ID: ${agentId}\n`);
+        // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+// process.stderr.write(`  Query: ${params.query}\n`);
+        // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+// process.stderr.write(`  Context: ${JSON.stringify(context, null, 2)}\n`);
+        // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+// process.stderr.write(`  Conversation ID: ${params.conversationId || 'new conversation'}\n`);
         
         // Query the Dust agent using our service
         const response: DustAgentResponse = await queryDustAgent(
@@ -216,12 +222,15 @@ const dustAgentTool = (server: McpServer) => {
         ) as DustAgentResponse;
         
         // Log response for debugging (to stderr to avoid interfering with MCP response)
-        process.stderr.write(`Dust agent response: ${JSON.stringify(response, null, 2)}\n`);
+        // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+// process.stderr.write(`Dust agent response: ${JSON.stringify(response, null, 2)}\n`);
         
         // Check if response.result exists
         if (!response.result) {
-          process.stderr.write(`Warning: response.result is undefined or null\n`);
-          process.stderr.write(`Full response object: ${JSON.stringify(response)}\n`);
+          // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+// process.stderr.write(`Warning: response.result is undefined or null\n`);
+          // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+// process.stderr.write(`Full response object: ${JSON.stringify(response)}\n`);
         }
         
         // Get the text to display
@@ -233,7 +242,8 @@ const dustAgentTool = (server: McpServer) => {
         
         // Safely log the response text with null checks
         const safeResponseText = responseText || "";
-        process.stderr.write(`Formatted response text: ${safeResponseText.length > 100 ? safeResponseText.substring(0, 100) + '...' : safeResponseText}\n`);
+        // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+// process.stderr.write(`Formatted response text: ${safeResponseText.length > 100 ? safeResponseText.substring(0, 100) + '...' : safeResponseText}\n`);
         
         // Format the response for MCP
         const mcpResponse: MCPResponse = createTextResponse(
@@ -252,16 +262,19 @@ const dustAgentTool = (server: McpServer) => {
           throw new Error("Failed to format response: Invalid content format");
         }
         
-        process.stderr.write(`MCP response content: ${JSON.stringify(mcpResponse.content)}\n`);
+        // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+// process.stderr.write(`MCP response content: ${JSON.stringify(mcpResponse.content)}\n`);
         
         return mcpResponse;
       } catch (error) {
         // Enhanced error logging
         const errorMessage = error instanceof Error ? error.message : String(error);
-        process.stderr.write(`Error querying Dust agent: ${errorMessage}\n`);
+        // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+// process.stderr.write(`Error querying Dust agent: ${errorMessage}\n`);
         
         if (error instanceof Error && error.stack) {
-          process.stderr.write(`Stack trace: ${error.stack}\n`);
+          // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+// process.stderr.write(`Stack trace: ${error.stack}\n`);
         }
         
         // Format error response for MCP

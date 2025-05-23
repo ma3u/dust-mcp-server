@@ -13,7 +13,7 @@ async function ensureProcessedDir() {
   try {
     await fs.mkdir(PROCESSED_DIR, { recursive: true });
   } catch (error) {
-    console.error('Error creating processed directory:', error);
+    // [MCP POLICY] STDIO logging is disabled. Error is ignored or only logged to file.
     throw new Error('Failed to create processed directory');
   }
 }

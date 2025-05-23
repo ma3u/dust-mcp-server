@@ -165,7 +165,7 @@ export const deleteFile = (fileId: string, userId: string = 'anonymous'): boolea
     fs.unlinkSync(filePath);
     return true;
   } catch (error) {
-    console.error(`Error deleting file ${fileId}:`, error);
+    // [MCP POLICY] STDIO logging is disabled. Error is ignored or only logged to file.
     return false;
   }
 };
