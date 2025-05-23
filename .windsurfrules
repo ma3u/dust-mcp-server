@@ -1,162 +1,101 @@
-# Project-Specific Windsurf Rules for 
-# Version 2.0.0
+# Project-Specific Windsurf Rules for MCP Server
+# Version 2.2.0
+
+# Core Configuration
 memory_bank:
   autoUpdate: true
   autoSync: true
-  triggers:
-    - onProgressChange
-    - onDecisionLogChange
-    - onCodeChange
+  triggers: [onProgressChange, onDecisionLogChange, onCodeChange]
   files:
-    - activeContext.md
-    - decisionLog.md
-    - progress.md
-    - systemPatterns.md
-    - productContext.md
-  rule_priority: >
+    - activeContext.md    # Current development context
+    - decisionLog.md     # Architecture and design decisions
+    - progress.md        # Task and milestone tracking
+    - systemPatterns.md  # System architecture patterns
+    - productContext.md  # Product requirements and specs
+    - systemLogs.md      # System and error logs
+  rule_priority: |
     ALWAYS use memory-bank for persistent context.
-    Do not prompt user for confirmation.
-    Check the new code in GitHub.
-    For each new decision, update decisionLog.md.
-    For each new task, update progress.md.
-    For each new system pattern, update systemPatterns.md.
-    For each new product context, update productContext.md.
-    Always update documentation when making changes.
+    - Update decisionLog.md for architectural changes
+    - Track tasks in progress.md
+    - Document patterns in systemPatterns.md
+    - Maintain product context in productContext.md
+    - Log system events to systemLogs.md
 
-# Memory System Rules
-memory_system_rules:
-  primary_system: memory-bank
-  restrictions:
-    - Use the memory-bank system defined here
-  rationale: >
-    This project maintains a clear separation between its memory-bank
-    system and Cascade's built-in memories.
-    The memory-bank system provides all necessary persistence through its core files.
-    External memory (GitHub) is used for version control and CI/CD only.
-  enforcement:
-    - ALL persistent information must use memory-bank files
-    - Use GitHub for version control and collaboration
-    - Reference systemPatterns.md for implementation patterns
+# MCP Server Standards
+mcp_server:
+  implementation:
+    - "Follow @modelcontextprotocol/sdk patterns"
+    - "Adhere to STDIO transport constraints"
+    - "Maintain TypeScript type safety"
+    - "Use semantic versioning"
+  transport:
+    - "NEVER use console.log()/error()"
+    - "Log to memory-bank/systemLogs.md"
+    - "Use process.stderr only for critical errors"
+    - "Never log to STDIO (breaks MCP protocol)"
 
-# Memory Bank Integration
-memory_integration:
-  internal:
-    - decisionLog.md         # Project decisions
-    - progress.md           # Progress tracking
-    - systemPatterns.md     # System patterns
-    - activeContext.md      # Active context
-    - productContext.md     # Product context
-
-  external:
-    github: "Ma3u/dust-mcp-server"
-    sync: true
-    paths:
-      - ".github/**/*"      # Workflows and templates
-      - "docs/**/*"         # Public documentation
-      - "src/**/*"          # Source code
-      - "*.md"              # Markdown files
-      - "package*.json"     # Dependencies
-      - "tsconfig*.json"    # TypeScript configs
-
-  rules:
-    - "Always update internal memory first"
-    - "Sync with GitHub after internal updates"
-    - "Reference systemPatterns.md for patterns"
-    - "Document all memory interactions"
-
-# GitHub Integration
-github:
-  # Repository settings
-  repo: "Ma3u/dust-mcp-server"
-  default_branch: "main"
+# Development Practices
+development:
+  tool_registration:
+    - "Use Zod for input validation"
+    - "Implement idempotent handlers"
+    - "Document in productContext.md"
+    - "Use toolRegistry utility"
+    - "Define input/output schemas"
   
-  # Pull Request Settings
-  pr:
-    require_reviews: true
-    required_approvals: 1
-    delete_branch_after_merge: true
-    template: .github/PULL_REQUEST_TEMPLATE.md
-    
-  # Branch Protection
-  protected_branches:
-    - name: "main"
-      required_status_checks:
-        strict: true
-        contexts: ["lint", "test", "build"]
-      enforce_admins: true
-      required_linear_history: true
-      allow_force_pushes: false
-      allow_deletions: false
-      
-  # CI/CD
+  session_management:
+    - "Use UUIDv7 for session IDs"
+    - "Implement TTL and cleanup"
+    - "Log lifecycle to decisionLog.md"
+  
+  error_handling:
+    - "Use structured errors with codes"
+    - "Map to MCP responses"
+    - "Log to systemPatterns.md"
+    - "Never expose sensitive data"
+
+  code_organization:
+    - "Modular, single-purpose handlers"
+    - "Centralize common utilities"
+    - "Follow DRY principles"
+    - "Use shared logging"
+
+# GitHub & CI/CD
+github:
+  repo: "Ma3u/dust-mcp-server"
+  branch_protection:
+    main:
+      required_checks: [lint, test, build]
+      enforce_linear_history: true
+      require_pr: true
   workflows:
     - name: "CI"
       path: .github/workflows/ci.yml
       triggers: [push, pull_request]
-      jobs: [lint, test, build]
-      
     - name: "CD"
       path: .github/workflows/cd.yml
       triggers: [push:main]
-      jobs: [deploy]
 
-  # Issue Templates
-  issue_templates:
-    - name: "Bug Report"
-      path: .github/ISSUE_TEMPLATE/bug_report.md
-    - name: "Feature Request"
-      path: .github/ISSUE_TEMPLATE/feature_request.md
-
-# Development Standards
-development:
-  guidelines:
-    mcp_implementation:
-      - "Before implementing MCP specific features, always consult the SDK source code examples: https://github.com/modelcontextprotocol/typescript-sdk/tree/main/src"
-      - "Follow official MCP patterns and conventions from example code"
-      - "Use proper import paths with .js extensions as required by ESM"
-      - "Always check the MCP types in SDK source rather than relying on TypeScript inference"
-      -  NEVER log on STDIO, beacuse this breaks the MCP protocol and fails the MCP server
-
-  code_practices:
-    typescript:
-      - "Add .js extension to all ESM imports when using NodeNext module resolution"
-      - "Properly handle Buffer to string conversions when needed"
-      - "Use SDK-provided types rather than creating custom ones when available"
-    
-    patterns:
-      - "Follow the McpServer and StreamableHTTPServerTransport patterns from examples"
-      - "Implement proper session handling for stateful servers"
-      
+# Validation & Quality
+validation:
   pre_commit:
-    enabled: true
-    hooks:
-      - id: lint-staged
-        name: Lint Staged Files
-        entry: npm run lint:staged
-        language: node
-        types: [file]
-        stages: [commit-msg, pre-commit]
-        
-  commit_message:
-    max_length: 72
-    require_emoji: true
-    template: |
-      :emoji: Concise summary under 50 chars
-      
-      More detailed explanation of changes if needed.
-      - Bullet points for multiple changes
-      - Reference related issues/PRs
-
+    - "Run linter"
+    - "Execute tests"
+    - "Check documentation"
+  ci_checks:
+    - "Run full test suite"
+    - "Verify type checking"
+    - "Check code coverage"
   code_review:
     required: true
     approval_count: 1
     rules:
-      - No direct pushes to main
-      - All tests must pass
-      - Documentation must be updated
-      - Follows project patterns
+      - "No direct pushes to main"
+      - "All tests must pass"
+      - "Documentation updated"
+      - "Follows project patterns"
 
-# Documentation Requirements
+# Documentation
 documentation:
   required_sections:
     - "## Purpose"
@@ -166,55 +105,17 @@ documentation:
     - "## Development"
   update_triggers:
     - "New features"
-    - "Configuration changes"
+    - "API changes"
     - "Bug fixes"
     - "Dependency updates"
 
-
-    # Automation Rules
+# Automation
 automation:
-  # Auto-commit settings
   auto_commit:
     enabled: true
-    on_success:
-      - cascade_run
-      - test_run
-    branch: "feature/auto-commit"  # Branch for auto-commits
+    branch: "feature/auto-commit"
     commit_message: |
-      :robot: Automated commit after successful {event_type}
-      
-      Changes made during the {event_type}:
-      - {timestamp}
-      - {changed_files_count} files modified
-      - {test_results_summary}
-      
-      {additional_notes}
-    push_to_remote: true
-    create_pr: true  # Create PR if not on main branch
-    pr_template: |
-      ## Changes
-      Automated changes from {event_type} at {timestamp}
-      
-      ### Modified Files
-      {file_changes}
-      
-      ### Test Results
-      {test_results}
-  
-  # Auto-test settings
-  auto_test:
-    run_on_change: true
-    required: true
-    commands:
-      - npm test
-    coverage_threshold: 80%
-  
-  rules:
-    - "Auto-commit after successful Cascade runs and test executions"
-    - "Include detailed commit messages with context"
-    - "Create PRs for non-main branch changes"
-    - "Run tests before committing"
-    - "Only commit if tests pass"
-    - "Include test coverage in commit message"
-    - "Push changes to remote repository"
-    - "Update related documentation automatically"
+      :robot: Automated commit - {event_type}
+      Changes: {changed_files_count} files
+      {test_results_summary}
+    create_pr: true

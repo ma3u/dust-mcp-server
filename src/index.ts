@@ -105,8 +105,8 @@ try {
 // Create directories if they don't exist
 async function ensureDirectories() {
   try {
-    // Use __dirname to get the current module's directory
-    const baseDir = __dirname;
+    // Get the project root directory (one level up from 'src')
+    const baseDir = path.resolve(process.cwd());
     const logsDir = process.env.LOGS_DIR || path.join(baseDir, 'logs');
     
     // Log the base directory for debugging
@@ -118,7 +118,8 @@ async function ensureDirectories() {
     } catch (error: any) {
       mcpLogger.error('Base directory is not writable', { 
         path: baseDir,
-        error: error.message 
+        error: error.message,
+        cwd: process.cwd()
       });
       throw new Error(`Base directory ${baseDir} is not writable: ${error.message}`);
     }

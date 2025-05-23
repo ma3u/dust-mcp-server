@@ -1,5 +1,5 @@
 import express from 'express';
-import { createServer } from 'http';
+import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { randomUUID } from 'node:crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
@@ -7,7 +7,13 @@ import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 import { debugIsInitializeRequest, logMcpRequest } from './debug-mcp-utils.js';
 import { registerAgentTools } from './agents/agentTools.js';
 import agentRoutes from './api/routes/agentRoutes.js';
-import logger from './utils/logger.js';
+import { getLogger } from './utils/logger.js';
+import { handleHttpRequest, handleStdioRequest } from './middleware/mcpHandler.js';
+import { toolRegistry } from './tools/toolRegistry.js';
+import { mcpLogger } from './utils/mcpUtils.js';
+
+// Initialize logger
+const logger = getLogger({ logFilePrefix: 'server' });
 
 // Environment variables
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -40,8 +46,15 @@ const createMcpServer = () => {
     capabilities: ['tools'],
   });
 
-  // Register MCP tools
+  // Register MCP tools with the SDK
   registerAgentTools(mcpServer);
+  
+  // Initialize tool registry
+  toolRegistry.initialize();
+  
+  // Log server initialization
+  mcpLogger.info('MCP server initialized with tool registry');
+  
   return mcpServer;
 };
 
@@ -49,6 +62,12 @@ const createMcpServer = () => {
 // Reusable handler for GET and DELETE requests
 const handleSessionRequest = async (req: express.Request, res: express.Response) => {
   const sessionId = req.headers['mcp-session-id'] as string | undefined;
+  
+  // Set up SSE headers
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*');
   if (!sessionId || !transports[sessionId]) {
     res.status(400).send('Invalid or missing session ID');
     return;
@@ -58,11 +77,56 @@ const handleSessionRequest = async (req: express.Request, res: express.Response)
   await transport.handleRequest(req, res);
 };
 
-// Handle GET requests for server-to-client notifications via SSE
+// MCP API endpoint for HTTP/SSE
 app.get('/mcp', handleSessionRequest);
 
-// Handle DELETE requests for session termination
+// MCP API endpoint for session termination
 app.delete('/mcp', handleSessionRequest);
+
+// JSON-RPC over HTTP endpoint
+app.post('/rpc', (req, res) => {
+  handleHttpRequest(req as unknown as IncomingMessage, res);
+});
+
+// STDIO transport for MCP
+if (process.stdin.isTTY) {
+  process.stdin.setEncoding('utf-8');
+  let buffer = '';
+  
+  process.stdin.on('data', async (chunk) => {
+    buffer += chunk;
+    
+    try {
+      // Try to parse the buffer as JSON
+      const request = JSON.parse(buffer);
+      buffer = ''; // Clear buffer on successful parse
+      
+      // Handle the request
+      const response = await handleStdioRequest(JSON.stringify(request));
+      process.stdout.write(response + '\n');
+    } catch (error) {
+      // If JSON is incomplete, wait for more data
+      if (error instanceof SyntaxError) {
+        return;
+      }
+      
+      // For other errors, send error response
+      const errorResponse = {
+        jsonrpc: '2.0',
+        error: {
+          code: -32603,
+          message: 'Internal error',
+          data: process.env.NODE_ENV === 'development' ? String(error) : undefined
+        },
+        id: null
+      };
+      
+      process.stdout.write(JSON.stringify(errorResponse) + '\n');
+    }
+  });
+  
+  process.on('SIGINT', () => process.exit(0));
+}
 
 // Handle POST requests for client-to-server communication
 app.post('/mcp', async (req, res) => {

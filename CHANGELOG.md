@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.3.0] - 2025-05-24
+
+### Added
+
+- Implemented structured JSON logging system
+- Added request ID correlation for better traceability
+- Configured log rotation and file management
+- Added support for different log levels (ERROR, WARN, INFO, DEBUG, TRACE)
+- Implemented MCP-compliant error handling that avoids breaking STDIO protocol
+- Added TypeScript type safety throughout the logging system
+- Included JSDoc documentation for all public methods
+
+### Changed
+
+- Replaced console.log with structured logging throughout the application
+- Improved error handling and reporting
+- Optimized log formatting and output
+- Updated configuration to support environment-based logging levels
+
+### Fixed
+
+- Resolved issues with log file rotation
+- Fixed potential memory leaks in log stream handling
+- Ensured thread-safe log writing operations
+- Addressed all TypeScript type checking issues
+
 ## [1.2.0] - 2025-05-19
 
 ### Added

@@ -18,6 +18,9 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --runInBand --coverage",
+    "test:hook": "node scripts/run-tests-hook.js",
+    "test:hook:all": "node scripts/run-tests-hook.js --all",
+    "test:hook:e2e": "node scripts/run-tests-hook.js --e2e",
     "start:stdio": "node build/index.js",
     "start:http": "USE_HTTP_TRANSPORT=true node build/index.js",
     "dev:cli": "tsc-watch --onSuccess \"node build/cli.js\"",
@@ -25,7 +28,8 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
     "validate": "npm run lint && npm run build && npm test",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "postrequest": "npm run test:hook"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.9.0",

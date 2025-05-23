@@ -45,6 +45,7 @@ const mockMessageResponse = {
 };
 
 describe('AgentService', () => {
+  const testAgent = {
     id: 'test1',
     name: 'Test Agent',
     description: 'A test agent',
@@ -54,6 +55,7 @@ describe('AgentService', () => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
+  
 
   const mockSession: SessionDescriptor = {
     id: 'session1',
