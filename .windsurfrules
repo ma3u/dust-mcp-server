@@ -115,6 +115,7 @@ development:
       - "Follow official MCP patterns and conventions from example code"
       - "Use proper import paths with .js extensions as required by ESM"
       - "Always check the MCP types in SDK source rather than relying on TypeScript inference"
+      -  NEVER log on STDIO, beacuse this breaks the MCP protocol and fails the MCP server
 
   code_practices:
     typescript:

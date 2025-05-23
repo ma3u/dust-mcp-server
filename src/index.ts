@@ -1,10 +1,13 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
 import dotenv from "dotenv";
 import path from "path";
 import { promises as fs } from 'fs';
 import express from 'express';
+import { randomUUID } from 'crypto';
+import { Readable } from 'stream';
 import logger, { LogLevel } from './utils/logger.js';
 
 // Import tools
@@ -20,17 +23,17 @@ import dustAgent from "./tools/dustAgent.js";
 // Load environment variables
 dotenv.config();
 
-// Debug environment variables
-console.log('=== Environment Variables ===');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('DUST_API_KEY:', process.env.DUST_API_KEY ? '***' + process.env.DUST_API_KEY.slice(-4) : 'not set');
-console.log('DUST_WORKSPACE_ID:', process.env.DUST_WORKSPACE_ID || 'not set');
-console.log('DUST_AGENT_ID:', process.env.DUST_AGENT_ID || 'not set');
-console.log('LOGS_DIR:', process.env.LOGS_DIR || 'not set');
-console.log('===========================');
-
 // Create a simple JSON logger for MCP protocol
-const mcpLogger = {
+interface McpLogger {
+  log: (level: string, message: string, data?: any) => void;
+  info: (message: string, data?: any) => void;
+  error: (message: string, error?: any) => void;
+  warn: (message: string, data?: any) => void;
+  debug: (message: string, data?: any) => void;
+}
+
+const mcpLogger: McpLogger = {
+  warn: (message: string, data?: any) => mcpLogger.log('warn', message, data),
   log: (level: string, message: string, data: any = {}) => {
     const logEntry = JSON.stringify({
       timestamp: new Date().toISOString(),
@@ -55,6 +58,15 @@ const mcpLogger = {
     }
   }
 };
+
+// Log environment variables
+mcpLogger.info('Environment variables', {
+  NODE_ENV: process.env.NODE_ENV,
+  DUST_API_KEY: process.env.DUST_API_KEY ? '***' + process.env.DUST_API_KEY.slice(-4) : 'not set',
+  DUST_WORKSPACE_ID: process.env.DUST_WORKSPACE_ID || 'not set',
+  DUST_AGENT_ID: process.env.DUST_AGENT_ID || 'not set',
+  LOGS_DIR: process.env.LOGS_DIR || 'not set'
+});
 
 // Replace console methods to ensure JSON output
 const originalConsole = { ...console };
@@ -81,13 +93,13 @@ logger['config'] = {
 // Create directories if they don't exist
 async function ensureDirectories() {
   try {
-    // Use __dirname to get the directory of the current module
-    const baseDir = __dirname;
-    const logsDir = process.env.LOGS_DIR || path.join(baseDir, '..', 'logs');
+    // Use process.cwd() to get the current working directory
+    const baseDir = process.cwd();
+    const logsDir = process.env.LOGS_DIR || path.join(baseDir, 'logs');
     
     // Ensure logs directory exists and is writable
     try {
-      await fs.mkdir(logsDir, { recursive: true });
+      await fs.mkdir(logsDir, { recursive: true, mode: 0o755 });
       await fs.access(logsDir, fs.constants.W_OK);
       mcpLogger.info('Logs directory verified', { path: logsDir });
     } catch (error: any) {
@@ -99,15 +111,15 @@ async function ensureDirectories() {
     process.env.LOGS_DIR = logsDir;
     
     const dirs = [
-      path.join(baseDir, '..', 'uploads'),
-      path.join(baseDir, '..', 'processed')
+      path.join(baseDir, 'uploads'),
+      path.join(baseDir, 'processed')
     ];
 
     mcpLogger.info('Ensuring required directories exist');
     
     for (const dir of dirs) {
       try {
-        await fs.mkdir(dir, { recursive: true });
+        await fs.mkdir(dir, { recursive: true, mode: 0o755 });
         mcpLogger.info('Directory ready', { path: dir });
       } catch (error: any) {
         if (error.code !== 'EEXIST') {
@@ -160,19 +172,19 @@ try {
 }
 
 // Create directories
-console.log('Ensuring directories exist...');
+mcpLogger.info('Ensuring directories exist...');
 try {
   await ensureDirectories();
-  console.log('Directories ready');
-} catch (error) {
-  console.error('Failed to create directories:', error);
+  mcpLogger.info('Directories ready');
+} catch (error: any) {
+  mcpLogger.error('Failed to create directories', { error: error.message });
   process.exit(1);
 }
 
 // Determine transport mode from environment or command line args
 const useHttpTransport = process.env.USE_HTTP_TRANSPORT === 'true' || 
                        process.argv.includes('--http');
-console.log(`Transport mode: ${useHttpTransport ? 'HTTP' : 'STDIO'}`);
+mcpLogger.info(`Transport mode: ${useHttpTransport ? 'HTTP' : 'STDIO'}`);
 
 // Authentication will be implemented in Milestone 2
 const useAuthentication = false; // Disabled until Milestone 2 is implemented
@@ -190,8 +202,9 @@ if (useHttpTransport) {
   
   // Health check endpoint
   app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'ok', uptime: process.uptime() });
-    broadcast('health', { status: 'ok', uptime: process.uptime() }); // Example broadcast
+    const healthData = { status: 'ok', uptime: process.uptime() };
+    res.status(200).json(healthData);
+    broadcast('health', healthData);
   });
 
   // SSE endpoint
@@ -207,11 +220,11 @@ if (useHttpTransport) {
   
   // API routes (authentication will be added in Milestone 2)
   const apiRouter = express.Router();
-  logger.warn('Authentication not implemented yet (Milestone 2)');
+  mcpLogger.warn('Authentication not implemented yet (Milestone 2)');
   
   // Web routes (authentication will be added in Milestone 2)
   const webRouter = express.Router();
-  logger.warn('Authentication not implemented yet (Milestone 2)');
+  mcpLogger.warn('Authentication not implemented yet (Milestone 2)');
   
   // Register routers
   app.use('/api', apiRouter);
@@ -219,21 +232,86 @@ if (useHttpTransport) {
   
   // Start HTTP server
   const httpServer = app.listen(port, () => {
-    logger.info(`HTTP server listening on port ${port}`);
+    mcpLogger.info(`HTTP server listening on port ${port}`);
   });
   
-  // Use STDIO transport for now (HTTP/SSE transport will be implemented in future versions)
-  logger.info('Starting MCP server with STDIO transport (HTTP/SSE transport will be implemented in future versions)');
-  const transport = new StdioServerTransport();
+  // Graceful shutdown
+  process.on('SIGTERM', () => {
+    mcpLogger.info('SIGTERM received, shutting down gracefully');
+    httpServer.close(() => {
+      mcpLogger.info('HTTP server closed');
+      process.exit(0);
+    });
+  });
+  
+  // Use HTTP transport for MCP
+  mcpLogger.info('Starting MCP server with HTTP transport');
+  
+  // Create HTTP transport with required options
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: () => randomUUID(),
+    onsessioninitialized: (sessionId) => {
+      mcpLogger.info(`New MCP session initialized: ${sessionId}`);
+    }
+  });
+  
+  // Handle MCP protocol messages
+  app.post('/mcp', (req, res) => {
+    mcpLogger.info('Received MCP message', { 
+      method: req.method, 
+      path: req.path,
+      headers: req.headers
+    });
+    
+    // Forward the request to the transport
+    transport.handleRequest(req, res).catch(error => {
+      mcpLogger.error('Error handling MCP request', { error });
+      res.status(500).json({ error: 'Internal server error' });
+    });
+  });
+  
+  // Handle SSE connections
+  app.get('/mcp', (req, res) => {
+    mcpLogger.info('New SSE connection', { 
+      method: req.method, 
+      path: req.path,
+      headers: req.headers
+    });
+    
+    transport.handleRequest(req, res).catch(error => {
+      mcpLogger.error('Error handling SSE connection', { error });
+      res.status(500).end();
+    });
+  });
+  
   await server.connect(transport);
   
-  // Session management will be implemented in Milestone 2
-  // setInterval(() => {
-  //   logger.info(`Active sessions: ${sessionManager.getSessionCount()}`);
-  // }, 60000); // Log every minute
 } else {
-  // Use STDIO transport for Claude Desktop (no authentication needed)
-  logger.info('Starting MCP server with STDIO transport (authentication not required)');
+  // Use STDIO transport for Claude Desktop
+  mcpLogger.info('Starting MCP server with STDIO transport');
+  
+  // Redirect all console output to mcpLogger in STDIO mode
+  const originalConsole = { ...console };
+  
+  console.log = (...args) => mcpLogger.info(args[0], args.length > 1 ? args[1] : undefined);
+  console.error = (...args) => mcpLogger.error(args[0], args.length > 1 ? args[1] : undefined);
+  console.warn = (...args) => mcpLogger.warn(args[0], args.length > 1 ? args[1] : undefined);
+  console.debug = (...args) => mcpLogger.debug(args[0], args.length > 1 ? args[1] : undefined);
+  
+  // Create and connect STDIO transport
+  // The StdioServerTransport handles process.stdin/stdout by default
   const transport = new StdioServerTransport();
+  
+  // Handle process termination
+  process.on('SIGTERM', () => {
+    mcpLogger.info('SIGTERM received, shutting down gracefully');
+    process.exit(0);
+  });
+  
+  process.on('SIGINT', () => {
+    mcpLogger.info('SIGINT received, shutting down');
+    process.exit(0);
+  });
+  
   await server.connect(transport);
 }
