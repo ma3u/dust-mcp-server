@@ -8,7 +8,7 @@ import { promises as fs } from 'fs';
 import express from 'express';
 import { randomUUID } from 'crypto';
 import { Readable } from 'stream';
-import logger, { LogLevel } from './utils/logger.js';
+import { getLogger, LogLevel } from './utils/logger.js';
 
 // Import tools
 import fileUpload from "./tools/fileUpload.js";
@@ -83,19 +83,45 @@ console.debug = (...args) => {
   mcpLogger.debug(args[0], args.length > 1 ? { data: args.slice(1) } : undefined);
 };
 
-// Disable default logger file output
-logger['config'] = {
-  ...logger['config'],
-  logToFile: false,
-  logToConsole: false
-};
+// Configure logger with environment-specific settings
+const logsDir = process.env.LOGS_DIR || path.join(process.cwd(), 'logs');
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Initialize logger with configuration
+const logger = getLogger({
+  logToFile: !isProduction, // Only log to file in non-production
+  logToConsole: !isProduction, // Only log to console in non-production
+  logDir: logsDir,
+  level: isProduction ? LogLevel.INFO : LogLevel.DEBUG
+});
+
+// Ensure logs directory exists
+try {
+  await fs.mkdir(logsDir, { recursive: true });
+} catch (error) {
+  // Logger will handle fallback directory
+}
 
 // Create directories if they don't exist
 async function ensureDirectories() {
   try {
-    // Use process.cwd() to get the current working directory
-    const baseDir = process.cwd();
+    // Use __dirname to get the current module's directory
+    const baseDir = __dirname;
     const logsDir = process.env.LOGS_DIR || path.join(baseDir, 'logs');
+    
+    // Log the base directory for debugging
+    mcpLogger.debug('Base directory', { baseDir });
+    
+    // Ensure base directory exists and is writable
+    try {
+      await fs.access(baseDir, fs.constants.W_OK);
+    } catch (error: any) {
+      mcpLogger.error('Base directory is not writable', { 
+        path: baseDir,
+        error: error.message 
+      });
+      throw new Error(`Base directory ${baseDir} is not writable: ${error.message}`);
+    }
     
     // Ensure logs directory exists and is writable
     try {
@@ -103,13 +129,17 @@ async function ensureDirectories() {
       await fs.access(logsDir, fs.constants.W_OK);
       mcpLogger.info('Logs directory verified', { path: logsDir });
     } catch (error: any) {
-      mcpLogger.error('Failed to access logs directory', error);
+      mcpLogger.error('Failed to access logs directory', { 
+        path: logsDir,
+        error: error.message 
+      });
       throw new Error(`Logs directory ${logsDir} is not writable: ${error.message}`);
     }
     
     // Set LOGS_DIR in process.env early so other parts can use it
     process.env.LOGS_DIR = logsDir;
     
+    // Define directories to create relative to baseDir
     const dirs = [
       path.join(baseDir, 'uploads'),
       path.join(baseDir, 'processed')
@@ -125,7 +155,8 @@ async function ensureDirectories() {
         if (error.code !== 'EEXIST') {
           mcpLogger.error('Failed to create directory', { 
             path: dir,
-            error: error.message
+            error: error.message,
+            code: error.code
           });
           throw error;
         }
@@ -137,7 +168,10 @@ async function ensureDirectories() {
     return true;
     
   } catch (error: any) {
-    mcpLogger.error('Failed to create directories', error);
+    mcpLogger.error('Failed to create directories', { 
+      error: error.message,
+      stack: error.stack 
+    });
     throw error;
   }
 }

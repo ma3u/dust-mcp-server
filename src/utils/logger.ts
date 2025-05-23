@@ -47,6 +47,8 @@ class Logger {
   private config: LoggerConfig;
   private currentLogFile: string;
   private writeStream: fs.WriteStream | null = null;
+  private initializing: boolean = false;
+  private initPromise: Promise<void> | null = null;
 
   constructor(config: Partial<LoggerConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -56,16 +58,48 @@ class Logger {
       // Optionally, could log to file or ignore.
     }
     this.currentLogFile = this.getLogFilePath();
-    this.initializeLogger();
+    // Don't initialize here, will be done lazily
+  }
+
+  private async ensureInitialized() {
+    if (this.initializing && this.initPromise) {
+      return this.initPromise;
+    }
+    if (this.initialized) return;
+    
+    this.initializing = true;
+    this.initPromise = this.initializeLogger();
+    await this.initPromise;
+    this.initializing = false;
+  }
+
+  private get initialized(): boolean {
+    return !this.initializing && this.initPromise !== null;
   }
 
   private async initializeLogger() {
-    // Ensure log directory exists
-    await fsPromises.mkdir(this.config.logDir, { recursive: true });
-    
-    // Initialize write stream if logging to file
-    if (this.config.logToFile) {
-      this.openLogStream();
+    try {
+      // Ensure log directory exists
+      await fsPromises.mkdir(this.config.logDir, { recursive: true });
+      
+      // Initialize write stream if logging to file
+      if (this.config.logToFile) {
+        this.openLogStream();
+      }
+    } catch (error) {
+      // Fallback to a directory we can write to
+      const fallbackDir = path.join(process.cwd(), 'logs');
+      if (this.config.logDir !== fallbackDir) {
+        this.config.logDir = fallbackDir;
+        this.currentLogFile = this.getLogFilePath();
+        await fsPromises.mkdir(fallbackDir, { recursive: true });
+        if (this.config.logToFile) {
+          this.openLogStream();
+        }
+      } else {
+        // If we're already using the fallback, just disable file logging
+        this.config.logToFile = false;
+      }
     }
   }
 
@@ -150,18 +184,38 @@ class Logger {
     // Skip if log level is higher than configured level
     if (level > this.config.level) return;
     
+    // Ensure logger is initialized
+    if (!this.initialized) {
+      try {
+        await this.ensureInitialized();
+      } catch (error) {
+        // If initialization fails, fall back to console.error for critical errors
+        if (level <= LogLevel.ERROR) {
+          console.error(`[LOGGER_INIT_ERROR] ${message}`, meta);
+        }
+        return;
+      }
+    }
+    
     const logMessage = this.formatLogMessage(level, message, meta);
     
     // Log to file if enabled
     if (this.config.logToFile && this.writeStream) {
-      this.writeStream.write(logMessage + '\n');
-      await this.rotateLogsIfNeeded();
+      try {
+        this.writeStream.write(logMessage + '\n');
+        await this.rotateLogsIfNeeded();
+      } catch (error) {
+        // If file writing fails, fall back to console.error for critical errors
+        if (level <= LogLevel.ERROR) {
+          console.error(`[LOGGER_WRITE_ERROR] ${message}`, meta);
+        }
+      }
     }
     
     // Log to console if enabled, but use stderr to avoid breaking STDIO JSON output
     if (this.config.logToConsole) {
       // Using stderr to avoid breaking STDIO JSON protocol
-      // [MCP POLICY] STDIO logging is disabled. This log is ignored.
+      console.error(logMessage);
     }
   }
 
@@ -204,10 +258,23 @@ class Logger {
   }
 }
 
-// Create and export a default logger instance
-const logger = new Logger();
+// Create a singleton logger instance with lazy initialization
+let loggerInstance: Logger | null = null;
 
-// Also export the Logger class for custom instances
+// Function to get or create the logger instance
+export function getLogger(config: Partial<LoggerConfig> = {}): Logger {
+  if (!loggerInstance) {
+    loggerInstance = new Logger(config);
+  } else if (Object.keys(config).length > 0) {
+    // If logger already exists but new config is provided, update it
+    Object.assign(loggerInstance['config'], config);
+  }
+  return loggerInstance;
+}
+
+// Export the Logger class for custom instances
 export { Logger };
 
-export default logger;
+// Default export for backward compatibility
+const defaultLogger = getLogger();
+export default defaultLogger;
