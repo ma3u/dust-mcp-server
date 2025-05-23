@@ -52,13 +52,38 @@ interface LoggerConfig {
 /**
  * Default logger configuration
  */
+// Use project-relative path for logs
+const PROJECT_ROOT = path.resolve(__dirname, '../..');
+const DEFAULT_LOGS_DIR = path.join(PROJECT_ROOT, 'logs');
+
+// Create logs directory if it doesn't exist
+const ensureLogsDir = (logDir: string): string => {
+  try {
+    fs.mkdirSync(logDir, { recursive: true });
+    return logDir;
+  } catch (error) {
+    // Fallback to a safe directory if the default one fails
+    const fallbackDir = path.join(require('os').tmpdir(), 'dust-mcp-logs');
+    console.warn(`Failed to create logs directory at ${logDir}, using fallback: ${fallbackDir}`, error);
+    try {
+      fs.mkdirSync(fallbackDir, { recursive: true });
+      return fallbackDir;
+    } catch (fallbackError) {
+      console.error('Critical: Failed to create fallback logs directory', fallbackError);
+      throw new Error('Cannot create logs directory and fallback failed');
+    }
+  }
+};
+
+const LOGS_DIR = ensureLogsDir(DEFAULT_LOGS_DIR);
+
 const DEFAULT_CONFIG: LoggerConfig = {
   level: process.env.NODE_ENV === 'production' ? LogLevel.INFO : LogLevel.DEBUG,
   logToFile: true,
   // WARNING: NEVER enable logToConsole in MCP STDIO JSON environments!
   // Only set to true for local debugging
   logToConsole: process.env.NODE_ENV !== 'production',
-  logDir: path.join(process.cwd(), 'memory-bank/logs'),
+  logDir: LOGS_DIR,
   logFilePrefix: 'mcp-server',
   maxLogFileSizeBytes: 10 * 1024 * 1024, // 10MB
   maxLogFiles: 10,
@@ -86,7 +111,13 @@ class Logger {
     
     // Ensure log directory exists if file logging is enabled
     if (this.config.logToFile) {
-      fs.mkdirSync(this.config.logDir, { recursive: true });
+      try {
+        fs.mkdirSync(this.config.logDir, { recursive: true });
+      } catch (error) {
+        // If we can't create the log directory, disable file logging
+        console.error(`Failed to create log directory at ${this.config.logDir}, disabling file logging`, error);
+        this.config.logToFile = false;
+      }
     }
     
     this.currentLogFile = this.getLogFilePath();

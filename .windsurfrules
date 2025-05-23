@@ -1,5 +1,5 @@
 # Project-Specific Windsurf Rules for MCP Server
-# Version 2.2.0
+# Version 2.3.0
 
 # Core Configuration
 memory_bank:
@@ -20,6 +20,19 @@ memory_bank:
     - Document patterns in systemPatterns.md
     - Maintain product context in productContext.md
     - Log system events to systemLogs.md
+
+# File System Operations
+file_system:
+  path_handling:
+    - "ALWAYS use path.join() or path.resolve() for cross-platform compatibility"
+    - "NEVER use absolute paths in code - always derive from __dirname or process.cwd()"
+    - "For user-provided paths, validate they are within project directory"
+    - "Log all file system operations with full paths for debugging"
+    - "Handle ENOENT and other filesystem errors gracefully"
+  directories:
+    logs: "./logs"  # Relative to project root
+    uploads: "./uploads"  # Relative to project root
+    temp: "./temp"  # Relative to project root
 
 # MCP Server Standards
 mcp_server:
@@ -82,10 +95,12 @@ validation:
     - "Run linter"
     - "Execute tests"
     - "Check documentation"
+    - "Verify no absolute paths in code"
   ci_checks:
     - "Run full test suite"
     - "Verify type checking"
     - "Check code coverage"
+    - "Scan for absolute paths"
   code_review:
     required: true
     approval_count: 1
@@ -94,6 +109,7 @@ validation:
       - "All tests must pass"
       - "Documentation updated"
       - "Follows project patterns"
+      - "No absolute paths in code"
 
 # Documentation
 documentation:

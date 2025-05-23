@@ -19,6 +19,37 @@
   "rules": {
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/no-explicit-any": "warn",
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "no-restricted-imports": ["error", {
+      "patterns": [
+        {
+          "group": ["/"],
+          "message": "Use path.join() or path.resolve() instead of absolute paths"
+        },
+        {
+          "group": ["^\\/", "^[A-Za-z]:\\\\"],
+          "message": "Absolute paths are not allowed. Use path.join() or path.resolve()"
+        }
+      ]
+    }],
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "CallExpression[callee.name='require']:matches([arguments.0.value=/^\\//], [arguments.0.value=/^[A-Za-z]:\\\\/])",
+        "message": "Absolute paths in require() are not allowed. Use path.join() or path.resolve()"
+      },
+      {
+        "selector": "ImportDeclaration[source.value=/^\\//], ImportDeclaration[source.value=/^[A-Za-z]:\\\\/]",
+        "message": "Absolute paths in imports are not allowed. Use path.join() or path.resolve()"
+      }
+    ]
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "paths": ["src"],
+        "extensions": [".ts", ".js", ".json"]
+      }
+    }
   }
 }
