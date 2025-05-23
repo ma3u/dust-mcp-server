@@ -265,7 +265,3 @@ function sendResponse(
   res.end(JSON.stringify(data));
 }
 
-export {
-  handleHttpRequest,
-  handleStdioRequest
-};

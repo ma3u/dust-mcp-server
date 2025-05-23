@@ -3,6 +3,31 @@
 This file records architectural and implementation decisions using a list format.
 
 ---
+"2025-05-24 01:20:00" - Updated UUID and Directory Handling
+
+## Decision 7: UUID v7 and Secure Directory Handling
+
+* Upgraded to UUID v7 for time-ordered session IDs
+* Implemented secure directory handling within project boundaries
+* Added proper error handling for file system operations
+* Ensured cross-platform compatibility for path resolution
+
+### Decision 7 Rationale
+
+* UUID v7 provides better time-ordered IDs for session management
+* Needed to prevent file system operations outside project directory
+* Required robust error handling for production reliability
+* Needed consistent behavior across different operating systems
+
+### Decision 7 Implementation
+
+* Updated UUID package to latest version supporting v7
+* Implemented proper path resolution using `process.cwd()`
+* Added comprehensive error handling for file operations
+* Added logging for directory creation events
+* Ensured all file operations are contained within project directory
+
+---
 "2025-05-24 01:10:00" - Implemented Structured Logging System
 
 ## Decision 6: Structured Logging Implementation

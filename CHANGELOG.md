@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.4.0] - 2025-05-24
+
+### Added
+
+- Upgraded to UUID v7 for time-ordered session IDs
+- Added secure directory handling within project boundaries
+- Implemented cross-platform path resolution
+- Added comprehensive error handling for file system operations
+- Enhanced logging for directory creation events
+
+### Changed
+
+- Updated UUID package to latest version supporting v7
+- Modified file upload handling to use project-relative paths
+- Improved error messages for file system operations
+- Updated dependencies to latest stable versions
+
+### Fixed
+
+- Resolved issue with directory creation in root filesystem
+- Fixed path resolution for cross-platform compatibility
+- Addressed potential security issues with file system access
+
 ## [1.3.0] - 2025-05-24
 
 ### Added

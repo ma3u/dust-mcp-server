@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { v7 as uuidv7 } from 'uuid';
-import { getLogger } from './logger';
-import { LogLevel } from './logger';
+import { getLogger, LogLevel } from './logger.js';
 
 // MCP Protocol Types
 export type McpResponse = {

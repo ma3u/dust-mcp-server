@@ -5,16 +5,18 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { createHash } from 'crypto';
 
-// Ensure uploads directory exists
+// Ensure uploads directory exists in the project root
 const UPLOADS_DIR = path.join(process.cwd(), 'uploads');
 
 // Create uploads directory if it doesn't exist
 async function ensureUploadsDir() {
   try {
     await fs.mkdir(UPLOADS_DIR, { recursive: true });
+    console.log(`Uploads directory created at: ${UPLOADS_DIR}`);
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error('Error creating uploads directory:', error);
-    throw new Error('Failed to create uploads directory');
+    throw new Error(`Failed to create uploads directory at ${UPLOADS_DIR}: ${errorMessage}`);
   }
 }
 
