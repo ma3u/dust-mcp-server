@@ -36,18 +36,21 @@ This file records architectural and implementation decisions using a list format
 
 #### Strategic Focus Areas
 
-* **MCP Client Compatibility**:
-  * Test against multiple MCP client implementations
-  * Ensure backward compatibility with existing clients
-  * Validate protocol version handling
-  * Monitor and test client connection lifecycles
-  * Document client-specific behaviors and requirements
+* **MCP Client Testing (via Claude Desktop)**:
+  * Implemented in [#13: Claude Desktop UI Testing](https://github.com/ma3u/dust-mcp-server/issues/13)
+  * Tests against Claude Desktop as the primary MCP client
+  * Validates protocol compatibility and message handling
+  * Monitors client connection lifecycles
+  * Documents client-specific behaviors and requirements
+  * Includes end-to-end testing of user workflows
+  * Implements UI automation for critical paths
+  * Benchmarks performance of user interactions
+  * Tests error handling and recovery scenarios
 
-* **Claude Desktop Integration**:
-  * End-to-end testing of user workflows
-  * UI automation for critical paths
-  * Performance benchmarking for user interactions
-  * Error handling and recovery scenarios
+* **Future Client Testing**:
+  * Framework designed to support additional MCP clients
+  * Structure in place for protocol version validation
+  * Documentation template for client-specific requirements
 
 #### Implementation Details
 
