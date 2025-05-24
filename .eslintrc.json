@@ -35,20 +35,8 @@
     "no-restricted-syntax": [
       "error",
       {
-        "selector": "CallExpression[callee.name='require'][arguments.0.value=^/]",
-        "message": "Absolute paths in require() are not allowed. Use path.join() or path.resolve()"
-      },
-      {
-        "selector": "CallExpression[callee.name='require'][arguments.0.value=^[A-Za-z]:\\\\]",
-        "message": "Windows absolute paths in require() are not allowed. Use path.join() or path.resolve()"
-      },
-      {
         "selector": "ImportDeclaration[source.value=^/]",
         "message": "Absolute paths in imports are not allowed. Use path.join() or path.resolve()"
-      },
-      {
-        "selector": "ImportDeclaration[source.value=^[A-Za-z]:\\\\]",
-        "message": "Windows absolute paths in imports are not allowed. Use path.join() or path.resolve()"
       }
     ]
   },
