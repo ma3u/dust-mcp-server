@@ -7,29 +7,58 @@ It is intended to be updated as the project evolves.
 - "2025-05-19 10:45:00" - Added VS Code debugging configuration and patterns.
 - "2025-05-19 10:50:00" - Added testing patterns and updated debugging patterns.
 
-## Testing Patterns
+## Testing Strategy
 
-### Unit Testing
+For a comprehensive overview of our testing approach, see the [Test Strategy Epic (#8)](https://github.com/ma3u/dust-mcp-server/issues/8).
+
+### Test Types
+
+#### 1. Unit Testing
 
 - **Location**: `/src/__tests__/unit/`
 - **Naming**: `*.test.ts`
-- **Coverage**: Aim for >80% coverage
+- **Coverage**: >90% coverage for core modules
 - **Mocks**: Use Jest mocks for external dependencies
 - **Fixtures**: Store test data in `__fixtures__` directories
+- **Related**: [Test Utilities (#12)](https://github.com/ma3u/dust-mcp-server/issues/12)
 
-### Integration Testing
+#### 2. Integration Testing
 
 - **Location**: `/src/__tests__/integration/`
-- **Focus**: Test component interactions
-- **Setup**: Use test containers for external services
-- **Cleanup**: Ensure proper cleanup after tests
+- **Focus**: Component interactions and transport layers
+- **Setup**: Test containers for external services
+- **Cleanup**: Automatic resource cleanup
+- **Related**: [Transport Test Suite (#10)](https://github.com/ma3u/dust-mcp-server/issues/10)
 
-### E2E Testing
+#### 3. E2E Testing
 
 - **Location**: `/src/__tests__/e2e/`
-- **Scope**: Test complete user journeys
-- **Data**: Use isolated test data
-- **Assertions**: Focus on business outcomes
+- **Scope**: Complete user journeys
+- **Data**: Isolated test data
+- **Assertions**: Business outcomes validation
+- **CI**: Runs in dedicated GitHub Actions workflow
+
+#### 4. UI Testing (Claude Desktop)
+
+- **Framework**: AskUI
+- **Scope**: End-to-end user interactions
+- **Coverage**: Critical user flows
+- **Related**: [Claude Desktop UI Testing (#13)](https://github.com/ma3u/dust-mcp-server/issues/13)
+
+### Quality Gates
+
+- **Pre-merge**: All tests must pass
+- **Coverage**: Enforced thresholds
+- **Performance**: Benchmarks in CI
+- **Security**: Automated scanning
+- **CI/CD**: [GitHub Actions Pipeline (#9)](https://github.com/ma3u/dust-mcp-server/issues/9)
+
+### Performance & Security
+
+- **Benchmarking**: Regular performance tests
+- **Load Testing**: Simulate production traffic
+- **Security**: Automated vulnerability scanning
+- **Related**: [Security & Performance Testing (#11)](https://github.com/ma3u/dust-mcp-server/issues/11)
 
 ## Debugging Patterns
 

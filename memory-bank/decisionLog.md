@@ -12,6 +12,7 @@ This file records architectural and implementation decisions using a list format
 * Defined transport-specific testing for STDIO, HTTP, and SSE
 * Integrated security and performance testing into the development workflow
 * Added Claude Desktop UI testing with AskUI for end-to-end validation
+* Included MCP client compatibility testing as a strategic priority
 
 ### Decision 8 Rationale
 
@@ -20,16 +21,57 @@ This file records architectural and implementation decisions using a list format
 * Needed performance baselines for production readiness
 * Security validation for health data handling
 * Essential to validate real user interactions with Claude Desktop
+* Critical to maintain compatibility with various MCP client implementations
 
 ### Decision 8 Implementation
 
-* Created GitHub issues for test implementation tasks:
-* [#8: Test Strategy Epic](https://github.com/ma3u/dust-mcp-server/issues/8)
-* [#9: CI/CD Pipeline](https://github.com/ma3u/dust-mcp-server/issues/9)
-* [#10: Transport Test Suite](https://github.com/ma3u/dust-mcp-server/issues/10)
-* [#11: Security & Performance Testing](https://github.com/ma3u/dust-mcp-server/issues/11)
-* [#12: Test Utilities](https://github.com/ma3u/dust-mcp-server/issues/12)
-* [#13: Claude Desktop UI Testing](https://github.com/ma3u/dust-mcp-server/issues/13)
+#### Subtasks Overview
+
+* **Test Strategy Epic (#8)**: Central epic tracking all testing initiatives with progress metrics and cross-dependencies.
+* **CI/CD Pipeline (#9)**: GitHub Actions workflow for automated testing, linting, and deployment with quality gates.
+* **Transport Test Suite (#10)**: Comprehensive testing for all MCP transport layers (STDIO, HTTP, SSE) with protocol validation.
+* **Security & Performance Testing (#11)**: Automated security scanning, load testing, and performance benchmarking.
+* **Test Utilities (#12)**: Shared test helpers, mocks, and fixtures to streamline test development.
+* **Claude Desktop UI Testing (#13)**: End-to-end testing of the Claude Desktop integration using AskUI for visual validation.
+
+#### Strategic Focus Areas
+
+* **MCP Client Compatibility**:
+  * Test against multiple MCP client implementations
+  * Ensure backward compatibility with existing clients
+  * Validate protocol version handling
+  * Monitor and test client connection lifecycles
+  * Document client-specific behaviors and requirements
+
+* **Claude Desktop Integration**:
+  * End-to-end testing of user workflows
+  * UI automation for critical paths
+  * Performance benchmarking for user interactions
+  * Error handling and recovery scenarios
+
+#### Implementation Details
+
+* **Test Coverage Requirements**:
+  * Unit Tests: 90%+ coverage for all core modules
+  * Integration Tests: 100% coverage for critical paths
+  * E2E Tests: Core user journeys validated
+  * Performance: < 2s response time for 95th percentile under load
+  * Security: Zero critical vulnerabilities in dependencies
+
+* **Quality Gates**:
+  * All tests must pass before merge
+  * Code coverage thresholds enforced
+  * Static analysis with zero warnings
+  * Performance benchmarks met
+  * Security scans clean
+
+* **Tooling**:
+  * Jest for unit and integration tests
+  * AskUI for UI testing
+  * autocannon for performance testing
+  * MCP Inspector for protocol validation
+  * GitHub Actions for CI/CD
+  * MCP Test Client for client compatibility testing
 * Established test coverage requirements and quality gates
 * Integrated MCP Inspector for protocol validation
 * Set up performance testing with autocannon
