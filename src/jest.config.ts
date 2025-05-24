@@ -5,20 +5,21 @@ export default async (): Promise<Config.InitialOptions> => ({
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testMatch: [
-    '**/__tests__/**/*.+(ts|tsx|js)',
-    '**/?(*.)+(spec|test).+(ts|tsx|js)',
+    '**/__tests__/**/*.+(ts|tsx)',
+    '**/?(*.)+(spec|test).+(ts|tsx)',
   ],
   transform: {
-    '^.+\\.(t|j)sx?$': ['@swc/jest', {
-      sourceMaps: true,
-      module: {
-        type: 'es6',
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+        tsconfig: 'tsconfig.json',
       },
-    }],
+    ],
   },
   moduleNameMapper: {
-    '^(\\.{1,2}/.*)\\.js$': '$1',
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^(\\..*)\\.js$': '$1',
   },
   extensionsToTreatAsEsm: ['.ts', '.tsx'],
   collectCoverage: true,
@@ -31,7 +32,4 @@ export default async (): Promise<Config.InitialOptions> => ({
     'node_modules/(?!(node-fetch|@modelcontextprotocol)/)',
   ],
   moduleFileExtensions: ['js', 'json', 'jsx', 'ts', 'tsx', 'node'],
-  testEnvironmentOptions: {
-    url: 'http://localhost/',
-  },
 });

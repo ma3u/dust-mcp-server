@@ -3,6 +3,50 @@
 This file records architectural and implementation decisions using a list format.
 
 ---
+"2025-05-25 00:45:26" - Redis Implementation Strategy
+
+## Decision 12: Redis Integration for Session and Caching
+
+* Implemented Redis as a distributed caching and session storage solution
+* Created a singleton Redis client with connection pooling
+* Added support for both session storage and general caching use cases
+* Implemented proper error handling and reconnection logic
+
+### Decision 12 Rationale
+
+* **Performance**: Redis provides sub-millisecond response times for cached data
+* **Scalability**: Supports horizontal scaling and high availability configurations
+* **Persistence**: Optional persistence for critical data
+* **Pub/Sub**: Built-in support for real-time features
+* **Atomic Operations**: Ensures data consistency in distributed environments
+
+### Implementation Details
+
+#### Components
+* `RedisService`: Singleton service handling Redis connections and operations
+* Configuration via environment variables:
+  * `REDIS_URL`: Connection string for Redis server
+  * `REDIS_TTL`: Default TTL for cached items
+  * `REDIS_CONNECTION_TIMEOUT`: Connection timeout in milliseconds
+  * `REDIS_MAX_RETRIES`: Maximum number of retry attempts
+
+#### Error Handling
+* Automatic reconnection on connection loss
+* Circuit breaker pattern for handling Redis outages
+* Comprehensive logging of connection states and errors
+
+#### Monitoring
+* Added health check endpoints
+* Integration with application metrics
+* Connection status monitoring
+
+#### Security
+* TLS/SSL support for secure connections
+* Authentication via Redis ACLs
+* Sensitive data encryption
+
+---
+
 "2025-05-24 19:23:02" - Session Storage Strategy
 
 ## Decision 11: Optimize Session Storage for Development and Production
