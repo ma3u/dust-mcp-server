@@ -117,6 +117,17 @@ This file tracks the project's progress using a task list format.
   * Implement performance metrics collection
   * Set up alerting for critical paths
 
+### Technical Debt
+
+* [ ] Update test coverage for new features
+* [ ] Refactor code for better maintainability
+* [ ] Update documentation with latest changes
+* [ ] Add comprehensive error handling for API failures
+* [ ] Implement retry logic for transient API errors
+* [ ] Add unit and integration tests for Dust service
+* [ ] Create test framework setup
+* [ ] Develop unit and integration tests
+
 ### Future Enhancements
 
 * [ ] Implement rate limiting and throttling
@@ -124,13 +135,4 @@ This file tracks the project's progress using a task list format.
 * [ ] Implement advanced caching strategies
 * [ ] Add comprehensive API documentation
 
-### Technical Debt
 
-* [ ] Update test coverage for new features
-* [ ] Refactor code for better maintainability
-* [ ] Update documentation with latest changes
-* Add comprehensive error handling for API failures
-* Implement retry logic for transient API errors
-* Add unit and integration tests for Dust service
-* Create test framework setup
-* Develop unit and integration tests

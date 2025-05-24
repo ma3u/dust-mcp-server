@@ -1,16 +1,16 @@
-import express from 'express';
-import { createServer, IncomingMessage, ServerResponse } from 'http';
 import { randomUUID } from 'node:crypto';
+import { IncomingMessage, ServerResponse } from 'http';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
 import { debugIsInitializeRequest, logMcpRequest } from './debug-mcp-utils.js';
 import { registerAgentTools } from './agents/agentTools.js';
-import agentRoutes from './api/routes/agentRoutes.js';
 import { getLogger } from './utils/logger.js';
 import { handleHttpRequest, handleStdioRequest } from './middleware/mcpHandler.js';
 import { toolRegistry } from './tools/toolRegistry.js';
 import { mcpLogger } from './utils/mcpUtils.js';
+import { app, httpServer } from './app.js';
+import { Request, Response, NextFunction } from 'express';
 
 // Initialize logger
 const logger = getLogger({ logFilePrefix: 'server' });
@@ -18,22 +18,6 @@ const logger = getLogger({ logFilePrefix: 'server' });
 // Environment variables
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
-
-// Create Express app
-const app = express();
-const httpServer = createServer(app);
-
-// Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// API Routes
-app.use('/api', agentRoutes);
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
 
 // Map to store transports by session ID
 const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
@@ -255,15 +239,22 @@ const gracefulShutdown = async () => {
 };
 
 // Start the server if this file is being run directly
-// Using ES modules pattern instead of require.main === module
 import { fileURLToPath } from 'url';
 const isMainModule = process.argv[1] === fileURLToPath(import.meta.url);
 
+// Export the server for testing
+const server = {
+  start: startServer,
+  stop: gracefulShutdown,
+  app,
+  httpServer
+};
+
 if (isMainModule) {
-  startServer().catch((error) => {
-    logger.error('Unhandled error during server startup', { error });
+  startServer().catch(err => {
+    logger.error('Failed to start server:', err);
     process.exit(1);
   });
 }
 
-export { app, startServer, gracefulShutdown };
+export default server;

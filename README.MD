@@ -99,6 +99,135 @@ This section outlines the typical user journey when interacting with the Dust MC
 - Node.js v18 or later
 - npm 9.x or later
 - A Dust.tt account with API access
+- Redis server (for session management)
+
+## Session Management
+
+The Dust MCP Server includes a robust session management system using Redis for persistence. This allows for secure and scalable session handling across multiple instances of the server.
+
+### Features
+
+- **Redis-based Session Storage**: Secure and scalable session storage
+- **Session Expiration**: Automatic cleanup of expired sessions
+- **Distributed Support**: Works in distributed environments
+- **Session Data**: Store arbitrary data with each session
+- **API Endpoints**: RESTful API for session management
+
+### Configuration
+
+Add these environment variables to your `.env` file:
+
+```
+# Redis Configuration
+REDIS_URL=redis://localhost:6379
+REDIS_PASSWORD=your_redis_password
+REDIS_TLS=false
+SESSION_SECRET=your_session_secret_here
+SESSION_TTL=86400  # 24 hours in seconds
+```
+
+### API Endpoints
+
+#### Create a Session
+
+```http
+POST /api/sessions
+Content-Type: application/json
+
+{
+  "userId": "user123",
+  "data": {
+    "role": "admin"
+  },
+  "ttl": 86400
+}
+```
+
+#### Get Session
+
+```http
+GET /api/sessions/:sessionId
+Authorization: Bearer <session_token>
+```
+
+#### Update Session
+
+```http
+PATCH /api/sessions/:sessionId
+Authorization: Bearer <session_token>
+Content-Type: application/json
+
+{
+  "data": {
+    "role": "admin",
+    "preferences": {}
+  },
+  "ttl": 86400
+}
+```
+
+#### Delete Session
+
+```http
+DELETE /api/sessions/:sessionId
+Authorization: Bearer <session_token>
+```
+
+#### Validate Session
+
+```http
+GET /api/sessions/:sessionId/validate
+Authorization: Bearer <session_token>
+```
+
+### Using Session Middleware
+
+To protect routes with session authentication, use the `sessionMiddleware`:
+
+```typescript
+import { sessionMiddleware } from './session/routes/sessionRoutes';
+import { redisClient } from './config/redis';
+
+// Apply to specific routes
+app.get('/protected-route', sessionMiddleware(redisClient), (req, res) => {
+  // Access session data
+  const session = req.session;
+  res.json({ message: 'Access granted', user: session.userId });
+});
+
+// Or apply to all routes
+app.use(sessionMiddleware(redisClient));
+```
+
+### Session Data Structure
+
+```typescript
+{
+  "sessionId": "unique-session-id",
+  "userId": "user123",
+  "data": {
+    // Custom session data
+  },
+  "expiresAt": "2025-05-25T12:00:00.000Z",
+  "createdAt": "2025-05-24T12:00:00.000Z",
+  "updatedAt": "2025-05-24T12:05:00.000Z"
+}
+```
+
+### Best Practices
+
+1. **Secure Your Session Secret**: Use a strong, unique secret for session encryption
+2. **Set Appropriate TTL**: Balance security and user convenience when setting session TTL
+3. **Validate Sessions**: Always validate sessions before processing sensitive operations
+4. **Handle Session Errors**: Implement proper error handling for session-related operations
+5. **Monitor Redis**: Monitor Redis server health and performance metrics
+
+### Troubleshooting
+
+- **Connection Issues**: Verify Redis server is running and accessible
+- **Session Expiry**: Check if sessions are expiring too quickly by adjusting TTL
+- **Memory Usage**: Monitor Redis memory usage for large session data
+- **Logs**: Check server logs for session-related errors
 
 ### Installation
 
