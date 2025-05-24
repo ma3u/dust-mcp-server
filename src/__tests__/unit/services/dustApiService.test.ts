@@ -31,12 +31,15 @@ describe('DustApiService', () => {
       
       expect(agents).toEqual(mockAgents.agents);
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        `/workspaces/${config.workspaceId}/agents`
+        `/workspaces/${config.workspaceId}/agents`,
+        expect.any(Object)
       );
     });
 
     it('should throw an error when the request fails', async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error('Network error'));
+      mockedAxios.get.mockRejectedValueOnce({
+        response: { status: 500, data: { error: 'Server Error' } }
+      });
       
       await expect(dustApiService.listAgents())
         .rejects
@@ -62,8 +65,21 @@ describe('DustApiService', () => {
       
       expect(agent).toEqual(mockAgent.agent);
       expect(mockedAxios.get).toHaveBeenCalledWith(
-        `/workspaces/${config.workspaceId}/agents/${agentId}`
+        `/workspaces/${config.workspaceId}/agents/${agentId}`,
+        expect.any(Object)
       );
+    });
+
+    it('should throw an error when agent is not found', async () => {
+      const agentId = 'nonexistent';
+      
+      mockedAxios.get.mockRejectedValueOnce({
+        response: { status: 404, data: { error: 'Not Found' } }
+      });
+      
+      await expect(dustApiService.getAgent(agentId))
+        .rejects
+        .toThrow(`Failed to get agent: ${agentId}`);
     });
   });
 
@@ -88,7 +104,8 @@ describe('DustApiService', () => {
       expect(session).toEqual(mockSession.session);
       expect(mockedAxios.post).toHaveBeenCalledWith(
         `/workspaces/${config.workspaceId}/sessions`,
-        { agentId, context }
+        { agentId, context },
+        expect.any(Object)
       );
     });
   });
@@ -99,20 +116,21 @@ describe('DustApiService', () => {
       const message = 'Hello, agent!';
       const files = [{ name: 'test.txt', content: 'Test content' }];
       const mockResponse = {
-        response: {
-          response: 'Hello, user!',
-          context: { lastMessage: message }
-        }
+        response: 'Hello, user!',
+        context: { lastMessage: message }
       };
       
-      mockedAxios.post.mockResolvedValueOnce({ data: mockResponse });
+      mockedAxios.post.mockResolvedValueOnce({ 
+        data: { response: mockResponse } 
+      });
       
       const response = await dustApiService.sendMessage(sessionId, message, files);
       
-      expect(response).toEqual(mockResponse.response);
+      expect(response).toEqual(mockResponse);
       expect(mockedAxios.post).toHaveBeenCalledWith(
         `/workspaces/${config.workspaceId}/sessions/${sessionId}/messages`,
-        { message, files }
+        { message, files },
+        expect.any(Object)
       );
     });
   });
@@ -121,11 +139,12 @@ describe('DustApiService', () => {
     it('should end a session', async () => {
       const sessionId = 'session1';
       
-      mockedAxios.delete.mockResolvedValueOnce({});
+      mockedAxios.delete.mockResolvedValueOnce({ data: {} });
       
       await expect(dustApiService.endSession(sessionId)).resolves.not.toThrow();
       expect(mockedAxios.delete).toHaveBeenCalledWith(
-        `/workspaces/${config.workspaceId}/sessions/${sessionId}`
+        `/workspaces/${config.workspaceId}/sessions/${sessionId}`,
+        expect.any(Object)
       );
     });
   });

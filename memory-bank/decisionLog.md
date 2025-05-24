@@ -3,6 +3,46 @@
 This file records architectural and implementation decisions using a list format.
 
 ---
+"2025-05-24 11:40:00" - Comprehensive Test Strategy Implementation
+
+## Decision 8: Test Strategy for MCP Server Implementation
+
+* Implemented a comprehensive test strategy covering unit, integration, and E2E tests
+* Established CI/CD pipeline with GitHub Actions for automated testing
+* Defined transport-specific testing for STDIO, HTTP, and SSE
+* Integrated security and performance testing into the development workflow
+* Added Claude Desktop UI testing with AskUI for end-to-end validation
+
+### Decision 8 Rationale
+
+* Need to ensure MCP protocol compliance across all transport layers
+* Required automated testing to maintain code quality and prevent regressions
+* Needed performance baselines for production readiness
+* Security validation for health data handling
+* Essential to validate real user interactions with Claude Desktop
+
+### Decision 8 Implementation
+
+* Created GitHub issues for test implementation tasks:
+* [#8: Test Strategy Epic](https://github.com/ma3u/dust-mcp-server/issues/8)
+* [#9: CI/CD Pipeline](https://github.com/ma3u/dust-mcp-server/issues/9)
+* [#10: Transport Test Suite](https://github.com/ma3u/dust-mcp-server/issues/10)
+* [#11: Security & Performance Testing](https://github.com/ma3u/dust-mcp-server/issues/11)
+* [#12: Test Utilities](https://github.com/ma3u/dust-mcp-server/issues/12)
+* [#13: Claude Desktop UI Testing](https://github.com/ma3u/dust-mcp-server/issues/13)
+* Established test coverage requirements and quality gates
+* Integrated MCP Inspector for protocol validation
+* Set up performance testing with autocannon
+* Documented test patterns in systemPatterns.md
+
+### Related Resources
+
+* [Test Implementation Plan](https://github.com/ma3u/dust-mcp-server/issues/8)
+* [CI/CD Pipeline](https://github.com/ma3u/dust-mcp-server/issues/9)
+* [Test Coverage Report](https://github.com/ma3u/dust-mcp-server/actions)
+* [AskUI Workshop](https://github.com/ma3u/askui-automation-workshop)
+
+---
 "2025-05-24 01:20:00" - Updated UUID and Directory Handling
 
 ## Decision 7: UUID v7 and Secure Directory Handling
