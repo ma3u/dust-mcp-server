@@ -23,24 +23,32 @@
     "no-restricted-imports": ["error", {
       "patterns": [
         {
-          "group": ["/"],
-          "message": "Use path.join() or path.resolve() instead of absolute paths"
+          "group": ["^\\/"],
+          "message": "Absolute paths are not allowed. Use path.join() or path.resolve()"
         },
         {
-          "group": ["^\\/", "^[A-Za-z]:\\\\"],
-          "message": "Absolute paths are not allowed. Use path.join() or path.resolve()"
+          "group": ["^[A-Za-z]:\\\\"],
+          "message": "Windows absolute paths are not allowed. Use path.join() or path.resolve()"
         }
       ]
     }],
     "no-restricted-syntax": [
       "error",
       {
-        "selector": "CallExpression[callee.name='require']:matches([arguments.0.value=^/], [arguments.0.value=^[A-Za-z]:\\\\])",
+        "selector": "CallExpression[callee.name='require'][arguments.0.value=^/]",
         "message": "Absolute paths in require() are not allowed. Use path.join() or path.resolve()"
       },
       {
-        "selector": "ImportDeclaration[source.value=^/], ImportDeclaration[source.value=^[A-Za-z]:\\\\]",
+        "selector": "CallExpression[callee.name='require'][arguments.0.value=^[A-Za-z]:\\\\]",
+        "message": "Windows absolute paths in require() are not allowed. Use path.join() or path.resolve()"
+      },
+      {
+        "selector": "ImportDeclaration[source.value=^/]",
         "message": "Absolute paths in imports are not allowed. Use path.join() or path.resolve()"
+      },
+      {
+        "selector": "ImportDeclaration[source.value=^[A-Za-z]:\\\\]",
+        "message": "Windows absolute paths in imports are not allowed. Use path.join() or path.resolve()"
       }
     ]
   },
