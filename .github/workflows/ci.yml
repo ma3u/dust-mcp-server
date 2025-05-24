@@ -59,7 +59,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results-node-${{ matrix.node-version }}
           path: |
@@ -95,7 +95,7 @@ jobs:
           fail_on_cvss_above: 7
 
       - name: Upload security report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: security-report
           path: dependency-check-report.html
@@ -134,7 +134,7 @@ jobs:
           cat results.json
 
       - name: Upload performance results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: performance-results
           path: results.json
