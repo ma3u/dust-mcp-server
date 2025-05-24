@@ -3,6 +3,46 @@
 This file records architectural and implementation decisions using a list format.
 
 ---
+"2025-05-24 18:56:32" - Server-Sent Events (SSE) Support Implementation
+
+## Decision 10: Implement SSE for Real-time Updates
+
+* Added support for Server-Sent Events (SSE) to enable real-time updates
+* Created new SSE endpoint at `/api/sse` for MCP clients
+* Integrated with existing session management system
+* Implemented connection management and keep-alive mechanism
+* Added rate limiting and connection limits
+* Documented SSE API for client integration
+
+### Decision 10 Rationale
+
+* Enable real-time updates for MCP clients like Windsurf
+* Reduce server load by eliminating polling
+* Improve user experience with instant updates
+* Support Smithery and Pipedream integration
+* Maintain backward compatibility with existing clients
+
+### Decision 10 Implementation
+
+#### Components Added
+* `SSEController`: Handles SSE connections and events
+* `SSEService`: Manages active connections and broadcasting
+* `SSETypes`: TypeScript types for SSE events
+* `sseRoutes`: Express routes for SSE endpoint
+* `sseMiddleware`: Handles SSE connection setup and teardown
+
+#### Configuration
+* `SSE_KEEP_ALIVE_INTERVAL`: Interval for keep-alive messages (default: 30s)
+* `SSE_MAX_CONNECTIONS_PER_IP`: Maximum concurrent connections per IP (default: 5)
+* `SSE_RECONNECTION_TIMEOUT`: Client reconnection timeout (default: 30s)
+
+#### Security
+* Rate limiting for SSE connections
+* Session validation for authenticated endpoints
+* CORS configuration for web clients
+* Connection cleanup on disconnect
+
+---
 "2025-05-24 17:25:00" - User Journey Test Implementation
 
 ## Decision 9: Test Implementation for Claude Desktop MCP Client

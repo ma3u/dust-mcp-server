@@ -134,5 +134,6 @@ This file tracks the project's progress using a task list format.
 * [ ] Add support for custom middleware
 * [ ] Implement advanced caching strategies
 * [ ] Add comprehensive API documentation
+* [ ] Add SSE Support for Real-time Updates ([#20](https://github.com/Ma3u/dust-mcp-server/issues/20))
 
 
