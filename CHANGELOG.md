@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### New Features
+
+* Added comprehensive test implementation for Claude Desktop MCP Client user journey (#19)
+* Mapped test cases to user journey steps
+* Defined acceptance criteria for test implementation
+* Integrated test coverage with existing CI/CD pipeline
+
 ## [1.4.0] - 2025-05-24
 
 ### New Features (v1.4.0)

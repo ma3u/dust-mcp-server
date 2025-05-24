@@ -45,78 +45,97 @@ The project follows a TypeScript-based server architecture with modular componen
 
 The system is designed to process documents, extract relevant information, and use Dust AI agents to analyze and generate insights from the data. The implementation includes a comprehensive test suite that validates all critical paths and edge cases, ensuring reliability and maintainability.
 
-## User Journey: Multi-Agent Interaction
+## User Journey: Claude Desktop as MCP Client for Dust
 
-### 1. Initial Setup and Agent Discovery
+### 1. Initial Setup and Configuration
 
-- **Entry Point**: User logs into the Dust platform
+- **MCP Client Installation**:
+  - User installs Claude Desktop with MCP Client capabilities
+  - Configures connection to Dust platform using API credentials
+  - Sets up local cache and session storage preferences
 
-- **Agent Discovery**:
-  - Views available agents in the Agent Marketplace
-  - Filters agents by category (e.g., Data Analysis, Content Creation, Research)
-  - Reviews agent capabilities, ratings, and documentation
+- **Dust Account Integration**:
+  - Authenticates with Dust platform via OAuth or API Key
+  - Syncs available agents and tools from Dust account
+  - Configures default agent preferences and settings
 
-- **Agent Selection**:
-  - Selects multiple agents based on task requirements
-  - Creates a new workspace or selects existing one
+- **Agent Discovery and Selection**:
+  - Browses available Dust agents through Claude Desktop interface
+  - Views agent capabilities, documentation, and example use cases
+  - Selects and configures preferred agents for different task types
 
-### 2. Workspace Configuration
+### 2. Workspace and Session Management
 
-- **Layout Setup**:
-  - Arranges agent panels in a custom layout
-  - Configures agent-specific settings and permissions
+- **Session Initialization**:
+  - Creates new MCP sessions tied to Dust conversation history
+  - Resumes previous sessions with full context preservation
+  - Manages multiple concurrent sessions for different tasks
 
-- **Context Sharing**:
-  - Enables/disables context sharing between agents
-  - Sets up data flow between agents
+- **Context Management**:
+  - Leverages Dust's session history for context continuity
+  - Syncs conversation state across devices via Dust platform
+  - Manages context window and summarization preferences
 
-- **File Management**:
-  - Uploads files to shared workspace
-  - Organizes files in project folders
-  - Sets file access permissions per agent
+- **File Handling**:
+  - Uploads various file formats (PDF, DOCX, XLSX, etc.) through Claude Desktop
+  - Tracks file references within Dust conversation history
+  - Manages file access permissions and versions
 
-### 3. Multi-Agent Collaboration
+### 3. Agent Interaction and Orchestration
 
-- **Conversation Flow**:
-  - Initiates chat with primary agent
-  - @mentions other agents to bring them into conversation
-  - Views inter-agent communication in dedicated threads
+- **Agent Selection and Invocation**:
+  - Uses natural language to request specific agent capabilities
+  - Claude Desktop intelligently routes requests to appropriate Dust agents
+  - Views which agent is handling each part of the conversation
 
-- **Task Delegation**:
-  - Assigns specific tasks to specialized agents
-  - Monitors task progress across agents
-  - Views task dependencies and status
+- **Multi-Agent Workflows**:
+  - Defines agent chains through conversation context
+  - Monitors agent handoffs and collaboration
+  - Adjusts workflow based on intermediate results
 
-- **File Collaboration**:
-  - Shares files with specific agents
-  - Tracks file access and modifications
-  - Views version history and agent contributions
+- **Real-time Monitoring**:
+  - Views agent activity and status in real-time
+  - Monitors token usage and API costs
+  - Receives notifications for long-running operations
 
-### 4. Advanced Interactions
+### 4. Advanced Features and Integration
 
-- **Agent Chaining**:
-  - Creates workflows by chaining agents
-  - Sets up conditional logic for agent handoffs
-  - Configures automatic triggers between agents
+- **Tool Integration**:
+  - Discovers and configures special tools through MCP
+  - Maps Claude Desktop features to Dust agent capabilities
+  - Manages authentication and permissions for integrated tools
+
+### 5. Future Integration Roadmap
+
+- **Collaboration Features**:
+  - Shares conversations and agent interactions via Dust's collaboration features
+  - Invites team members to join active sessions
+  - Tracks changes and contributions from different users
+
+- **Analysis and Reporting**:
+  - Generates reports using Dust's analysis capabilities
+  - Exports conversation history and agent outputs
+  - Creates custom dashboards for recurring analysis tasks
+
+- **Enhanced Collaboration**:
+  - Real-time co-editing of agent prompts and configurations
+  - Team workspaces with shared agent presets
+  - Version control for agent interactions
+
+- **Advanced Analytics**:
+  - Performance metrics for agent interactions
+  - Cost and usage analytics across teams
+  - Automated quality assessment of agent outputs
+
+- **Extended Platform Support**:
+  - Mobile client integration
+  - Browser extension for web-based interactions
+  - API for custom client implementations
 
 - **Context Management**:
   - Reviews and edits shared context
   - Resolves context conflicts between agents
   - Saves context snapshots for future reference
-
-### 5. Reporting and Analysis
-
-- **Report Generation**:
-  - Requests reports from analysis agents
-  - Customizes report templates and parameters
-  - Exports reports in multiple formats (PDF, Markdown, HTML)
-
-- **Insight Visualization**:
-  - Views interactive dashboards
-  - Filters and drills down into data visualizations
-  - Compares outputs from different agents
-
-### 6. Session Management
 
 - **Session Saving**:
   - Saves current workspace state
@@ -128,17 +147,10 @@ The system is designed to process documents, extract relevant information, and u
   - Reverts to previous states
   - Compares different versions of agent outputs
 
-### 7. Integration and Export
-
 - **Data Export**:
   - Exports agent conversations
   - Saves processed data in structured formats
   - Generates API documentation for agent interactions
-
-- **Third-party Integration**:
-  - Connects to external tools (e.g., Notion, Slack, GitHub)
-  - Sets up webhooks for automated workflows
-  - Monitors integration status
 
 ## Existing Files and Resources
 

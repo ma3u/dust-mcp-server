@@ -1,4 +1,17 @@
-export interface AgentDescriptor {
+// Base type for agent configuration
+export type AgentConfig = {
+  model: string;
+  provider: string;
+  temperature: number;
+  status: string;
+  pictureUrl?: string;
+  supportedOutputFormats: string[];
+  tags: string[];
+  visualizationEnabled: boolean;
+  [key: string]: unknown;
+};
+
+export interface AgentDescriptor extends AgentConfig {
   id: string;
   name: string;
   description: string;
@@ -6,13 +19,15 @@ export interface AgentDescriptor {
   version: string;
   createdAt: string;
   updatedAt: string;
-  [key: string]: any;
 }
+
+// Base type for session context
+export type SessionContext = Record<string, unknown>;
 
 export interface SessionDescriptor {
   id: string;
   agentId: string;
-  context: Record<string, any>;
+  context: SessionContext;
   isActive: boolean;
   createdAt: string;
   lastActivity: string;
@@ -22,11 +37,10 @@ export interface SessionDescriptor {
     content: string;
     timestamp: string;
   }>;
-  [key: string]: any;
 }
 
 export interface DustMessageResponse {
   response: string;
-  context: Record<string, any>;
-  [key: string]: any;
+  context: SessionContext;
+  metadata?: Record<string, unknown>;
 }

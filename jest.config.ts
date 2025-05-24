@@ -5,23 +5,26 @@ const config: Config.InitialOptions = {
   roots: ['<rootDir>/src'],
   testMatch: [
     '**/__tests__/**/*.+(ts|tsx|js)',
-    '**/?(*.)+(spec|test).+(ts|tsx|js)'
+    '**/?(*.)+(spec|test).+(ts|tsx|js)',
   ],
   transform: {
-    '^.+\\.(t|j)sx?$': ['@swc/jest', {
-      sourceMaps: true,
-      module: {
-        type: 'es6',
-      },
-      jsc: {
-        parser: {
-          syntax: 'typescript',
-          tsx: true,
-          decorators: true,
+    '^.+\\.(t|j)sx?$': [
+      '@swc/jest',
+      {
+        sourceMaps: true,
+        module: {
+          type: 'es6',
         },
-        target: 'es2020',
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            tsx: true,
+            decorators: true,
+          },
+          target: 'es2020',
+        },
       },
-    }],
+    ],
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',

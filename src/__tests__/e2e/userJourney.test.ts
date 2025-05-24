@@ -40,15 +40,20 @@ const mockSession: SessionDescriptor = {
   lastActivity: new Date().toISOString()
 };
 
+// Define context type for agent operations
+interface AgentContext {
+  [key: string]: unknown;
+}
+
 // Create a mock implementation of the agent service
 const mockAgentService = {
   getAgents: jest.fn<Promise<AgentDescriptor[]>, []>(),
-  createSession: jest.fn<Promise<SessionDescriptor>, [string, Record<string, any>]>(),
-  sendMessage: jest.fn<Promise<{ response: string; context: any }>, [string, string, string[]]>(),
+  createSession: jest.fn<Promise<SessionDescriptor>, [string, Record<string, unknown>]>(),
+  sendMessage: jest.fn<Promise<{ response: string; context: AgentContext }>, [string, string, string[]]>(),
   endSession: jest.fn<Promise<{ success: boolean }>, [string]>(),
   getSession: jest.fn<Promise<SessionDescriptor | null>, [string]>(),
   saveSession: jest.fn<Promise<{ success: boolean; sessionId: string }>, [string, string, string[]]>(),
-  invokeAgent: jest.fn<Promise<{ response: string; context: any }>, [string, string, any]>()
+  invokeAgent: jest.fn<Promise<{ response: string; context: AgentContext }>, [string, string, Record<string, unknown>]>()
 };
 
 // Mock the agent service module
