@@ -16,12 +16,25 @@
     "types": ["node", "jest"],
     "resolveJsonModule": true,
     "allowJs": true,
-    "checkJs": false
+    "checkJs": false,
+    "allowSyntheticDefaultImports": true,
+    "noEmit": false,
+    "isolatedModules": true,
+    "incremental": true,
+    "composite": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ]
   },
   "include": ["src/**/*", "**/*.test.ts"],
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules", "dist"],
   "ts-node": {
     "esm": true,
-    "experimentalSpecifierResolution": "node"
-  }
+    "experimentalSpecifierResolution": "node",
+    "transpileOnly": true
+  },
+  "references": [
+    { "path": "./tsconfig.node.json" }
+  ]
 }

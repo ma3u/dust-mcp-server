@@ -3,6 +3,53 @@
 This file records architectural and implementation decisions using a list format.
 
 ---
+"2025-05-24 19:23:02" - Session Storage Strategy
+
+## Decision 11: Optimize Session Storage for Development and Production
+
+* Implemented dual-mode session storage strategy:
+  - **Development/Local**: In-memory store (node-cache) as default
+  - **Production**: Redis-based session store
+* Removed Redis as a hard dependency for local development
+* Added environment-based configuration for session store selection
+* Documented setup instructions for both modes
+
+### Decision 11 Rationale
+
+* **Simplified Local Development**:
+  - No need to run Redis locally for basic development
+  - Faster setup for new contributors
+  - Reduced resource usage during development
+* **Production Readiness**:
+  - Maintain Redis for production-grade session management
+  - Support for distributed session storage
+  - Better performance and reliability in production
+* **Developer Experience**:
+  - Clear separation of development and production requirements
+  - Easier onboarding for new team members
+  - Simplified CI/CD pipeline for testing
+
+### Decision 11 Implementation
+
+#### Components Modified
+* `SessionService`: Updated to support multiple storage backends
+* Configuration: Added `SESSION_STORE_TYPE` environment variable
+* Dependencies: Made `ioredis` optional, added `node-cache` as dev dependency
+* Documentation: Updated setup instructions
+
+#### Configuration
+* `SESSION_STORE_TYPE`: 'memory' | 'redis' (default: 'memory' in development, 'redis' in production)
+* `REDIS_URL`: Only required when using Redis store
+* `SESSION_TTL`: Session time-to-live (applies to both stores)
+
+#### Migration Path
+1. For local development: No changes needed, uses memory store by default
+2. For production: Set `SESSION_STORE_TYPE=redis` and configure `REDIS_URL`
+3. Existing Redis-specific code remains functional but is now optional
+
+---
+
+---
 "2025-05-24 18:56:32" - Server-Sent Events (SSE) Support Implementation
 
 ## Decision 10: Implement SSE for Real-time Updates

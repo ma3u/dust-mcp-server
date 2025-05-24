@@ -1,0 +1,101 @@
+name: Build Artifacts
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*.*.*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and Package
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Build package
+        run: npm run build
+      
+      - name: Create artifact directory
+        run: mkdir -p artifact
+      
+      - name: Package application
+        run: |
+          cp -r build package.json package-lock.json README.md LICENSE .env.example artifact/
+          cd artifact
+          npm install --omit=dev
+          # Create a tarball of the built application
+          tar -czf ../dust-mcp-server-${{ github.ref_name }}.tar.gz .
+          # Create a zip file for Windows users
+          zip -r ../dust-mcp-server-${{ github.ref_name }}.zip .
+        
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dust-mcp-server-${{ github.ref_name }}
+          path: |
+            dust-mcp-server-*.tar.gz
+            dust-mcp-server-*.zip
+          retention-days: 90
+      
+      # Create a GitHub Release and upload artifacts for tagged commits
+      - name: Create Release
+        id: create_release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          body: |
+            ## What's Changed
+            
+            ### New Features
+            - Initial release of Dust MCP Server
+            
+            ### Bug Fixes
+            - Various stability improvements
+            
+            ### Dependencies
+            - Updated all dependencies to their latest versions
+      
+      - name: Upload Release Assets
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dust-mcp-server-${{ github.ref_name }}.tar.gz
+          asset_name: dust-mcp-server-${{ github.ref_name }}.tar.gz
+          asset_content_type: application/gzip
+      
+      - name: Upload Windows Release Asset
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dust-mcp-server-${{ github.ref_name }}.zip
+          asset_name: dust-mcp-server-${{ github.ref_name }}.zip
+          asset_content_type: application/zip

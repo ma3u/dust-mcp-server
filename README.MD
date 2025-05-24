@@ -229,6 +229,30 @@ app.use(sessionMiddleware(redisClient));
 - **Memory Usage**: Monitor Redis memory usage for large session data
 - **Logs**: Check server logs for session-related errors
 
+### Session Storage Options
+
+The server supports different session storage backends:
+
+#### In-Memory Store (Default for Development)
+
+- No additional setup required
+- Sessions are lost on server restart
+- Perfect for local development and testing
+
+#### Redis Store (Recommended for Production)
+
+```bash
+# Install Redis (macOS)
+brew install redis
+
+# Start Redis server (in a separate terminal)
+redis-server
+
+# In your .env file:
+SESSION_STORE_TYPE=redis
+REDIS_URL=redis://localhost:6379
+```
+
 ### Installation
 
 1. Clone the repository:
@@ -244,16 +268,11 @@ app.use(sessionMiddleware(redisClient));
    npm install
    ```
 
-3. Create a `.env` file in the root directory with your configuration:
+3. Set up environment variables:
 
-   ```env
-   # Required
-   DUST_API_KEY=your_dust_api_key
-   DUST_WORKSPACE_ID=your_workspace_id
-   
-   # Optional
-   PORT=3000
-   NODE_ENV=development
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
    LOG_LEVEL=info
    
    # Advanced Configuration
