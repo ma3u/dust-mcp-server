@@ -1,5 +1,5 @@
-import { Redis } from 'ioredis';
-import { ISession, SessionRepository } from '../interfaces/ISession';
+import type { Redis } from 'ioredis';
+import type { ISession, SessionRepository, CreateSessionInput, UpdateSessionInput } from '../interfaces/ISession.js';
 import { v4 as uuidv4 } from 'uuid';
 
 export class RedisSessionRepository implements SessionRepository {

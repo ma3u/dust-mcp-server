@@ -30,9 +30,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">4.57% </span>
+                <span class="strong">3.16% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>7/153</span>
+                <span class='fraction'>7/221</span>
             </div>
         
             
@@ -840,6 +840,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -975,6 +976,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -987,6 +989,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1014,6 +1017,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1067,6 +1071,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1136,6 +1141,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1243,6 +1249,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1292,13 +1299,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1489,13 +1489,13 @@ export a<span class="cstat-no" title="statement not covered" >sync function getA
     // https://docs.dust.tt/reference/get_api-v1-w-wid-assistant-agent-configurations-sid
     cons<span class="cstat-no" title="statement not covered" >t apiUrl = `${DUST_API_URL}/w/${workspaceId}/assistant/agent_configurations/${agentId}`;</span>
     
-    logger('INFO', `Fetching a<span class="cstat-no" title="statement not covered" >gent configuration from ${apiUrl}`);</span>
+    logger('INFO', `Fetching agent configuration from ${apiUrl}`);
     <span class="cstat-no" title="statement not covered" ></span>
-    const response = await axios.get(apiUrl, {
+    const response = await <span class="cstat-no" title="statement not covered" >axios.get(apiUrl, {</span>
       headers: {
         Authorization: `Bearer ${DUST_API_KEY}`,
-        "Content-Type": "application/json"<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ></span></span>
-      }
+        "Content-Type": "application/json"
+      }<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ></span></span>
     });
     
     if (response.status === 200 &amp;&amp; response.data) {
@@ -1507,19 +1507,19 @@ export a<span class="cstat-no" title="statement not covered" >sync function getA
         name: agentData.name || "Unknown Agent",
         description: agentData.description || "",
         capabilities: agentData.actions?.map((action: any) =&gt; action.name) || [],
-        mode<span class="cstat-no" title="statement not covered" >l: agentData.model?.modelId || "",</span>
-        prov<span class="cstat-no" title="statement not covered" >ider: agentData.model?.providerId || "",</span>
-        temp<span class="cstat-no" title="statement not covered" >erature: agentD</span>ata.model?.temperature,
-        instructions: agentData.instructions,
-<span class="cstat-no" title="statement not covered" >        status: agentData.status,</span>
-<span class="cstat-no" title="statement not covered" >        pictureUrl: a</span>gentData.pictureUrl,
-        supportedOutputFormats: agentData.supportedOutputFormats || [],
-<span class="cstat-no" title="statement not covered" >        tags: agentData.tags || [],</span>
-        visualizationEnabled: agentData.visualizationEnabled,
-<span class="cstat-no" title="statement not covered" >        timestamp: Date.now()</span>
+        model: agentData.model?.modelId || "",
+        prov<span class="cstat-no" title="statement not covered" >ider: agentData.model?.providerId || ""</span>,
+        temp<span class="cstat-no" title="statement not covered" >erature: agentData.model?.temperature,</span>
+        inst<span class="cstat-no" title="statement not covered" >ructions: agent</span>Data.instructions,
+        status: agentData.status,
+<span class="cstat-no" title="statement not covered" >        pictureUrl: agentData.pictureUrl,</span>
+<span class="cstat-no" title="statement not covered" >        supportedOutp</span>utFormats: agentData.supportedOutputFormats || [],
+        tags: agentData.tags || [],
+<span class="cstat-no" title="statement not covered" >        visualizationEnabled: agentData.visualizationEnabled,</span>
+        timestamp: Date.now()
       };<span class="cstat-no" title="statement not covered" ></span>
       <span class="cstat-no" title="statement not covered" ></span>
-      // Update cache
+      // Update cache<span class="cstat-no" title="statement not covered" ></span>
       agentConfigCache.set(agentId, config);
       logger('INFO', `Updated cache for agent ${agentId}`);
       return config;
@@ -1542,135 +1542,135 @@ export a<span class="cstat-no" title="statement not covered" >sync function getA
         provider: "openai",
         temperature: 0.7,
         instructions: "You are a helpful assistant.",
-        stat<span class="cstat-no" title="statement not covered" >us: "active",</span>
-        pict<span class="cstat-no" title="statement not covered" >ureUrl: "https://du</span>st.tt/static/spiritavatar/Spirit_Indigo_3.jpg",
-        supportedOutputFormats: ["text", "json"],
-<span class="cstat-no" title="statement not covered" >        tags: [],</span>
-        visualizationEnabled: false,
+        status: "active",
+        pict<span class="cstat-no" title="statement not covered" >ureUrl: "https://dust.tt/static/spiritavata</span>r/Spirit_Indigo_3.jpg",
+        supp<span class="cstat-no" title="statement not covered" >ortedOutputFormats:</span> ["text", "json"],
+        tags: [],
+<span class="cstat-no" title="statement not covered" >        visualization</span>Enabled: false,
         timestamp: Date.now()
       };
       
       agentConfigCache.set(agentId, mockConfig);
       return mockConfig;
-    }<span class="fstat-no" title="function not covered" ></span>
-    <span class="cstat-no" title="statement not covered" ></span>
-<span class="cstat-no" title="statement not covered" >    return null;</span>
+    }
+    <span class="fstat-no" title="function not covered" ></span>
+    return null;<span class="cstat-no" title="statement not covered" ></span>
   }<span class="cstat-no" title="statement not covered" ></span>
-}
+}<span class="cstat-no" title="statement not covered" ></span>
 &nbsp;
-/**<span class="cstat-no" title="statement not covered" ><span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ></span></span></span>
- * F<span class="cstat-no" title="statement not covered" >unction to get the default agent ID from environment</span>
+/**
+ * Function to get th<span class="cstat-no" title="statement not covered" >e default agent ID from enviro<span class="fstat-no" title="function not covered" >nm</span>ent<span class="cstat-no" title="statement not covered" ></span></span>
  * <span class="cstat-no" title="statement not covered" ></span>
- * @returns The first agent ID from the DUST_AGENT_IDs environment variable
- */<span class="cstat-no" title="statement not covered" ></span>
-function getDefaultAgentId(): string {
-  const agentId<span class="fstat-no" title="function not covered" >sString = proce</span>ss.env.DUST_AGENT_IDs;<span class="branch-0 cbranch-no" title="branch not covered" ></span>
-  if<span class="cstat-no" title="statement not covered" > (!agentIdsString) {</span>
-    thro<span class="cstat-no" title="statement not covered" >w new Error("DUST_AGENT_IDs is not set in environment variables");</span>
+ * @retu<span class="cstat-no" title="statement not covered" >rns The first agent ID from the DUST_AGENT_IDs environment variable</span>
+ */
+func<span class="cstat-no" title="statement not covered" >tion getDefaultAgent</span>Id(): string {
+  const agentIdsString = process.env.DUST_AGENT_IDs;
+  if (!agentIds<span class="fstat-no" title="function not covered" >String) {<span class="branch-0 cbranch-no" title="branch not covered" ></span></span>
+<span class="cstat-no" title="statement not covered" >    throw new Error("DUST_AGENT_IDs is not set in environment variables");</span>
+  }<span class="cstat-no" title="statement not covered" ></span>
+  <span class="cstat-no" title="statement not covered" ></span>
+  // Parse the comma-separated list and get the first agent ID
+  const agentIds = agentIdsString.split(',').map(id =&gt; id.trim());
+  if (agentIds.length === 0)<span class="cstat-no" title="statement not covered" > {</span>
+    thro<span class="cstat-no" title="statement not covered" >w new Error("No agent IDs found in DUST_AGENT_IDs environment variable");</span>
   }<span class="cstat-no" title="statement not covered" ></span>
   
-  // Parse the comma-separated list and get the first agent ID
-  const agentIds = agentIdsS<span class="cstat-no" title="statement not covered" >tring.split(',').map(id =&gt; id.</span>trim());
-  if (ag<span class="cstat-no" title="statement not covered" >entIds.length === 0) {</span>
-    throw ne<span class="cstat-no" title="statement not covered" >w Error("No agent IDs found in DUST_AGENT_IDs environment variable");</span>
-  }
-  
-  return<span class="cstat-no" title="statement not covered" > agentIds[0];</span>
+  return agentIds[0];
 }<span class="cstat-no" title="statement not covered" ></span>
 <span class="cstat-no" title="statement not covered" ></span>
-/**
+/**<span class="cstat-no" title="statement not covered" ></span>
  * Query a Dust agent with a message and optional context
- * <span class="cstat-no" title="statement not covered" ></span>
- * This implementation follows the Dust API documentation:
+ * 
+ * This <span class="cstat-no" title="statement not covered" >implementation follows the Dust API documentation:</span>
  * - https://docs.dust.tt/reference/post_api-v1-w-wid-assistant-conversations
- * - https://docs.dust.tt/reference/pos<span class="cstat-no" title="statement not covered" >t_api-v1-w-wid-a</span>ssistant-conversations-cid-messages
- * - https:/<span class="cstat-no" title="statement not covered" >/docs.dust.tt/reference/get_api-v1-w-wid-assistant-conversations-cid</span>
+ * - https://docs.dust.tt/reference/post_api-v1-w-wid-assistant-conversations-cid-messages
+ * - https://docs.dust.tt/reference/get<span class="cstat-no" title="statement not covered" >_api-v1-w-wid-as</span>sistant-conversations-cid
  * <span class="cstat-no" title="statement not covered" ></span>
- * @param agentId ID of the agent to query (assistant ID)
+ * @param agentI<span class="cstat-no" title="statement not covered" >d ID of the agent to query (assistant ID)</span>
  * @param query User message content
  * @param context Additional context for the conversation
  * @param conversationId Optional existing conversation ID
  * @returns Promise resolving to the agent's response
- */<span class="cstat-no" title="statement not covered" ></span>
-export async fun<span class="cstat-no" title="statement not covered" >ction queryDustAgent(</span>
-  agentId: string | null, 
+ */
+export async functi<span class="cstat-no" title="statement not covered" >on queryDustAgent(</span>
+  agentId: strin<span class="cstat-no" title="statement not covered" >g | null, </span>
   query: string, 
   context: any = {}, 
   conversationId?: string
 ): Promise&lt;any&gt; {
   try {
-    if (!DUST_AP<span class="cstat-no" title="statement not covered" >I_KEY) {</span>
-      throw new Error("DUST_API_KEY is not set in environment variables");
+    if (!DUST_API_KEY) {
+      throw new <span class="cstat-no" title="statement not covered" >Error("DUST_API_KEY is not set in environment variables");</span>
     }
     
     // Get workspace ID from environment
     const workspaceId = process.env.DUST_WORKSPACE_ID;
     if (!workspaceId) {
-      throw <span class="cstat-no" title="statement not covered" >new Error("DUST_WOR</span>KSPACE_ID is not set in environment variables");
-    }
+      throw new Error("DUST_WORKSPACE_ID is not set in environment variables");
+    }<span class="cstat-no" title="statement not covered" ></span>
     
-    // Use the first age<span class="cstat-no" title="statement not covered" >nt ID from environment if not provided</span>
-    if (!agentId) {
-      ag<span class="cstat-no" title="statement not covered" >entId = getDefaultAgentId();</span>
+    // Use the first agent ID from environment if not provided
+    if (!agentId) {<span class="cstat-no" title="statement not covered" ></span>
+      agentId = getDefaultAgentId();
       lo<span class="cstat-no" title="statement not covered" >gger('INFO', `Using default agent ID: ${agentId}`);</span>
-    }
+    }<span class="cstat-no" title="statement not covered" ></span>
     
-    // F<span class="cstat-no" title="statement not covered" >or development, return mock response</span>
-    if (process.env.NODE_ENV === "development") {
-      // Sim<span class="cstat-no" title="statement not covered" >ulate different responses based on</span> query type
+    // For development, return mock response
+    if (<span class="cstat-no" title="statement not covered" >process.env.NODE_ENV === "development") {</span>
+      // Simulate different responses based on query type
       let mo<span class="cstat-no" title="statement not covered" >ckResult;</span>
-      const mockConversationId = uuidv4();
+      const <span class="cstat-no" title="statement not covered" >mockConversationId = uuidv4();</span>
       
       if (query.toLowerCase().includes('summary') || query.toLowerCase().includes('summarize')) {
-        mockResult = {<span class="cstat-no" title="statement not covered" ></span>
-          re<span class="cstat-no" title="statement not covered" >sult: `# Summary\n\nBased on the available information, here's a comprehensive summary:\n\n## Key Points\n\n1. The Dust MCP Server provides integration with Dust AI agents\n2. It supports file uploads, document processing, and agent querying\n3. The implementation uses direct API calls rather than the Dust SDK\n4. The server includes caching mechanisms for agent configurations\n\n## Current Status\n\nThe server is operational and can list available agents. Document processing and agent querying functionality are implemented but may need further refinement.\n\nWould you like more specific information about any particular aspect of the system?`,</span>
-          conver<span class="cstat-no" title="statement not covered" >sationId: mockConversationId,</span>
+        mockResult = {
+          result: `# Summary\n\nBased on t<span class="cstat-no" title="statement not covered" >he available information, here's a comprehensive summa</span>ry:\n\n## Key Points\n\n1. The Dust MCP Server provides integration with Dust AI agents\n2. It supports file uploads, document processing, and agent querying\n3. The implementation uses direct API calls rather than the Dust SDK\n4. The server includes caching mechanisms for agent configurations\n\n## Current Status\n\nThe server is operational and can list available agents. Document processing and agent querying functionality are implemented but may need further refinement.\n\nWould you like more specific information about any particular aspect of the system?`,
+          co<span class="cstat-no" title="statement not covered" >nversationId: mockConversationId,</span>
           agentId,
-          timestamp: new Date().toISOSt<span class="cstat-no" title="statement not covered" >ring()</span>
+          timest<span class="cstat-no" title="statement not covered" >amp: new Date().toISOString()</span>
         };
-      } else if (query.toLowerCase().includes('help') || query.toLowerCase().includes('capabilities')) {
+      } else if (query.toLowerCase().in<span class="cstat-no" title="statement not covered" >cludes('help') || query.toLowerCase().includes('capabilities')) {</span>
         mockResult = {
           result: `# Dust MCP Server Capabilities\n\nThis MCP server provides the following capabilities:\n\n## Agent Interaction\n- Query Dust agents with natural language prompts\n- List available agents and their capabilities\n- Maintain conversation context across multiple interactions\n\n## Document Handling\n- Upload documents for processing\n- Extract structured data from documents\n- Include document content as context for agent queries\n\n## Integration\n- Connect with Dust AI through API integration\n- Support for various document types and formats\n- Extensible architecture for additional features\n\nHow can I assist you with using these capabilities?`,
           conversationId: mockConversationId,
           agentId,
-          timest<span class="cstat-no" title="statement not covered" >amp: new Date().toISOString()</span>
+          timestamp: new Date().toISOString()
         };
       } else {<span class="cstat-no" title="statement not covered" ></span>
-        mockResult =<span class="cstat-no" title="statement not covered" > {</span>
-          result: `I've analyzed your query: "${query}"\n\nBased on my understanding, you're asking about ${query.split(' ').slice(0, 3).join(' ')}...\n\nTo provide a helpful response, I'd need more specific information about what you're looking for. Could you please provide more details or context about your question?\n\nIn the meantime, here are some general points that might be relevant:\n\n1. The Dust MCP Server provides integration with various AI agents\n2. You can upload and process documents for analysis\n3. Conversations maintain context across multiple interactions\n\nPlease let me know if you'd like information on a specific topic.`,
-          conversati<span class="cstat-no" title="statement not covered" >onId: mockConversationId,</span>
+        mockResult = {
+          result<span class="cstat-no" title="statement not covered" >: `I've analyzed your query: "${query}"\n\nBased on my understanding, you're asking about ${query.split(' ').slice(0, 3).join(' ')}...\n\nTo provide a helpful response, I'd need more specific information about what you're looking for. Could you please provide more details or context about your question?\n\nIn the meantime, here are some general points that might be relevant:\n\n1. The Dust MCP Server provides integration with various AI agents\n2. You can upload and process documents for analysis\n3. Conversations maintain context across multiple interactions\n\nPlease let me know if you'd like information on a specific topic.`,</span>
+          conversationId: mockConversationId,
           agentId,<span class="cstat-no" title="statement not covered" ></span>
-          timestamp: new<span class="cstat-no" title="statement not covered" > Date().toISOString()</span>
-        };
+          timestamp: new Date().toISOString()
+        };<span class="cstat-no" title="statement not covered" ></span>
       }<span class="cstat-no" title="statement not covered" ></span>
-      return mockResult;
+      return mockResult;<span class="cstat-no" title="statement not covered" ></span>
     }
-    
-    // Normalize the<span class="cstat-no" title="statement not covered" > base URL</span>
-    const baseUrl = <span class="cstat-no" title="statement not covered" >DUST_API_URL.endsWith('/') ? DUST_API_URL.slice(0, -1) : DUST_API_URL;</span>
-    
-    // For debugging purposes
-    logger('INFO<span class="cstat-no" title="statement not covered" >', `Querying Dust agent ${agentId} with query: ${query.substring(0, 100)}...`);</span>
-    logger('INFO', `<span class="cstat-no" title="statement not covered" >Using API URL: ${baseUrl}/w/${workspaceId}`);</span>
     <span class="cstat-no" title="statement not covered" ></span>
-    // Step 1: Create a new conversation or use existing one
+    // Normalize the base URL
+    const baseUrl = DUST_API_URL.endsWith('/') ? DUST_API_URL.slice(0, -1) : DUST_API_URL;
+    
+    // For debugging<span class="cstat-no" title="statement not covered" > purposes</span>
+    logger('INFO', `<span class="cstat-no" title="statement not covered" >Querying Dust agent ${agentId} with query: ${query.substring(0, 100)}...</span>`);
+    logger('INFO', `Using API URL: ${baseUrl}/w/${workspaceId}`);
+    
+    // Step 1: C<span class="cstat-no" title="statement not covered" >reate a new conversation or use existing one</span>
     let conversation<span class="cstat-no" title="statement not covered" >SId: string;</span>
     <span class="cstat-no" title="statement not covered" ></span>
     if (conversationId) {
-      // Use existing conversation
-      conversationSId = conversationId;
+      // Use existin<span class="cstat-no" title="statement not covered" >g conversation</span>
+      conversationSI<span class="cstat-no" title="statement not covered" >d = conversat</span>ionId;
       logger('INFO', `Using existing conversation with ID: ${conversationSId}`);
     } else {
-      //<span class="cstat-no" title="statement not covered" > Create a new conversation according to API documentation</span>
+      // Create a new conversation according to API documentation
       // https://docs.dust.tt/reference/post_api-v1-w-wid-assistant-conversations
-      const createConversationU<span class="cstat-no" title="statement not covered" >rl = `${baseUrl}/w/${workspaceId}/assistant/conversations`;</span>
+      const createConversationUrl = `${baseUrl}/w/${workspaceId}/assistant/conversations`;
       <span class="cstat-no" title="statement not covered" ></span>
       try {
-        logger('INFO', `Creating ne<span class="cstat-no" title="statement not covered" >w conversation at URL: ${createConversationUrl}`);</span>
-        
-        // POST request with empty body as per API documentation
+        logger('INFO', `Creating new conversation at URL: ${createConversationUrl}`);
+        <span class="cstat-no" title="statement not covered" ></span>
+        // P<span class="cstat-no" title="statement not covered" >OST request with empty body as per API documentation</span>
         const createResponse = await axios.post(createConversationUrl, {}, {
-          headers: {
+          headers: {<span class="cstat-no" title="statement not covered" ></span>
             'Authorization': `Bearer ${DUST_API_KEY}`,
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -1684,125 +1684,125 @@ export async fun<span class="cstat-no" title="statement not covered" >ction quer
           logger('ERROR', 'Failed to get conversation.sId from response', createResponse.data);
           
           // Try to extract the ID from other fields if available
-          if<span class="cstat-no" title="statement not covered" > (createResponse.data?.conversation?.id) {</span>
+          if (createResponse.data?.conversation?.id) {
             conversationSId = String(createResponse.data.conversation.id);
             logger('WARN', `Using conversation.id as fallback: ${conversationSId}`);
           } else {
-            throw new Error(`Failed to get conversation ID from response: ${JSON.stringify(createResponse.data)}`);
+<span class="cstat-no" title="statement not covered" >            throw new Error(`Failed to get conversation ID from response: ${JSON.stringify(createResponse.data)}`);</span>
           }
-        } else {<span class="cstat-no" title="statement not covered" ></span>
+        } else {
           // Use the correct conversation.sId field
           conversationSId = createResponse.data.conversation.sId;
           logger('INFO', `Created new conversation with ID: ${conversationSId}`);
-        }
+        }<span class="cstat-no" title="statement not covered" ></span>
       } catch (error: any) {
         if (error.response) {
-          lo<span class="cstat-no" title="statement not covered" >gger('ERROR', `Failed to create conversation: ${error.response.stat</span>us}`, error.response.data);
+          logger('ERROR', `Failed to create conversation: ${error.response.status}`, error.response.data);
           throw new Error(`Failed to create conversation: ${error.response.status} - ${JSON.stringify(error.response.data)}`);
-        } el<span class="cstat-no" title="statement not covered" >se {</span>
-          logger<span class="cstat-no" title="statement not covered" >('ERROR', 'Failed to create conversation', error);</span>
-          throw error;
-        }<span class="cstat-no" title="statement not covered" ></span>
-      }
-    }
-    <span class="cstat-no" title="statement not covered" ></span>
-    // Step 2: Send a message to<span class="cstat-no" title="statement not covered" > the </span>conversation
-    // https://docs.dust.tt<span class="cstat-no" title="statement not covered" >/r</span>eference/post_api-v1-w-wid-assistant-conversations-cid-messages
-    try {<span class="cstat-no" title="statement not covered" ></span>
-      // URL for sending a message t<span class="cstat-no" title="statement not covered" >o the</span> conversation
-      const <span class="cstat-no" title="statement not covered" >messageUrl = `${baseUrl}/w/${workspaceId}/assistant/conversations/${conversationSId}/m</span>essages`;
-      logger<span class="cstat-no" title="statement not covered" >('INFO', `Sending message to URL: ${messageUrl}`);</span>
+        } else {
+          logger('ERROR', 'Failed to create conversation', error);
+          th<span class="cstat-no" title="statement not covered" >row error;</span>
+        }
+      }<span class="cstat-no" title="statement not covered" ></span>
+    }<span class="cstat-no" title="statement not covered" ></span>
+    
+    // Step 2: Send a message t<span class="cstat-no" title="statement not covered" >o the conversation</span>
+    // https://docs.dust.tt/reference/post_api-v1-w-wid-assistant-conversations-cid-messages
+    try {
+      // URL for sending a message t<span class="cstat-no" title="statement not covered" >o the conversation</span>
+      const messageUrl = `${base<span class="cstat-no" title="statement not covered" >Url}/</span>w/${workspaceId}/assistant/conversations/${conversationSId}/messages`;
+      logger('INFO', `Sendi<span class="cstat-no" title="statement not covered" >ng</span> message to URL: ${messageUrl}`);
       <span class="cstat-no" title="statement not covered" ></span>
-      // Prepare message payload with required fields
-      const mess<span class="cstat-no" title="statement not covered" >agePayload = {<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ></span></span></span>
-        assistan<span class="cstat-no" title="statement not covered" >t: agentId,</span>
-        content: query,
-        mentions: [], // Required by the API<span class="cstat-no" title="statement not covered" ></span>
-        context: {
-          // Required user context fields
+      // Prepare message payload wit<span class="cstat-no" title="statement not covered" >h req</span>uired fields
+      const <span class="cstat-no" title="statement not covered" >messagePayload = {</span>
+        assi<span class="cstat-no" title="statement not covered" >stant: agentId,</span>
+        content:<span class="cstat-no" title="statement not covered" > query,</span>
+        mentions: [], // Required by the API
+        context:<span class="cstat-no" title="statement not covered" > {<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ></span></span></span>
+          // Req<span class="cstat-no" title="statement not covered" >uired user context fields</span>
           username: process.env.DUST_USERNAME || "Anonymous User",
           timezone: process.env.DUST_TIMEZONE || "UTC",
-          email: process.env.DUST_EMAIL || "",
-          fullname: <span class="cstat-no" title="statement not covered" >process.env.DUST_FULLNAME || "",</span>
+          email: process.env.DUST_EMAIL || "",<span class="cstat-no" title="statement not covered" ></span>
+          fullname: process.env.DUST_FULLNAME || "",
           // Add any additional context provided
-          ...context<span class="cstat-no" title="statement not covered" ></span>
-        },<span class="cstat-no" title="statement not covered" ></span>
+          ...context
+        },
         // Add outputFormat if specified in context
-        ...(context.outp<span class="cstat-no" title="statement not covered" >utFormat ? {<span class="cstat-no" title="statement not covered" > o</span>utputFormat: context.outputFormat } : {})</span>
-      };<span class="cstat-no" title="statement not covered" ></span>
+        ...(context.<span class="cstat-no" title="statement not covered" >outputFormat ? { outputFormat: context.outputFormat } : {})</span>
+      };
       <span class="cstat-no" title="statement not covered" ></span>
-      logger('INFO', 'Sending message with payload', {
-        agentId,<span class="cstat-no" title="statement not covered" ></span>
-        conversationId: conversationSId,
-        contentLength: query.len<span class="cstat-no" title="statement not covered" >gth</span>
+      logger('INFO', 'Se<span class="cstat-no" title="statement not covered" >nding message with payload', {</span>
+        agentId,
+        conversationId: <span class="cstat-no" title="statement not covered" >conversation<span class="cstat-no" title="statement not covered" >SI</span>d,</span>
+        contentLength: query.length<span class="cstat-no" title="statement not covered" ></span>
       });<span class="cstat-no" title="statement not covered" ></span>
       
       // Send the message<span class="cstat-no" title="statement not covered" ></span>
-      const messageResponse = await axio<span class="cstat-no" title="statement not covered" >s.post(messageUrl, messagePaylo</span>ad, {
+      const messageResponse = await axios.post(messageUrl, messagePayload, {
         headers: {<span class="cstat-no" title="statement not covered" ></span>
-          'Authorization': `Bearer ${DUS<span class="cstat-no" title="statement not covered" >T_API_K</span>EY}`,
+          'Authorization': `Bearer $<span class="cstat-no" title="statement not covered" >{DUST_API_KEY}`,</span>
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      });
-      
-      logger('INFO',<span class="cstat-no" title="statement not covered" > 'Message response received', messageResponse.data);</span>
+          'Accept': 'application/jso<span class="cstat-no" title="statement not covered" >n'</span>
+        }<span class="cstat-no" title="statement not covered" ></span>
+      });<span class="cstat-no" title="statement not covered" ></span>
       <span class="cstat-no" title="statement not covered" ></span>
+      logger('INFO', 'Message response received', messageResponse.data);
+      
       // Check if we got a message ID back
       if (!messageResponse.data?.message?.sId) {
-        throw new Er<span class="cstat-no" title="statement not covered" >ror(`Failed to get message ID from response: ${JSON.stringify(messageRespon</span>se.data)}`);
+        throw new Error(`Failed to get message ID from response: ${JSON.stringify(messageResponse.data)}`);
       }<span class="cstat-no" title="statement not covered" ></span>
       <span class="cstat-no" title="statement not covered" ></span>
       const messageSId = messageResponse.data.message.sId;
       
-      // Step 3: Wait for the agent's response
-      // Poll the conversation to get the agent's response
-      const <span class="cstat-no" title="statement not covered" >conversationUrl = `${baseUrl}/w/${workspaceId}/assistant/conversations/${conversationSId}`;</span>
-      <span class="cstat-no" title="statement not covered" ></span>
-      let agentR<span class="cstat-no" title="statement not covered" >esponse = null;</span>
+      // Step 3: Wai<span class="cstat-no" title="statement not covered" >t for the agent's response</span>
+      // Poll the co<span class="cstat-no" title="statement not covered" >nversation to get the agent's response</span>
+      const conversation<span class="cstat-no" title="statement not covered" >Url = `${baseUrl}/w/${workspaceId}/assistant/conversations/${conversati</span>onSId}`;
+      
+      let agentResponse = null;
       let attempts = 0;
       const maxAttempts = 60; // Increase max attempts to allow for longer processing time
       const <span class="cstat-no" title="statement not covered" >pollingInterval = 2000; // 2 seconds between polling attempts</span>
       <span class="cstat-no" title="statement not covered" ></span>
-      logger('INFO', `Starting to poll for agent response at ${new Date().toISOString()}`);
+      logger('IN<span class="cstat-no" title="statement not covered" >FO', `Starting to poll for agent response at ${new Date().toISOString()}`);</span>
       
       while (!agentResponse &amp;&amp; attempts &lt; maxAttempts) {
-        attempts++;
-        
+        atte<span class="cstat-no" title="statement not covered" >mpts++;</span>
+        <span class="cstat-no" title="statement not covered" ></span>
         // Wait between polling attempts
         await new Promise(resolve =&gt; setTimeout(resolve, pollingInterval));
-        <span class="cstat-no" title="statement not covered" ></span>
-        try <span class="cstat-no" title="statement not covered" >{</span>
-          // Get<span class="cstat-no" title="statement not covered" > the conversation with its messages</span>
+        
+        try {
+          // Get the conversation with its messages
           const conversationResponse = await axios.get(conversationUrl, {
-            head<span class="cstat-no" title="statement not covered" >ers: {</span>
-              'Authorization': `Bearer ${DUST_API_KEY}`,
-              'Accept': 'application/json'
-            }
-<span class="cstat-no" title="statement not covered" >          });</span>
-        <span class="cstat-no" title="statement not covered" >  </span>
+            headers: {
+<span class="cstat-no" title="statement not covered" >              'Authorization': `Bearer ${DUST_API_KEY}`,</span>
+<span class="cstat-no" title="statement not covered" >              'Accept': 'application/json'</span>
+            }<span class="cstat-no" title="statement not covered" ></span>
+          });
+          <span class="cstat-no" title="statement not covered" ></span>
           logger('INFO', `Polling attempt ${attempts}: ${conversationResponse.status}`);
           
-          // Ch<span class="fstat-no" title="function not covered" >eck if there ar</span>e messages in <span class="branch-0 cbranch-no" title="branch not covered" >the</span> conversation
+          // Check if there are messages in the conversation
 <span class="cstat-no" title="statement not covered" >          if (conversationResponse.data?.conversation?.content) {</span>
-<span class="cstat-no" title="statement not covered" >            logger('INFO', `Found ${conversationResponse.data.conversation.content.length} message groups in conversation`);</span>
-            <span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >            logger('I</span>NFO', `Found ${conversationResponse.data.conversation.content.length} message groups in conversation`);
+            
             // Look for the assistant's response message
-            for (let i = 0; i &lt; conversationResponse.data.conversation.content.length; i++) {
-              const messageV<span class="cstat-no" title="statement not covered" >ersions = conversationResponse</span>.data.conversation.content[i];
-        <span class="cstat-no" title="statement not covered" >      </span>
+            for<span class="fstat-no" title="function not covered" > (let i = 0; i </span>&lt; conversation<span class="branch-0 cbranch-no" title="branch not covered" >Res</span>ponse.data.conversation.content.length; i++) {
+<span class="cstat-no" title="statement not covered" >              const messageVersions = conversationResponse.data.conversation.content[i];</span>
+              
 <span class="cstat-no" title="statement not covered" >              if (messageVersions &amp;&amp; messageVersions.length &gt; 0) {</span>
-                // Get the latest version of the message
+<span class="cstat-no" title="statement not covered" >                // Get the latest version of the message</span>
                 const latestMessage = messageVersions[messageVersions.length - 1];
-        <span class="cstat-no" title="statement not covered" >        </span>
-<span class="cstat-no" title="statement not covered" >                // Check if this is an assistant message</span>
+                
+                // Check if <span class="cstat-no" title="statement not covered" >this is an assistant message</span>
 <span class="cstat-no" title="statement not covered" >                if (latestMessage.type === "assistant_message") {</span>
-                  logger('INFO', `Found assistant message with status: ${latestMessage.status}`);
+<span class="cstat-no" title="statement not covered" >                  logger('INFO', `Found assistant message with status: ${latestMessage</span>.status}`);
                   
                   // Check if the message is completed
-                  if (latestMessage.status === "completed" || latestMessage.status === "complete") {
-                    agentResponse = latestMessage;
-                    logger('INFO', `Found completed agent response after ${attempts} attempts`);
+<span class="cstat-no" title="statement not covered" >                  if (latestMessage.status === "completed" || latestMessage.status === "complete") {</span>
+<span class="cstat-no" title="statement not covered" >                    agentResponse = latestMessage;</span>
+<span class="cstat-no" title="statement not covered" >                    logger('INFO', `Found completed agent response after ${attempts} attempts`);</span>
                     break;
                   }
                 }
@@ -1860,71 +1860,71 @@ export async fun<span class="cstat-no" title="statement not covered" >ction quer
  * @param view Optional view type for filtering agents
  * @param limit Maximum number of agents to return (default: 10)
  * @returns Promise resolving to an array of agent configurations
- */<span class="cstat-no" title="statement not covered" ></span>
-export a<span class="cstat-no" title="statement not covered" >sync function listDustAgents(</span>
-  view?: str<span class="cstat-no" title="statement not covered" >ing,</span>
+ */
+export async function listDustAgents(
+  view?: string,
   limit: number = 10
-): Promi<span class="cstat-no" title="statement not covered" >se&lt;AgentConfig[]&gt; {</span>
-  try {<span class="cstat-no" title="statement not covered" ></span>
-    if (!DUST_API_KEY) {
-      throw new Error("DUST_API_KEY is not set in environment variables");
-    }<span class="cstat-no" title="statement not covered" ></span>
-    <span class="cstat-no" title="statement not covered" ></span>
-    // Get workspace ID from environment
-    const workspaceId = process.env.DUST_WORKSPACE_ID;
-    if (!workspaceId) {<span class="cstat-no" title="statement not covered" ></span>
-      th<span class="cstat-no" title="statement not covered" >row new Error("DUST_WORKSPACE_ID is not set in environment variable</span>s");
+): Promise&lt;AgentConfig[]&gt; {
+  try {
+    if (!DUST_API_KEY) <span class="cstat-no" title="statement not covered" >{</span>
+      th<span class="cstat-no" title="statement not covered" >row new Error("DUST_API_KEY is not set in environment variables");</span>
     }<span class="cstat-no" title="statement not covered" ></span>
     
+    // G<span class="cstat-no" title="statement not covered" >et workspace ID from environment</span>
+    const wo<span class="cstat-no" title="statement not covered" >rkspaceId = process.env.DUST_WORKSPACE_ID;</span>
+    if (!workspaceId) {
+      throw new Error("DUST_WORKSPACE_ID is not set in environment variables");
+    }<span class="cstat-no" title="statement not covered" ></span>
+    <span class="cstat-no" title="statement not covered" ></span>
     // For development, return mock agents
     if (process.env.NODE_ENV === "development") {
-      logger('INFO', 'Using mock agent list in development mode');
-      return [
-        {<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ></span></span>
+      logger('INFO', 'U<span class="cstat-no" title="statement not covered" >sing mock agent list in development mode');</span>
+      re<span class="cstat-no" title="statement not covered" >turn [</span>
+        {<span class="cstat-no" title="statement not covered" ></span>
           id: "mock-agent-1",
           name: "General Assistant",
-<span class="cstat-no" title="statement not covered" >          description: "A general-purpose assistant that can help with a wide range of tasks.",</span>
-          ca<span class="cstat-no" title="statement not covered" >pabilities: ["web_search", "browse", "extract_data"],</span>
-          mo<span class="cstat-no" title="statement not covered" >del: "gpt-4o",</span>
-          provider: "openai",
+          description: "A general-purpose assistant that can help with a wide range of tasks.",
+          capabilities: ["web_search", "browse", "extract_data"],
+          model: "gpt-4o",
+          provider: "openai"<span class="fstat-no" title="function not covered" >,<span class="cstat-no" title="statement not covered" ></span></span>
           temperature: 0.7,
-          status: "active",<span class="cstat-no" title="statement not covered" ></span>
+          status: "active",
 <span class="cstat-no" title="statement not covered" >          pictureUrl: "https://dust.tt/static/spiritavatar/Spirit_Indigo_3.jpg",</span>
-          supportedOutputFormats: ["text", "json"],
-<span class="cstat-no" title="statement not covered" >          timestamp: Date.now()<span class="fstat-no" title="function not covered" ></span></span>
-        },<span class="cstat-no" title="statement not covered" ></span>
+          su<span class="cstat-no" title="statement not covered" >pportedOutputFormats: ["text", "json"],</span>
+          ti<span class="cstat-no" title="statement not covered" >mestamp: Date.now()</span>
+        },
         {
-          id: "mock-agent-2",
-          name: "Code Assistant",
-          description: "A specialized assistant f<span class="fstat-no" title="function not covered" >or</span> program<span class="cstat-no" title="statement not covered" >ming and cod</span>e-related tasks.",
-          capabilities: ["code_generation", "code_explanation", "code_review"],
+          id: "mock-agent-2",<span class="cstat-no" title="statement not covered" ></span>
+<span class="cstat-no" title="statement not covered" >          name: "Code Assistant",</span>
+          description: "A specialized assistant for programming and code-related tasks.",
+<span class="cstat-no" title="statement not covered" >          capabilities: ["code_generati<span class="fstat-no" title="function not covered" >on</span>", "code_explanation", "code_review"],</span>
           model: "claude-3-opus",
-          provider: "anthropic",
+          provider: "anthro<span class="cstat-no" title="statement not covered" >pic",</span>
           temperature: 0.5,
           status: "active",
           pictureUrl: "https://dust.tt/static/spiritavatar/Spirit_Emerald_2.jpg",
-          supportedOutputFormats: ["text", "json"],
+          supportedOutputFormats: ["text", "json"],<span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" ></span></span>
           timestamp: Date.now()
         },
         {
           id: "mock-agent-3",
           name: "Data Analyst",
-          de<span class="cstat-no" title="statement not covered" >scription: "An assistant specialized in d</span>ata analysis and visualization.",
-          ca<span class="cstat-no" title="statement not covered" >pabilities: ["d</span>ata_analysis", "chart_generation", "extract_data"],
+          description: "An assistant specialized in data analysis and visualization.",
+          capabilities: ["data_analysis", "chart_generation", "extract_data"],
           model: "gpt-4-turbo",
           provider: "openai",
-<span class="cstat-no" title="statement not covered" >          temperature: 0.3,</span>
+          temperature: 0.3,
           status: "active",
-<span class="cstat-no" title="statement not covered" >          pictureUrl: "https://dust.tt/static/spiritavatar/Spirit_Amber_1.jpg",</span>
+          pictureUrl: "https://dust.tt/static/spiritavatar/Spirit_Amber_1.jpg",
           su<span class="cstat-no" title="statement not covered" >pportedOutputFormats: ["text", "json"],</span>
-          ti<span class="cstat-no" title="statement not covered" >mestamp: Date.now()</span>
+          ti<span class="cstat-no" title="statement not covered" >mestamp: Date.n</span>ow()
         }
       ];
-    }
+    }<span class="cstat-no" title="statement not covered" ></span>
     
-    // Construct query parameters
-    const params = new URLSearchParams();
-    if (view) {
+    // C<span class="cstat-no" title="statement not covered" >onstruct query parameters</span>
+    const pa<span class="cstat-no" title="statement not covered" >rams = new URLSearchParams();</span>
+    if (view<span class="cstat-no" title="statement not covered" >) {</span>
       params.append("view", view);
     }
     if (limit &gt; 0) {
@@ -1940,14 +1940,14 @@ export a<span class="cstat-no" title="statement not covered" >sync function list
     const apiUrl = `${baseUrl}/w/${workspaceId}/assistant/agent_configurations${queryString}`;
     
     logger('INFO', `Requesting agent configurations from: ${apiUrl}`);
-    <span class="cstat-no" title="statement not covered" ></span>
+    
     const response = await axios.get(apiUrl, {
       headers: {
         Authorization: `Bearer ${DUST_API_KEY}`,
         "Accept": "application/json",
         "Content-Type": "application/json"
       },
-      validateStatus: () =&gt; true // Accept all status codes to handle errors properly
+      va<span class="cstat-no" title="statement not covered" >lidateStatus:</span> () =&gt; true // Accept all status codes to handle errors properly
     });
     
     // Check for successful response
@@ -2017,7 +2017,7 @@ export a<span class="cstat-no" title="statement not covered" >sync function list
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-05-24T09:14:48.207Z
+                at 2025-05-24T21:50:16.714Z
             </div>
         <script src="../prettify.js"></script>
         <script>

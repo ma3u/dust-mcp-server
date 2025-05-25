@@ -11,15 +11,15 @@
     "start:dev": "NODE_ENV=development node --no-warnings --experimental-specifier-resolution=node build/index.js",
     "start:memory": "NODE_ENV=development SESSION_STORE_TYPE=memory node --no-warnings build/server.js",
     "start:redis": "NODE_ENV=development SESSION_STORE_TYPE=redis node --no-warnings build/server.js",
-    "test": "jest",
-    "test:unit": "jest --testPathPattern=__tests__/unit",
-    "test:integration": "jest --testPathPattern=__tests__/integration",
-    "test:e2e": "jest --testPathPattern=__tests__/e2e",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "test:ci": "jest --ci --runInBand --coverage",
-    "test:memory": "SESSION_STORE_TYPE=memory jest",
-    "test:redis": "SESSION_STORE_TYPE=redis jest",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs",
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs --testPathPattern=__tests__/unit",
+    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs --testPathPattern=__tests__/integration",
+    "test:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs --testPathPattern=__tests__/e2e",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs --watch",
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs --coverage",
+    "test:ci": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs --ci --runInBand --coverage",
+    "test:memory": "NODE_OPTIONS=--experimental-vm-modules SESSION_STORE_TYPE=memory jest --config=jest.config.mjs",
+    "test:redis": "NODE_OPTIONS=--experimental-vm-modules SESSION_STORE_TYPE=redis jest --config=jest.config.mjs",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
@@ -66,6 +66,7 @@
     "@types/ioredis": "^4.28.10",
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.5",
+    "@types/lru-cache": "^7.10.9",
     "@types/multer": "^1.4.12",
     "@types/node": "^20.17.50",
     "@types/node-cache": "^4.2.5",
@@ -79,10 +80,13 @@
     "eslint-plugin-jest": "^27.6.0",
     "eslint-plugin-prettier": "^5.0.0",
     "husky": "^8.0.3",
+    "ioredis-mock": "^8.9.0",
     "jest": "^29.7.0",
     "jest-mock-extended": "^3.0.7",
     "lint-staged": "^15.0.0",
+    "lru-cache": "^11.1.0",
     "prettier": "^3.0.0",
+    "redis-mock": "^0.56.3",
     "supertest": "^6.3.4",
     "ts-jest": "^29.3.4",
     "ts-node": "^10.9.2",
@@ -101,37 +105,20 @@
   },
   "jest": {
     "preset": "ts-jest/presets/default-esm",
+    "testEnvironment": "node",
     "extensionsToTreatAsEsm": [
       ".ts"
     ],
     "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/src/$1",
-      "^(\\.{1,2}/.*)\\.js$": "$1"
+      "^@/(.*)$": "<rootDir>/src/$1"
     },
-    "transform": {
-      "^.+\\.ts$": [
-        "ts-jest",
-        {
-          "useESM": true
-        }
-      ]
-    },
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/src"
-    ],
-    "testMatch": [
-      "**/__tests__/**/*.+(ts|tsx)",
-      "**/?(*.)+(spec|test).+(ts|tsx)"
-    ],
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "jsx",
-      "ts",
-      "tsx",
-      "node"
+    "transformIgnorePatterns": [
+      "node_modules/(?!(node-fetch|@modelcontextprotocol)/)"
     ]
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": "./src/index.ts"
   },
   "engines": {
     "node": ">=18.0.0"

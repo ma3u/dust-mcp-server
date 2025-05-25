@@ -115,6 +115,53 @@ The Dust MCP Server includes a robust session management system using Redis for 
 
 ### Configuration
 
+#### Redis Configuration
+
+1. **Environment Variables**
+   Add these variables to your `.env` file:
+
+   ```env
+   # Redis Configuration
+   REDIS_ENABLED=true  # Set to false to disable Redis (uses in-memory store)
+   REDIS_URL=redis://localhost:6379
+   REDIS_PASSWORD=  # Leave empty if no password is set
+   REDIS_TLS=false  # Set to true for secure connections
+   SESSION_SECRET=your_session_secret_here
+   SESSION_TTL=86400  # 24 hours in seconds
+   ```
+
+2. **Test Connection**
+
+   You can test your Redis connection with:
+
+   ```bash
+   node -e "const { createClient } = require('redis'); (async () => { const client = createClient({ url: process.env.REDIS_URL }); await client.connect(); console.log('Redis connected successfully'); await client.quit(); })().catch(console.error);"
+   ```
+
+3. **Disabling Redis for Development**
+
+   If you want to run the server without Redis for development:
+
+   ```env
+   REDIS_ENABLED=false
+   ```
+
+   This will use an in-memory store instead. Note: This is not suitable for production.
+
+4. **Skipping Redis Cache Tests**
+
+   To skip Redis-related tests, set the following environment variable:
+
+   ```bash
+   SKIP_REDIS_TESTS=true
+   ```
+
+   Or when running tests:
+
+   ```bash
+   SKIP_REDIS_TESTS=true npm test
+   ```
+
 Add these environment variables to your `.env` file:
 
 ```

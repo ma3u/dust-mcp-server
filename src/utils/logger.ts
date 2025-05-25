@@ -1,7 +1,19 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { promises as fsPromises } from 'node:fs';
 import { v4 as uuidv4 } from 'uuid';
+
+// Get directory name in ESM
+const getDirname = (url: string) => {
+  try {
+    return path.dirname(fileURLToPath(url));
+  } catch (e) {
+    return process.cwd();
+  }
+};
+
+const __dirname = getDirname(import.meta.url);
 
 /**
  * Log levels for structured logging
@@ -112,7 +124,7 @@ class Logger {
     // Ensure log directory exists if file logging is enabled
     if (this.config.logToFile) {
       try {
-        fs.mkdirSync(this.config.logDir, { recursive: true });
+        fsPromises.mkdir(this.config.logDir, { recursive: true });
       } catch (error) {
         // If we can't create the log directory, disable file logging
         console.error(`Failed to create log directory at ${this.config.logDir}, disabling file logging`, error);

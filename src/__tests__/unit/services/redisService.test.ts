@@ -1,51 +1,83 @@
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
-import IORedis from 'ioredis';
-import { RedisConnection } from '../../../../config/redis';
+import RedisConnection from '../../../config/redis';
+
+// Create a mock Redis client
+const createMockRedis = () => ({
+  on: jest.fn().mockReturnThis(),
+  quit: jest.fn().mockResolvedValue('OK'),
+  set: jest.fn().mockResolvedValue('OK'),
+  get: jest.fn().mockResolvedValue('test-value'),
+  del: jest.fn().mockResolvedValue(1),
+  expire: jest.fn().mockResolvedValue(1),
+  status: 'ready',
+});
 
 // Mock ioredis
-jest.mock('ioredis');
+const mockRedis = createMockRedis();
+const mockRedisModule = jest.fn().mockImplementation(() => mockRedis);
 
-const MockedIORedis = IORedis as jest.MockedClass<typeof IORedis>;
+// Mock ioredis-mock
+const mockRedisMock = createMockRedis();
+const mockRedisMockModule = {
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => mockRedisMock)
+};
+
+// Mock the modules
+jest.mock('ioredis', () => ({
+  __esModule: true,
+  default: mockRedisModule
+}));
+
+jest.mock('ioredis-mock', () => mockRedisMockModule);
 
 describe('RedisConnection', () => {
-  let mockRedis: jest.Mocked<IORedis.Redis>;
-  
+  let originalEnv: NodeJS.ProcessEnv;
+
   beforeEach(() => {
+    // Save original process.env
+    originalEnv = { ...process.env };
+    
     // Clear all mocks and reset the module state
     jest.clearAllMocks();
-    jest.resetModules();
     
-    // Create a fresh mock Redis instance
-    mockRedis = {
-      on: jest.fn(),
-      quit: jest.fn().mockResolvedValue('OK'),
-      set: jest.fn().mockResolvedValue('OK'),
-      get: jest.fn().mockResolvedValue('test-value'),
-      del: jest.fn().mockResolvedValue(1),
-      expire: jest.fn().mockResolvedValue(1),
-      // Add other Redis methods as needed
-    } as unknown as jest.Mocked<IORedis.Redis>;
-    
-    // Mock the IORedis constructor to return our mock instance
-    MockedIORedis.mockImplementation(() => mockRedis);
+    // Reset the singleton instance before each test
+    (RedisConnection as any)._instance = null;
+    (RedisConnection as any)._isConnected = false;
+    (RedisConnection as any)._initialized = false;
+    (RedisConnection as any)._useMemoryStore = false;
   });
   
-  afterEach(() => {
-    // Clean up the singleton instance after each test
-    jest.resetModules();
+  afterEach(async () => {
+    // Clean up after each test
+    await RedisConnection.disconnect();
+    
+    // Restore original process.env
+    process.env = { ...originalEnv };
   });
   
   describe('initialize', () => {
-    it('should create a Redis client with default configuration', () => {
+    it('should use mock Redis when REDIS_DISABLED is true', () => {
       // Arrange
-      delete process.env.REDIS_URL;
+      process.env.REDIS_DISABLED = 'true';
       
       // Act
       const client = RedisConnection.initialize();
       
       // Assert
-      expect(MockedIORedis).toHaveBeenCalledTimes(1);
-      expect(MockedIORedis).toHaveBeenCalledWith(expect.any(Object));
+      expect(RedisConnection.isUsingMemoryStore()).toBe(true);
+      expect(client).toBeDefined();
+    });
+    
+    it('should use mock Redis when in test environment', () => {
+      // Arrange
+      process.env.NODE_ENV = 'test';
+      
+      // Act
+      const client = RedisConnection.initialize();
+      
+      // Assert
+      expect(RedisConnection.isUsingMemoryStore()).toBe(true);
       expect(client).toBeDefined();
     });
     
@@ -58,8 +90,8 @@ describe('RedisConnection', () => {
       const client = RedisConnection.initialize();
       
       // Assert
-      expect(MockedIORedis).toHaveBeenCalledTimes(1);
-      expect(MockedIORedis).toHaveBeenCalledWith(redisUrl, expect.any(Object));
+      expect(IORedis).toHaveBeenCalledTimes(1);
+      expect(IORedis).toHaveBeenCalledWith(redisUrl, expect.any(Object));
     });
     
     it('should return the same instance on subsequent calls', () => {
@@ -69,30 +101,91 @@ describe('RedisConnection', () => {
       
       // Assert
       expect(client1).toBe(client2);
-      expect(MockedIORedis).toHaveBeenCalledTimes(1);
+      expect(IORedis).toHaveBeenCalledTimes(1);
     });
   });
   
-  describe('getInstance', () => {
-    it('should throw an error if not initialized', () => {
-      // Arrange
-      // Reset the singleton state
-      jest.resetModules();
-      const { RedisConnection: FreshRedisConnection } = require('../../../../config/redis');
-      
-      // Act & Assert
-      expect(() => FreshRedisConnection.getInstance()).toThrow('Redis connection not initialized');
-    });
-    
-    it('should return the Redis client instance after initialization', () => {
+  describe('getClient', () => {
+    it('should return the Redis client instance', () => {
       // Arrange
       const client = RedisConnection.initialize();
       
       // Act
-      const instance = RedisConnection.getInstance();
+      const result = RedisConnection.getClient();
       
       // Assert
-      expect(instance).toBe(client);
+      expect(result).toBe(client);
+    });
+    
+    it('should throw an error if Redis is not initialized', () => {
+      // Act & Assert
+      expect(() => RedisConnection.getClient()).toThrow('Redis client not initialized');
+    });
+  });
+  
+  describe('isConnected', () => {
+    it('should return true if Redis is connected', () => {
+      // Arrange
+      RedisConnection.initialize();
+      
+      // Act & Assert
+      expect(RedisConnection.isConnected()).toBe(true);
+    });
+    
+    it('should return false if Redis is not connected', () => {
+      // Act & Assert
+      expect(RedisConnection.isConnected()).toBe(false);
+    });
+  });
+  
+  describe('isUsingMemoryStore', () => {
+    it('should return true when using memory store', () => {
+      // Arrange
+      process.env.REDIS_DISABLED = 'true';
+      RedisConnection.initialize();
+      
+      // Act & Assert
+      expect(RedisConnection.isUsingMemoryStore()).toBe(true);
+    });
+    
+    it('should return false when using real Redis', () => {
+      // Arrange
+      delete process.env.REDIS_DISABLED;
+      process.env.NODE_ENV = 'production';
+      RedisConnection.initialize();
+      
+      // Act & Assert
+      expect(RedisConnection.isUsingMemoryStore()).toBe(false);
+    });
+  });
+  
+  describe('disconnect', () => {
+    it('should disconnect from Redis', async () => {
+      // Arrange
+      RedisConnection.initialize();
+      
+      // Act
+      await RedisConnection.disconnect();
+      
+      // Assert
+      expect(mockRedis.quit).toHaveBeenCalled();
+      expect(RedisConnection.isConnected()).toBe(false);
+    });
+    
+    it('should not throw if Redis is not connected', async () => {
+      // Act & Assert
+      await expect(RedisConnection.disconnect()).resolves.not.toThrow();
+    });
+  });
+
+  describe('isConnected', () => {
+    it('should return connection status', () => {
+      expect(RedisConnection.isConnected()).toBe(false);
+      
+      RedisConnection.initialize();
+      (RedisConnection as any)._isConnected = true;
+      
+      expect(RedisConnection.isConnected()).toBe(true);
     });
   });
   

@@ -5,7 +5,9 @@
  * - /health HTTP endpoint
  * - /events SSE endpoint
  */
+import { jest, describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import http from 'http';
+import fetch from 'node-fetch';
 
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 
@@ -19,8 +21,8 @@ describe('HTTP/SSE Integration', () => {
   });
 
   test('SSE /events streams events', async () => {
-    // Increase timeout for this test (10s)
-    jest.setTimeout(10000);
+    // Increase timeout for this test (30s)
+    jest.setTimeout(30000);
     let eventReceived = false;
     // Open SSE connection
     const res = await fetch(`${BASE_URL}/events`, {

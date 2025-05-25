@@ -26,14 +26,18 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "types": ["node", "jest"],
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.js",
     "src/**/*.jsx",
-    "jest.config.ts"
+    "jest.config.js",
+    "jest.setup.js",
+    "jest.setup.afterEnv.js"
   ],
   "exclude": [
     "node_modules",
@@ -44,9 +48,14 @@
   ],
   "ts-node": {
     "esm": true,
-    "experimentalSpecifierResolution": "node"
+    "experimentalSpecifierResolution": "node",
+    "transpileOnly": true
   },
   "references": [
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "ts-jest": {
+    "useESM": true,
+    "isolatedModules": true
+  }
 }

@@ -1,13 +1,18 @@
-import { Router } from 'express';
-import { SessionController } from '../controllers/SessionController';
-import { SessionService } from '../services/SessionService';
-import { RedisSessionRepository } from '../repositories/RedisSessionRepository';
-import { Redis } from 'ioredis';
+import { Router, type Request, type Response, type NextFunction } from 'express';
+import type { Redis } from 'ioredis';
+import { SessionController } from '../controllers/SessionController.js';
+import { SessionService } from '../services/SessionService.js';
 
-export const createSessionRouter = (redisClient: Redis): Router => {
+/**
+ * Create and configure the session router
+ * @param redisClient Optional Redis client (will use memory store if not provided)
+ * @returns Configured Express router
+ */
+export const createSessionRouter = (redisClient?: Redis): Router => {
   const router = Router();
-  const sessionRepository = new RedisSessionRepository(redisClient);
-  const sessionService = new SessionService(sessionRepository);
+  
+  // Initialize session service with the appropriate store
+  const sessionService = SessionService.getInstance(redisClient);
   const sessionController = new SessionController(sessionService);
 
   // Create a new session
@@ -35,26 +40,52 @@ export const createSessionRouter = (redisClient: Redis): Router => {
 };
 
 // Middleware that can be used to protect routes
-export const sessionMiddleware = (redisClient: Redis) => {
-  const sessionRepository = new RedisSessionRepository(redisClient);
-  const sessionService = new SessionService(sessionRepository);
+/**
+ * Middleware that can be used to protect routes
+ * Validates the session and attaches it to the request object
+ */
+export const sessionMiddleware = (redisClient?: Redis) => {
+  // Get the session service instance
+  const sessionService = SessionService.getInstance(redisClient);
 
-  return async (req: any, res: any, next: any) => {
+  return async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    // Try to get session ID from Authorization header or cookie
     const authHeader = req.headers.authorization;
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Authentication required' });
+    let sessionId: string | undefined;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      sessionId = authHeader.split(' ')[1];
+    } else if (req.cookies?.sessionId) {
+      sessionId = req.cookies.sessionId;
     }
 
-    const sessionId = authHeader.split(' ')[1];
-    const session = await sessionService.getSession(sessionId);
-
-    if (!session) {
-      return res.status(401).json({ error: 'Invalid or expired session' });
+    if (!sessionId) {
+      return res.status(401).json({ error: 'No session ID provided' });
     }
 
-    // Attach session to request for use in route handlers
-    req.session = session;
-    next();
+    try {
+      const session = await sessionService.getSession(sessionId);
+
+      if (!session) {
+        return res.status(401).json({ error: 'Invalid or expired session' });
+      }
+
+      // Check if session is expired
+      if (new Date(session.expiresAt) < new Date()) {
+        await sessionService.deleteSession(sessionId);
+        return res.status(401).json({ error: 'Session expired' });
+      }
+
+      // Attach session to request for use in route handlers
+      (req as any).session = session;
+      next();
+    } catch (error) {
+      console.error('Session validation error:', error);
+      res.status(500).json({ error: 'Failed to validate session' });
+    }
   };
 };

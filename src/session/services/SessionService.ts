@@ -1,11 +1,50 @@
-import { SessionRepository } from '../interfaces/ISession';
-import { ISession, CreateSessionInput, UpdateSessionInput } from '../interfaces/ISession';
+import type { Redis } from 'ioredis';
+import type { SessionRepository } from '../interfaces/ISession.js';
+import type { ISession, CreateSessionInput, UpdateSessionInput } from '../interfaces/ISession.js';
+import { SessionStoreFactory } from '../factories/SessionStoreFactory.js';
 
 export class SessionService {
-  constructor(private readonly sessionRepository: SessionRepository) {}
+  private static instance: SessionService;
+  private readonly sessionRepository: SessionRepository;
+  
+  /**
+   * Private constructor to enforce singleton pattern
+   * @param sessionRepository The session repository to use
+   */
+  private constructor(sessionRepository: SessionRepository) {
+    this.sessionRepository = sessionRepository;
+  }
+  
+  /**
+   * Get or create a SessionService instance
+   * @param redisClient Optional Redis client for Redis-based session storage
+   * @returns SessionService instance
+   */
+  /**
+   * Get or create a SessionService instance
+   * @param redisClient Optional Redis client for Redis-based session storage
+   * @returns SessionService instance
+   */
+  static getInstance(redisClient?: Redis): SessionService {
+    if (!SessionService.instance) {
+      const repository = SessionStoreFactory.createSessionRepository(redisClient);
+      SessionService.instance = new SessionService(repository);
+    }
+    return SessionService.instance;
+  }
 
+  /**
+   * Create a new session
+   * @param input Session creation parameters
+   * @returns The created session
+   */
   async createSession(input: CreateSessionInput): Promise<ISession> {
-    return this.sessionRepository.create(input);
+    try {
+      return await this.sessionRepository.create(input);
+    } catch (error) {
+      console.error('Failed to create session:', error);
+      throw new Error('Failed to create session');
+    }
   }
 
   async getSession(sessionId: string): Promise<ISession | null> {

@@ -1,7 +1,6 @@
 import { Types } from 'mongoose';
 
 export interface ISession {
-  _id?: Types.ObjectId;
   sessionId: string;
   userId: string;
   data: Record<string, any>;

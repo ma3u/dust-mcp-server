@@ -3,6 +3,72 @@
 This file records architectural and implementation decisions using a list format.
 
 ---
+
+"2025-05-25 11:52:15" - Memory Session Management Strategy
+
+## Decision 13: In-Memory Session Management with Fallback
+
+* Implemented `lru-cache` as the in-memory session store for development and testing
+* Configured automatic fallback to in-memory store when Redis is unavailable
+* Added environment-based configuration to force in-memory store when needed
+
+### Decision 13 Rationale
+
+* **Development Experience**: In-memory store provides a zero-configuration option for development
+* **Resilience**: Automatic fallback ensures application remains functional during Redis outages
+* **Performance**: In-memory store offers the best possible performance for single-instance deployments
+* **Simplicity**: No external dependencies required for basic functionality
+
+### Implementation Details
+
+#### Memory Store Framework
+
+* Using `lru-cache` for in-memory session storage
+* Configured with reasonable defaults for TTL and max entries
+* Implements the same interface as Redis for seamless switching
+
+#### Fallback Mechanism
+
+* Automatic fallback to in-memory store when:
+  * `NODE_ENV=test` (test environment)
+  * `REDIS_DISABLED=true` (explicit disable)
+  * `USE_MEMORY_STORE=true` (explicit preference)
+  * Redis connection fails repeatedly (configurable threshold)
+* Fallback is transparent to application code
+
+#### Configuration
+
+```env
+# Force in-memory store
+USE_MEMORY_STORE=true
+
+# Disable Redis (implicitly uses in-memory)
+REDIS_DISABLED=true
+
+# Redis connection string (when not using in-memory)
+REDIS_URL=redis://localhost:6379
+```
+
+#### Error Handling
+
+* Graceful degradation when Redis is unavailable
+* Automatic reconnection attempts to Redis when it becomes available
+* Logging of fallback activation and Redis reconnection events
+
+### Trade-offs
+
+* **Persistence**: In-memory sessions are lost on server restart
+* **Scalability**: Not suitable for distributed deployments without sticky sessions
+* **Memory Usage**: Must be monitored to prevent excessive memory consumption
+
+### Future Considerations
+
+* Implement distributed caching with Redis for production deployments
+* Add support for other session stores (e.g., MongoDB, PostgreSQL)
+* Implement session sharing between instances using a distributed cache
+
+---
+
 "2025-05-25 00:45:26" - Redis Implementation Strategy
 
 ## Decision 12: Redis Integration for Session and Caching
@@ -22,7 +88,8 @@ This file records architectural and implementation decisions using a list format
 
 ### Implementation Details
 
-#### Components
+#### Redis Components
+
 * `RedisService`: Singleton service handling Redis connections and operations
 * Configuration via environment variables:
   * `REDIS_URL`: Connection string for Redis server
@@ -31,16 +98,19 @@ This file records architectural and implementation decisions using a list format
   * `REDIS_MAX_RETRIES`: Maximum number of retry attempts
 
 #### Error Handling
+
 * Automatic reconnection on connection loss
 * Circuit breaker pattern for handling Redis outages
 * Comprehensive logging of connection states and errors
 
 #### Monitoring
+
 * Added health check endpoints
 * Integration with application metrics
 * Connection status monitoring
 
 #### Security
+
 * TLS/SSL support for secure connections
 * Authentication via Redis ACLs
 * Sensitive data encryption
@@ -52,8 +122,8 @@ This file records architectural and implementation decisions using a list format
 ## Decision 11: Optimize Session Storage for Development and Production
 
 * Implemented dual-mode session storage strategy:
-  - **Development/Local**: In-memory store (node-cache) as default
-  - **Production**: Redis-based session store
+  * **Development/Local**: In-memory store (node-cache) as default
+  * **Production**: Redis-based session store
 * Removed Redis as a hard dependency for local development
 * Added environment-based configuration for session store selection
 * Documented setup instructions for both modes
@@ -61,39 +131,41 @@ This file records architectural and implementation decisions using a list format
 ### Decision 11 Rationale
 
 * **Simplified Local Development**:
-  - No need to run Redis locally for basic development
-  - Faster setup for new contributors
-  - Reduced resource usage during development
+  * No need to run Redis locally for basic development
+  * Faster setup for new contributors
+  * Reduced resource usage during development
 * **Production Readiness**:
-  - Maintain Redis for production-grade session management
-  - Support for distributed session storage
-  - Better performance and reliability in production
+  * Maintain Redis for production-grade session management
+  * Support for distributed session storage
+  * Better performance and reliability in production
 * **Developer Experience**:
-  - Clear separation of development and production requirements
-  - Easier onboarding for new team members
-  - Simplified CI/CD pipeline for testing
+  * Clear separation of development and production requirements
+  * Easier onboarding for new team members
+  * Simplified CI/CD pipeline for testing
 
 ### Decision 11 Implementation
 
-#### Components Modified
+#### Session Storage Components
+
 * `SessionService`: Updated to support multiple storage backends
 * Configuration: Added `SESSION_STORE_TYPE` environment variable
 * Dependencies: Made `ioredis` optional, added `node-cache` as dev dependency
 * Documentation: Updated setup instructions
 
 #### Configuration
+
 * `SESSION_STORE_TYPE`: 'memory' | 'redis' (default: 'memory' in development, 'redis' in production)
 * `REDIS_URL`: Only required when using Redis store
 * `SESSION_TTL`: Session time-to-live (applies to both stores)
 
 #### Migration Path
+
 1. For local development: No changes needed, uses memory store by default
 2. For production: Set `SESSION_STORE_TYPE=redis` and configure `REDIS_URL`
 3. Existing Redis-specific code remains functional but is now optional
 
 ---
 
----
 "2025-05-24 18:56:32" - Server-Sent Events (SSE) Support Implementation
 
 ## Decision 10: Implement SSE for Real-time Updates
@@ -115,7 +187,8 @@ This file records architectural and implementation decisions using a list format
 
 ### Decision 10 Implementation
 
-#### Components Added
+#### SSE Components
+
 * `SSEController`: Handles SSE connections and events
 * `SSEService`: Manages active connections and broadcasting
 * `SSETypes`: TypeScript types for SSE events
@@ -123,17 +196,20 @@ This file records architectural and implementation decisions using a list format
 * `sseMiddleware`: Handles SSE connection setup and teardown
 
 #### Configuration
+
 * `SSE_KEEP_ALIVE_INTERVAL`: Interval for keep-alive messages (default: 30s)
 * `SSE_MAX_CONNECTIONS_PER_IP`: Maximum concurrent connections per IP (default: 5)
 * `SSE_RECONNECTION_TIMEOUT`: Client reconnection timeout (default: 30s)
 
 #### Security
+
 * Rate limiting for SSE connections
 * Session validation for authenticated endpoints
 * CORS configuration for web clients
 * Connection cleanup on disconnect
 
 ---
+
 "2025-05-24 17:25:00" - User Journey Test Implementation
 
 ## Decision 9: Test Implementation for Claude Desktop MCP Client
