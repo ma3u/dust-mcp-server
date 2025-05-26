@@ -4,9 +4,155 @@ This file provides a high-level overview of the project and the expected product
 
 "2025-05-19 09:04:18" - Added detailed user journey for multi-agent interaction.
 
+## Table of Contents
+
+- [Project Goal](#project-goal)
+- [User Personas](#user-personas)
+  - [1. Business Analyst](#1-business-analyst)
+  - [2. Software Engineer](#2-software-engineer)
+- [User Journeys](#user-journeys)
+  - [Business Analyst with Claude Desktop](#user-journey-1-business-analyst-with-claude-desktop)
+  - [Software Engineer in Windsurf IDE](#user-journey-2-software-engineer-in-windsurf-ide)
+- [Key Features](#key-features)
+- [Overall Architecture](#overall-architecture)
+- [Implementation Roadmap](#implementation-roadmap)
+- [Implementation Details](#implementation-details)
+
 ## Project Goal
 
 The Dust MCP Server project is a server implementation for integrating with Dust AI services using the Model Context Protocol (MCP). It serves as a middleware connector between client applications (particularly Claude Desktop) and Dust AI agents, enabling data processing, analysis, and insights generation through AI agents. The implementation includes a comprehensive test suite covering unit, integration, and end-to-end testing scenarios.
+
+## User Personas
+
+### 1. Business Analyst
+
+- **Role**: Data and Business Analysis
+- **Key Tools**: Dust Agents, Spaces, Claude Desktop
+- **Needs**:
+  - Simplified local frontend for data analysis
+  - Easy integration of various data sources via MCP
+  - Visual workflow builder for agent interactions
+  - Pre-built templates for common analysis tasks
+- **Frustrations**:
+  - Complex setup processes
+  - Switching between multiple tools
+  - Manual data preparation and cleaning
+
+### 2. Software Engineer
+
+- **Role**: System and Requirements Engineering
+- **Key Tools**: Dust Agents, Spaces, IDE (Windsurf)
+- **Needs**:
+  - Seamless integration with development environment
+  - Ability to work with cloud-based servers
+  - Version control integration
+  - Automated testing of agent interactions
+- **Frustrations**:
+  - Context switching between tools
+  - Manual deployment processes
+  - Lack of development tooling integration
+
+## User Journeys
+
+### User Journey 1: Business Analyst with Claude Desktop
+
+### Business Analyst Overview
+
+This journey describes how a Business Analyst uses Claude Desktop with Dust Agents and Spaces to perform data analysis through a simplified local interface.
+
+#### 1. Initial Setup
+
+- **Installation**
+  - Downloads and installs Claude Desktop with one-click installer
+  - MCP Server is automatically configured during installation
+  - No command-line or technical setup required
+
+- **Workspace Configuration**
+  - Connects to existing Dust Spaces
+  - Sets up local data source connections (CSV, Excel, Databases)
+  - Configures default analysis templates and dashboards
+
+#### 2. Daily Workflow
+
+- **Data Preparation**
+  - Imports data from various sources via drag-and-drop
+  - Uses visual tools to clean and transform data
+  - Saves data preparation steps as reusable workflows
+
+- **Analysis with Agents**
+  - Selects from pre-configured analysis templates
+  - Customizes agent parameters through simple forms
+  - Views real-time results in interactive dashboards
+  - Saves and shares analysis configurations
+
+- **Collaboration**
+  - Shares analysis with team members
+  - Comments on specific data points
+  - Tracks changes and versions of analyses
+
+#### 3. Advanced Features
+
+- **Custom Data Connectors**
+  - Creates reusable connectors for internal data sources
+  - Schedules automatic data refreshes
+  - Manages credentials securely
+
+- **Automation**
+  - Schedules recurring analyses
+  - Sets up alerts for data thresholds
+  - Creates automated reports and exports
+
+### User Journey 2: Software Engineer in Windsurf IDE
+
+### Software Engineer Overview
+
+This journey describes how a Software Engineer uses Dust Agents and Spaces directly within their Windsurf IDE for system and requirements engineering tasks.
+
+#### 1. Development Environment Setup
+
+- **IDE Integration**
+  - Installs Dust extension for Windsurf IDE
+  - Configures connection to cloud-based MCP servers
+  - Sets up local development environment
+
+- **Project Configuration**
+  - Imports existing Dust Spaces and agents
+  - Configures local and remote execution environments
+  - Sets up version control integrations
+
+#### 2. Development Workflow
+
+- **Agent Development**
+  - Creates and tests agents directly in the IDE
+  - Uses code completion and IntelliSense for agent development
+  - Runs and debugs agents locally or in the cloud
+
+- **Version Control**
+  - Commits agent configurations and code to Git
+  - Creates branches for new features
+  - Reviews and merges changes through PRs
+
+- **Testing**
+  - Writes and runs unit tests for agents
+  - Sets up integration tests for agent workflows
+  - Performs load testing for high-volume scenarios
+
+#### 3. Deployment and Operations
+
+- **CI/CD Integration**
+  - Configures automated testing pipelines
+  - Sets up deployment to staging and production
+  - Implements blue/green deployments
+
+- **Monitoring and Debugging**
+  - Views real-time logs and metrics
+  - Debugs production issues with remote debugging
+  - Performs A/B testing of agent versions
+
+- **Scaling**
+  - Configures auto-scaling for agents
+  - Monitors resource usage and performance
+  - Optimizes agent performance and cost
 
 ## Key Features
 
@@ -44,213 +190,6 @@ The project follows a TypeScript-based server architecture with modular componen
   - `/.github`: GitHub workflows and templates
 
 The system is designed to process documents, extract relevant information, and use Dust AI agents to analyze and generate insights from the data. The implementation includes a comprehensive test suite that validates all critical paths and edge cases, ensuring reliability and maintainability.
-
-## User Journey 1: Claude Desktop (STDIO Transport)
-
-### Overview
-
-Claude Desktop's integration with Dust via the MCP server enables powerful AI-assisted workflows through a local STDIO-based interface. This section details how users can interact with Dust agents and workspaces, including creating and continuing conversations, uploading files, and managing AI-assisted tasks.
-
-### Key Capabilities
-
-1. **Agent Interaction**
-   - List and select from available Dust agents
-   - Chain multiple agents for complex workflows
-   - View and manage agent configurations
-
-2. **Workspace Management**
-   - Switch between different workspaces
-   - Create and organize conversations
-   - Manage access and permissions
-
-3. **Conversation Flow**
-   - Start new conversations with specific agents
-   - Continue existing conversations with full context
-   - Reference previous interactions and files
-
-4. **File Operations**
-   - Upload and process various file types
-   - Reference files in conversations
-   - View and manage uploaded files
-
-### 1. Initial Setup and Configuration
-
-- **Prerequisites**:
-  - Node.js (v16+) and NPM (v8+) installed locally
-  - Claude Desktop application installed
-  - Valid Dust API credentials with workspace access
-  - Local development environment with required dependencies
-
-- **Configuration**:
-  - User opens Claude Desktop settings
-  - Navigates to MCP Server configuration
-  - Configures `claude_desktop_config.json` with:
-    ```json
-    {
-      "mcpServers": {
-        "dust": {
-          "command": "node",
-          "args": ["/path/to/dust-mcp-server/dist/index.js"],
-          "env": {
-            "DUST_API_KEY": "your-api-key",
-            "WORKSPACE_ID": "target-workspace-id"
-          }
-        }
-      }
-    }
-    ```
-  - Saves configuration and restarts Claude Desktop
-
-- **Authentication Flow**:
-  1. User provides Dust API key
-  2. System validates credentials and retrieves available workspaces
-  3. User selects default workspace
-  4. Session token is stored securely in system keychain
-
-- **Workspace Initialization**:
-  ```typescript
-  // Example: Initialize workspace session
-  const initResponse = await fetch('https://dust.tt/api/v1/workspaces/{workspaceId}/init', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      client: 'claude-desktop',
-      version: '1.0.0'
-    })
-  });
-  ```
-
-- **Configuration Validation**:
-  - Verifies API connectivity
-  - Validates workspace access
-  - Tests file system permissions
-  - Initializes local cache
-
-### 2. Session Initialization
-
-- **Local Server Startup**:
-  - Claude Desktop starts the MCP server as a subprocess via STDIO
-  - Server initializes with user's local environment context
-  - Local file system access permissions are established
-
-- **Session Management**:
-  - Creates new MCP sessions with full context preservation
-  - Manages multiple concurrent sessions for different tasks
-  - All operations execute within user's local security context
-
-### 3. Local File Operations
-
-- **File Access**:
-  - User requests file operations through natural language
-  - Claude Desktop routes requests to local MCP server via STDIO
-  - User grants explicit permissions for file system access
-  - Operations execute with user's local permissions
-
-- **Data Processing**:
-  - Local files are processed by Dust agents
-  - Processing occurs entirely on the local machine
-  - No data leaves the user's system without explicit consent
-
-### 4. Security and Permissions
-
-- **Local Execution**:
-  - All operations run with user's local permissions
-  - No network communication required for local operations
-  - Clear audit trail of all file system access
-
-- **Permission Model**:
-  - Explicit user approval for sensitive operations
-  - Granular control over file system access
-  - Session-based permission persistence
-
-## User Journey 2: Remote MCP Clients (HTTP/SSE Transport)
-
-### Overview
-
-Remote MCP clients connect to MCP servers over the network using HTTP and Server-Sent Events (SSE). This enables cloud-based deployments, team collaboration, and centralized management of MCP servers.
-
-### 1. Server Deployment
-
-- **Supported Platforms**:
-  - **Smithery** (Recommended)
-    - Managed MCP server hosting
-    - Built-in authentication and monitoring
-    - Team collaboration features
-    - Automatic scaling and updates
-    
-    **Deployment Steps**:
-    1. Sign up for a Smithery account at [app.smithery.io](https://app.smithery.io)
-    2. Create a new MCP server instance
-    3. Configure authentication (OAuth 2.0 or API keys)
-    4. Set up team members and permissions
-    5. Connect your MCP server configuration
-    6. Deploy with a single click
-
-  - **Pipedream**
-    - Serverless MCP server hosting
-    - Event-driven architecture
-    - Easy integration with various services
-    
-    **Deployment Steps**:
-    1. Create a Pipedream account at [pipedream.com](https://pipedream.com)
-    2. Create a new MCP server workflow
-    3. Configure the HTTP/SSE endpoints
-    4. Set up environment variables
-    5. Deploy the workflow
-    6. Configure webhook integrations as needed
-
-  - **Azure Container Apps** (Planned for future release)
-    - Managed container service
-    - Enterprise-grade security
-    - Integration with Azure ecosystem
-    
-  - **Self-Hosted Options**: (Planned for future release)
-    - Kubernetes
-
-- **Configuration**:
-  - Configure server with appropriate scaling and security settings
-  - Set up monitoring and logging
-
-### 2. Client Configuration
-
-- **Supported Clients**:
-  - Cursor
-  - VS Code with MCP extension
-  - Simple AI
-  - Tester MCP Client
-  - Windsurf
-
-- **Connection Setup**:
-  - User configures client with server URL (e.g., `https://your-cloud-run-url/sse`)
-  - Sets up authentication (API keys, OAuth, etc.)
-  - Configures connection timeouts and retry policies
-
-### 3. Remote Operations
-
-- **Session Management**:
-  - Establishes persistent SSE connection to remote server
-  - Handles reconnection logic for network interruptions
-  - Maintains session state on the server
-
-- **Tool Execution**:
-  - Client sends tool execution requests via HTTP POST
-  - Receives streaming updates via SSE
-  - Handles partial results and progress updates
-
-### 4. Multi-User Features
-
-- **Collaboration**:
-  - Multiple users can connect to the same server
-  - Shared tool configurations and presets
-  - Real-time collaboration features
-
-- **Centralized Management**:
-  - Single control plane for all MCP operations
-  - Centralized logging and monitoring
-  - Team-based access control
 
 ## Implementation Roadmap
 
@@ -290,71 +229,102 @@ Remote MCP clients connect to MCP servers over the network using HTTP and Server
 | Maintenance                   | User-managed               | Centrally managed           |
 | Data Privacy                 | Local only                 | Network transfer required   |
 
-## Legacy Configuration
+## Implementation Details
 
-### Initial Setup and Configuration
+### 1. Core Architecture
 
-- **MCP Client Installation**:
-  - User installs Claude Desktop with MCP Client capabilities
-  - Configures connection to Dust platform using API credentials
-  - Sets up local cache and session storage preferences 
-  - no other external dependencies for the MCP Server
+- **Modular Design**
+  - Decoupled components for maintainability and scalability
+  - Clear separation of concerns between transport, business logic, and agent interfaces
+  - Plugin-based architecture for easy extension
 
-- **Dust Account Integration**:
-  - Authenticates with Dust platform via OAuth or API Key
-  - Syncs available agents and tools from Dust account
-  - Configures default agent preferences and settings
+- **Transport Layer**
+  - Dual support for STDIO (local) and HTTP/SSE (remote) communication
+  - Automatic protocol negotiation and fallback mechanisms
+  - Connection pooling and session management
 
-- **Agent Discovery and Selection**:
-  - Browses available Dust agents through Claude Desktop interface
-  - Views agent capabilities, documentation, and example use cases
-  - Selects and configures preferred agents for different task types
+### 2. File Management
 
-### 2. Workspace and Session Management
+- **Supported Formats**
+  - Documents: PDF, DOCX, PPTX, XLSX
+  - Text: TXT, Markdown, JSON, CSV
+  - Images: JPG, PNG (with OCR support)
+  - Maximum file size: 50MB per file
 
-- **Session Initialization**:
-  - Creates new MCP sessions tied to Dust conversation history
-  - Resumes previous sessions with full context preservation
-  - Manages multiple concurrent sessions for different tasks
-  - No external session or caching services for local installation
-
-- **Context Management**:
-  - Leverages Dust's session history for context continuity
-  - Syncs conversation state across devices via Dust platform
-  - Manages context window and summarization preferences
-
-- **File Handling**:
-  - Uploads various file formats (PDF, DOCX, XLSX, etc.) through Claude Desktop
-  - Tracks file references within Dust conversation history
-  - Manages file access permissions and versions
+- **Processing Pipeline**
+  - Automatic file type detection and validation
+  - Secure temporary storage with automatic cleanup
+  - Metadata extraction and indexing
+  - Chunking for large files with context preservation
 
 ### 3. Agent Interaction and Orchestration
 
-- **Agent Selection and Invocation**:
-  - Uses natural language to request specific agent capabilities
-  - Claude Desktop intelligently routes requests to appropriate Dust agents
-  - Views which agent is handling each part of the conversation
+- **Agent Registry**
+  - Dynamic discovery of available agents
+  - Capability-based routing of requests
+  - Versioning and compatibility management
 
-- **Multi-Agent Workflows**:
-  - Defines agent chains through conversation context
-  - Monitors agent handoffs and collaboration
-  - Adjusts workflow based on intermediate results
+- **Workflow Engine**
+  - Visual workflow designer for multi-agent processes
+  - Conditional branching and error handling
+  - State persistence and recovery
+  - Timeout and retry mechanisms
 
-- **Real-time Monitoring**:
-  - Views agent activity and status in real-time
-  - Monitors token usage and API costs
-  - Receives notifications for long-running operations
+- **Session Management**
+  - Isolated conversation contexts
+  - Long-running session support
+  - Context summarization for large histories
+  - Automatic session cleanup
 
-### 4. Advanced Features and Integration
+### 4. Security and Access Control
 
-- **Tool Integration**:
-  - Discovers and configures special tools through MCP
-  - Maps Claude Desktop features to Dust agent capabilities
-  - Manages authentication and permissions for integrated tools
+- **Authentication**
+  - OAuth 2.0 with Dust platform
+  - API key support for service-to-service communication
+  - Session token rotation
 
-### 5. Future Integration Roadmap
+- **Authorization**
+  - Role-based access control (RBAC)
+  - Fine-grained permissions for operations
+  - Audit logging for all sensitive actions
 
-- **Collaboration Features**:
+### 5. Monitoring and Observability
+
+- **Metrics Collection**
+  - Performance metrics (latency, throughput)
+  - Resource utilization
+  - API usage and quotas
+
+- **Logging**
+  - Structured logging with request correlation
+  - Configurable log levels
+  - Log rotation and retention policies
+
+- **Alerting**
+  - Custom alert rules
+  - Integration with monitoring tools
+  - Health check endpoints
+
+### 6. Integration Capabilities
+
+- **Third-Party Integrations**
+  - Pre-built connectors for common services
+  - Webhook support for event-driven workflows
+  - Custom adapter development kit
+
+- **Developer Tools**
+  - Interactive API documentation (OpenAPI/Swagger)
+  - SDKs for multiple languages
+  - Local development server with hot-reload
+
+- **Data Sources**
+  - Database connectors (SQL, NoSQL)
+  - Cloud storage providers (S3, GCS, Azure Blob)
+  - API clients for REST and GraphQL services
+
+## Future Roadmap
+
+- **Collaboration Features**
   - Shares conversations and agent interactions via Dust's collaboration features
   - Invites team members to join active sessions
   - Tracks changes and contributions from different users
@@ -369,44 +339,24 @@ Remote MCP clients connect to MCP servers over the network using HTTP and Server
   - Team workspaces with shared agent presets
   - Version control for agent interactions
 
-- **Advanced Analytics**:
-  - Performance metrics for agent interactions
-  - Cost and usage analytics across teams
-  - Automated quality assessment of agent outputs
-
-- **Extended Platform Support**:
-  - Mobile client integration
-  - Browser extension for web-based interactions
-  - API for custom client implementations
-
 - **Context Management**:
-  - Reviews and edits shared context
-  - Resolves context conflicts between agents
-  - Saves context snapshots for future reference
+  - Manual context editing
+  - Context summarization
+  - Context versioning and branching
 
-- **Session Saving**:
-  - Saves current workspace state
-  - Names and tags sessions for retrieval
-  - Shares sessions with team members
+- **Custom Tools and Integrations**:
+  - Create custom tools with TypeScript/JavaScript
+  - Integrate with external APIs and services
+  - Share tools across workspaces
 
-- **History and Versioning**:
-  - Reviews interaction history
-  - Reverts to previous states
-  - Compares different versions of agent outputs
+## Technical Architecture
 
-- **Data Export**:
-  - Exports agent conversations
-  - Saves processed data in structured formats
-  - Generates API documentation for agent interactions
+### Core Components
 
-## Existing Files and Resources
-
-### Core Application Files
-
-- `src/`
-  - `agents/`: Agent definitions and configurations
-  - `api/`: REST API endpoints
-  - `services/`: Core services for agent management
+- **Agents**: Handle specific tasks and workflows
+- **API Layer**: Manages communication between components
+- **Services**: Core functionality for agent management
+- **Storage**: Persistent data storage and caching
   - `utils/`: Shared utilities and helpers
 
 ### Configuration
@@ -422,33 +372,9 @@ Remote MCP clients connect to MCP servers over the network using HTTP and Server
   - `guides/`: User guides and tutorials
   - `examples/`: Example implementations
 
-## Agent Capabilities
 
-### Document Analysis Agent
 
-- Processes and analyzes uploaded documents
-- Extracts key information and metadata
-- Generates summaries and insights
-
-### Data Processing Agent
-
-- Handles structured and unstructured data
-- Performs data cleaning and transformation
-- Generates visualizations and reports
-
-### Research Agent
-
-- Conducts web research
-- Validates information from multiple sources
-- Compiles research findings
-
-### Content Generation Agent
-
-- Creates written content
-- Adapts tone and style
-- Ensures consistency with brand guidelines
-
-## MCP Integration with DUST Agents
+## Details MCP Integration with DUST Agents
 
 ### MCP Server Architecture
 
