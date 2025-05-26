@@ -11,15 +11,15 @@
     "start:dev": "NODE_ENV=development node --no-warnings --experimental-specifier-resolution=node build/index.js",
     "start:memory": "NODE_ENV=development SESSION_STORE_TYPE=memory node --no-warnings build/server.js",
     "start:redis": "NODE_ENV=development SESSION_STORE_TYPE=redis node --no-warnings build/server.js",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs",
-    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs --testPathPattern=__tests__/unit",
-    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs --testPathPattern=__tests__/integration",
-    "test:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs --testPathPattern=__tests__/e2e",
-    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs --watch",
-    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs --coverage",
-    "test:ci": "NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.mjs --ci --runInBand --coverage",
-    "test:memory": "NODE_OPTIONS=--experimental-vm-modules SESSION_STORE_TYPE=memory jest --config=jest.config.mjs",
-    "test:redis": "NODE_OPTIONS=--experimental-vm-modules SESSION_STORE_TYPE=redis jest --config=jest.config.mjs",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=__tests__/unit",
+    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=__tests__/integration",
+    "test:e2e": "NODE_OPTIONS=--experimental-vm-modules jest --testPathPattern=__tests__/e2e",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test:ci": "NODE_OPTIONS=--experimental-vm-modules jest --ci --runInBand --coverage",
+    "test:memory": "NODE_OPTIONS=--experimental-vm-modules SESSION_STORE_TYPE=memory jest",
+    "test:redis": "NODE_OPTIONS=--experimental-vm-modules SESSION_STORE_TYPE=redis jest",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
@@ -101,19 +101,6 @@
     ],
     "*.{json,md}": [
       "prettier --write"
-    ]
-  },
-  "jest": {
-    "preset": "ts-jest/presets/default-esm",
-    "testEnvironment": "node",
-    "extensionsToTreatAsEsm": [
-      ".ts"
-    ],
-    "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/src/$1"
-    },
-    "transformIgnorePatterns": [
-      "node_modules/(?!(node-fetch|@modelcontextprotocol)/)"
     ]
   },
   "exports": {

@@ -21,7 +21,7 @@ type RedisConfig = RedisOptions & {
 };
 
 class RedisConnection {
-  private static _instance: Redis | null = null;
+  private static _client: Redis | null = null;
   private static _isConnected = false;
   private static _initialized = false;
   private static _useMemoryStore = false;
@@ -30,11 +30,50 @@ class RedisConnection {
 
   private constructor() {}
 
-  public static getInstance(_config: RedisConfig = {}): Redis {
-    if (!RedisConnection._initialized || !RedisConnection._instance) {
-      throw new Error('Redis connection not initialized. Call RedisConnection.initialize() first.');
+  /**
+   * Get the Redis client instance
+   * @throws {Error} If the client is not initialized
+   */
+  public static getClient(): Redis {
+    if (!RedisConnection._client) {
+      throw new Error('Redis client not initialized');
     }
-    return RedisConnection._instance;
+    return RedisConnection._client;
+  }
+
+  /**
+   * Check if the Redis client is connected
+   */
+  public static isConnected(): boolean {
+    return RedisConnection._isConnected && RedisConnection._client?.status === 'ready';
+  }
+
+  /**
+   * Check if using in-memory store
+   */
+  public static isUsingMemoryStore(): boolean {
+    return RedisConnection._useMemoryStore;
+  }
+  
+  /**
+   * Close the Redis connection
+   */
+  public static async close(): Promise<void> {
+    if (!RedisConnection._client) {
+      return;
+    }
+    
+    try {
+      await RedisConnection._client.quit();
+      logger.info('Redis connection closed');
+    } catch (error) {
+      logger.error('Error closing Redis connection:', error);
+      throw error;
+    } finally {
+      RedisConnection._client = null;
+      RedisConnection._isConnected = false;
+      RedisConnection._initialized = false;
+    }
   }
 
   public static async initialize(config: RedisConfig = {}): Promise<Redis> {

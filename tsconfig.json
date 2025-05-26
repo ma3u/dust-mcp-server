@@ -37,7 +37,8 @@
     "src/**/*.jsx",
     "jest.config.js",
     "jest.setup.js",
-    "jest.setup.afterEnv.js"
+    "jest.setup.afterEnv.js",
+    "**/*.d.ts"
   ],
   "exclude": [
     "node_modules",
