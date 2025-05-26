@@ -143,6 +143,12 @@ This journey describes how a Software Engineer uses Dust Agents and Spaces direc
   - Configures automated testing pipelines
   - Sets up deployment to staging and production
   - Implements blue/green deployments
+  - **Vercel Deployment**
+    - One-click deployment of MCP server to Vercel
+    - Automatic environment variable management
+    - Serverless function configuration for optimal performance
+    - Custom domain and SSL setup
+    - Preview deployments for pull requests
 
 - **Monitoring and Debugging**
   - Views real-time logs and metrics
