@@ -49,20 +49,85 @@ The system is designed to process documents, extract relevant information, and u
 
 ### Overview
 
-Claude Desktop exclusively supports the STDIO (standard input/output) transport for MCP servers. This means it runs MCP servers as local subprocesses, communicating via STDIO pipes. This setup is ideal for local integrations, such as accessing files on your computer, and ensures all actions are performed within your user context and require explicit permission.
+Claude Desktop's integration with Dust via the MCP server enables powerful AI-assisted workflows through a local STDIO-based interface. This section details how users can interact with Dust agents and workspaces, including creating and continuing conversations, uploading files, and managing AI-assisted tasks.
+
+### Key Capabilities
+
+1. **Agent Interaction**
+   - List and select from available Dust agents
+   - Chain multiple agents for complex workflows
+   - View and manage agent configurations
+
+2. **Workspace Management**
+   - Switch between different workspaces
+   - Create and organize conversations
+   - Manage access and permissions
+
+3. **Conversation Flow**
+   - Start new conversations with specific agents
+   - Continue existing conversations with full context
+   - Reference previous interactions and files
+
+4. **File Operations**
+   - Upload and process various file types
+   - Reference files in conversations
+   - View and manage uploaded files
 
 ### 1. Initial Setup and Configuration
 
 - **Prerequisites**:
-  - Node.js and NPM installed locally
-  - Claude Desktop installed
-  - Valid Dust API credentials
+  - Node.js (v16+) and NPM (v8+) installed locally
+  - Claude Desktop application installed
+  - Valid Dust API credentials with workspace access
+  - Local development environment with required dependencies
 
 - **Configuration**:
   - User opens Claude Desktop settings
-  - Edits `claude_desktop_config.json` to add local Filesystem MCP Server
-  - Configures connection to Dust platform using API credentials
-  - Sets up local cache and session storage preferences
+  - Navigates to MCP Server configuration
+  - Configures `claude_desktop_config.json` with:
+    ```json
+    {
+      "mcpServers": {
+        "dust": {
+          "command": "node",
+          "args": ["/path/to/dust-mcp-server/dist/index.js"],
+          "env": {
+            "DUST_API_KEY": "your-api-key",
+            "WORKSPACE_ID": "target-workspace-id"
+          }
+        }
+      }
+    }
+    ```
+  - Saves configuration and restarts Claude Desktop
+
+- **Authentication Flow**:
+  1. User provides Dust API key
+  2. System validates credentials and retrieves available workspaces
+  3. User selects default workspace
+  4. Session token is stored securely in system keychain
+
+- **Workspace Initialization**:
+  ```typescript
+  // Example: Initialize workspace session
+  const initResponse = await fetch('https://dust.tt/api/v1/workspaces/{workspaceId}/init', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      client: 'claude-desktop',
+      version: '1.0.0'
+    })
+  });
+  ```
+
+- **Configuration Validation**:
+  - Verifies API connectivity
+  - Validates workspace access
+  - Tests file system permissions
+  - Initializes local cache
 
 ### 2. Session Initialization
 
