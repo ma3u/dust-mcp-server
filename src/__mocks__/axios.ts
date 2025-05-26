@@ -4,12 +4,12 @@ export default {
   post: jest.fn(),
   put: jest.fn(),
   delete: jest.fn(),
-  create: jest.fn(function() {
+  create: jest.fn(function () {
     return this;
   }),
   defaults: {
     headers: {
-      common: {}
-    }
-  }
+      common: {},
+    },
+  },
 };

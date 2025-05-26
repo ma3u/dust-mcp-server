@@ -38,8 +38,12 @@ interface ToolResponse {
 type ToolHandler = (params: Record<string, unknown>) => Promise<ToolResponse>;
 
 // Define proper types for mock functions
-type QueryDustAgentFn = (params: QueryDustAgentParams) => Promise<Record<string, unknown>>;
-type ListDustAgentsFn = (params: ListDustAgentsParams) => Promise<AgentConfig[]>;
+type QueryDustAgentFn = (
+  params: QueryDustAgentParams
+) => Promise<Record<string, unknown>>;
+type ListDustAgentsFn = (
+  params: ListDustAgentsParams
+) => Promise<AgentConfig[]>;
 type GetAgentConfigFn = (agentId: string) => Promise<AgentConfig | null>;
 
 // Mock the Dust service with proper types
@@ -51,7 +55,7 @@ const mockGetAgentConfig = jest.fn();
 const mockDustService = {
   queryDustAgent: mockQueryDustAgent,
   listDustAgents: mockListDustAgents,
-  getAgentConfig: mockGetAgentConfig
+  getAgentConfig: mockGetAgentConfig,
 };
 
 jest.mock('../../src/services/dustService.js', () => mockDustService);
@@ -71,7 +75,7 @@ interface MockServer {
 describe('Dust MCP Tools', () => {
   let mockServer: MockServer;
   let mockTool: jest.Mock<void, [string, unknown, ToolHandler]>;
-  
+
   const mockAgent: AgentConfig = {
     id: 'agent1',
     name: 'Test Agent',
@@ -87,44 +91,46 @@ describe('Dust MCP Tools', () => {
     visualizationEnabled: true,
     version: '1.0.0',
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date().toISOString(),
   };
-  
+
   const mockAgents: AgentConfig[] = [mockAgent];
 
   // Setup mock implementations before each test
   beforeEach(() => {
     // Reset all mocks
     jest.clearAllMocks();
-    
+
     // Setup default mock implementations with proper types
     (mockQueryDustAgent as jest.Mock).mockResolvedValue({
       agentId: 'test-agent-1',
       conversationId: 'conv-123',
       messageId: 'msg-123',
       result: 'Test response',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-    
-    (mockListDustAgents as jest.Mock).mockResolvedValue([{
-      id: 'test-agent-1',
-      name: 'Test Agent',
-      description: 'A test agent',
-      capabilities: ['query', 'search']
-    }]);
-    
+
+    (mockListDustAgents as jest.Mock).mockResolvedValue([
+      {
+        id: 'test-agent-1',
+        name: 'Test Agent',
+        description: 'A test agent',
+        capabilities: ['query', 'search'],
+      },
+    ]);
+
     (mockGetAgentConfig as jest.Mock).mockResolvedValue({
       id: 'test-agent-1',
       name: 'Test Agent',
       description: 'A test agent',
-      capabilities: ['query', 'search']
+      capabilities: ['query', 'search'],
     });
-    
+
     // Create a mock MCP server
     mockServer = {
-      tool: jest.fn()
+      tool: jest.fn(),
     } as unknown as MockServer;
-    
+
     // Setup the dust tools with the mock server
     setupDustTools(mockServer as unknown as McpServer);
   });
@@ -158,7 +164,7 @@ describe('Dust MCP Tools', () => {
 
   describe('list_agents tool', () => {
     let listAgentsHandler: ToolHandler;
-    
+
     beforeEach(() => {
       // Get the handler for the list agents tool
       const call = (mockServer.tool as jest.Mock).mock.calls.find(
@@ -174,7 +180,7 @@ describe('Dust MCP Tools', () => {
 
       // Call the handler
       const response = await listAgentsHandler({});
-      
+
       // Verify the response
       expect(Array.isArray(response.content)).toBe(true);
       expect(response.content[0].text).toContain('Available Dust Agents');
@@ -185,7 +191,7 @@ describe('Dust MCP Tools', () => {
 
   describe('get_agent_config tool', () => {
     let getAgentConfigHandler: ToolHandler;
-    
+
     beforeEach(() => {
       // Get the handler for the get agent config tool
       const call = (mockServer.tool as jest.Mock).mock.calls.find(
@@ -201,7 +207,7 @@ describe('Dust MCP Tools', () => {
 
       // Call the handler
       const response = await getAgentConfigHandler({ agent_id: 'agent1' });
-      
+
       // Verify the response
       expect(Array.isArray(response.content)).toBe(true);
       expect(response.content[0].text).toContain('Agent Configuration');
@@ -212,7 +218,7 @@ describe('Dust MCP Tools', () => {
 
   describe('dust_agent_query tool', () => {
     let agentQueryHandler: ToolHandler;
-    
+
     beforeEach(() => {
       // Get the handler for the agent query tool
       const call = (mockServer.tool as jest.Mock).mock.calls.find(
@@ -229,16 +235,16 @@ describe('Dust MCP Tools', () => {
         conversationId: 'conv1',
         messageId: 'msg1',
         result: 'Test response',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       });
 
       // Call the handler
       const response = await agentQueryHandler({
         agent_id: 'agent1',
         query: 'Test query',
-        conversation_id: 'conv1'
+        conversation_id: 'conv1',
       } as any);
-      
+
       // Verify the response
       expect(Array.isArray(response.content)).toBe(true);
       expect(response.content[0].text).toContain('Test response');
@@ -257,9 +263,9 @@ describe('Dust MCP Tools', () => {
       // Call the handler
       const response = await agentQueryHandler({
         agent_id: 'agent1',
-        query: 'Test query'
+        query: 'Test query',
       } as any);
-      
+
       // Verify the error response
       expect(Array.isArray(response.content)).toBe(true);
       expect(response.content[0].text).toContain('Error querying agent');

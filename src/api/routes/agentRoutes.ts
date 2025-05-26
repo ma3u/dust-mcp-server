@@ -13,10 +13,14 @@ const CreateSessionSchema = z.object({
 
 const SendMessageSchema = z.object({
   message: z.string(),
-  files: z.array(z.object({
-    name: z.string(),
-    content: z.string(),
-  })).optional(),
+  files: z
+    .array(
+      z.object({
+        name: z.string(),
+        content: z.string(),
+      })
+    )
+    .optional(),
 });
 
 /**
@@ -112,7 +116,9 @@ router.post('/sessions', async (req, res) => {
     res.status(201).json(session);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid input', details: error.errors });
+      return res
+        .status(400)
+        .json({ error: 'Invalid input', details: error.errors });
     }
     logger.error('Failed to create session', { error });
     res.status(500).json({ error: 'Failed to create session' });
@@ -169,18 +175,24 @@ router.post('/sessions/:sessionId/messages', async (req, res) => {
   try {
     const { sessionId } = req.params;
     const { message, files = [] } = SendMessageSchema.parse(req.body);
-    
+
     // Convert base64 file content to string as required by the AgentService
-    const processedFiles = files.map(file => ({
+    const processedFiles = files.map((file) => ({
       name: file.name,
       content: Buffer.from(file.content, 'base64').toString('utf-8'),
     }));
-    
-    const result = await agentService.sendMessage(sessionId, message, processedFiles);
+
+    const result = await agentService.sendMessage(
+      sessionId,
+      message,
+      processedFiles
+    );
     res.json(result);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: 'Invalid input', details: error.errors });
+      return res
+        .status(400)
+        .json({ error: 'Invalid input', details: error.errors });
     }
     if (error.message.includes('not found')) {
       return res.status(404).json({ error: error.message });

@@ -45,14 +45,195 @@ The project follows a TypeScript-based server architecture with modular componen
 
 The system is designed to process documents, extract relevant information, and use Dust AI agents to analyze and generate insights from the data. The implementation includes a comprehensive test suite that validates all critical paths and edge cases, ensuring reliability and maintainability.
 
-## User Journey: Claude Desktop as MCP Client for Dust
+## User Journey 1: Claude Desktop (STDIO Transport)
+
+### Overview
+
+Claude Desktop exclusively supports the STDIO (standard input/output) transport for MCP servers. This means it runs MCP servers as local subprocesses, communicating via STDIO pipes. This setup is ideal for local integrations, such as accessing files on your computer, and ensures all actions are performed within your user context and require explicit permission.
 
 ### 1. Initial Setup and Configuration
+
+- **Prerequisites**:
+  - Node.js and NPM installed locally
+  - Claude Desktop installed
+  - Valid Dust API credentials
+
+- **Configuration**:
+  - User opens Claude Desktop settings
+  - Edits `claude_desktop_config.json` to add local Filesystem MCP Server
+  - Configures connection to Dust platform using API credentials
+  - Sets up local cache and session storage preferences
+
+### 2. Session Initialization
+
+- **Local Server Startup**:
+  - Claude Desktop starts the MCP server as a subprocess via STDIO
+  - Server initializes with user's local environment context
+  - Local file system access permissions are established
+
+- **Session Management**:
+  - Creates new MCP sessions with full context preservation
+  - Manages multiple concurrent sessions for different tasks
+  - All operations execute within user's local security context
+
+### 3. Local File Operations
+
+- **File Access**:
+  - User requests file operations through natural language
+  - Claude Desktop routes requests to local MCP server via STDIO
+  - User grants explicit permissions for file system access
+  - Operations execute with user's local permissions
+
+- **Data Processing**:
+  - Local files are processed by Dust agents
+  - Processing occurs entirely on the local machine
+  - No data leaves the user's system without explicit consent
+
+### 4. Security and Permissions
+
+- **Local Execution**:
+  - All operations run with user's local permissions
+  - No network communication required for local operations
+  - Clear audit trail of all file system access
+
+- **Permission Model**:
+  - Explicit user approval for sensitive operations
+  - Granular control over file system access
+  - Session-based permission persistence
+
+## User Journey 2: Remote MCP Clients (HTTP/SSE Transport)
+
+### Overview
+
+Remote MCP clients connect to MCP servers over the network using HTTP and Server-Sent Events (SSE). This enables cloud-based deployments, team collaboration, and centralized management of MCP servers.
+
+### 1. Server Deployment
+
+- **Supported Platforms**:
+  - **Smithery** (Recommended)
+    - Managed MCP server hosting
+    - Built-in authentication and monitoring
+    - Team collaboration features
+    - Automatic scaling and updates
+    
+    **Deployment Steps**:
+    1. Sign up for a Smithery account at [app.smithery.io](https://app.smithery.io)
+    2. Create a new MCP server instance
+    3. Configure authentication (OAuth 2.0 or API keys)
+    4. Set up team members and permissions
+    5. Connect your MCP server configuration
+    6. Deploy with a single click
+
+  - **Pipedream**
+    - Serverless MCP server hosting
+    - Event-driven architecture
+    - Easy integration with various services
+    
+    **Deployment Steps**:
+    1. Create a Pipedream account at [pipedream.com](https://pipedream.com)
+    2. Create a new MCP server workflow
+    3. Configure the HTTP/SSE endpoints
+    4. Set up environment variables
+    5. Deploy the workflow
+    6. Configure webhook integrations as needed
+
+  - **Azure Container Apps** (Planned for future release)
+    - Managed container service
+    - Enterprise-grade security
+    - Integration with Azure ecosystem
+    
+  - **Self-Hosted Options**: (Planned for future release)
+    - Kubernetes
+
+- **Configuration**:
+  - Configure server with appropriate scaling and security settings
+  - Set up monitoring and logging
+
+### 2. Client Configuration
+
+- **Supported Clients**:
+  - Cursor
+  - VS Code with MCP extension
+  - Simple AI
+  - Tester MCP Client
+  - Windsurf
+
+- **Connection Setup**:
+  - User configures client with server URL (e.g., `https://your-cloud-run-url/sse`)
+  - Sets up authentication (API keys, OAuth, etc.)
+  - Configures connection timeouts and retry policies
+
+### 3. Remote Operations
+
+- **Session Management**:
+  - Establishes persistent SSE connection to remote server
+  - Handles reconnection logic for network interruptions
+  - Maintains session state on the server
+
+- **Tool Execution**:
+  - Client sends tool execution requests via HTTP POST
+  - Receives streaming updates via SSE
+  - Handles partial results and progress updates
+
+### 4. Multi-User Features
+
+- **Collaboration**:
+  - Multiple users can connect to the same server
+  - Shared tool configurations and presets
+  - Real-time collaboration features
+
+- **Centralized Management**:
+  - Single control plane for all MCP operations
+  - Centralized logging and monitoring
+  - Team-based access control
+
+## Implementation Roadmap
+
+### Phase 1: Core STDIO Support (Current)
+
+- [x] Basic STDIO transport implementation
+- [x] Local file system integration
+- [x] Session management for local operations
+- [x] Basic error handling and recovery
+
+### Phase 2: HTTP/SSE Transport
+
+- [ ] Implement HTTP server with SSE support
+- [ ] Add authentication middleware
+- [ ] Create client SDK for remote connections
+- [ ] Implement connection pooling and management
+
+### Phase 3: Advanced Features
+
+- [ ] Load balancing for multiple clients
+- [ ] Distributed session management
+- [ ] Advanced monitoring and metrics
+- [ ] Team collaboration features
+
+## Feature Comparison: STDIO vs HTTP/SSE
+
+| Feature                         | STDIO (Claude Desktop)     | HTTP/SSE (Remote Clients)    |
+|--------------------------------|----------------------------|-----------------------------|
+| Transport                      | Local subprocess            | Network (HTTP/SSE)          |
+| Server Location               | Local machine              | Cloud/on-premises           |
+| Use Case                      | Local file access          | Team collaboration          |
+| Authentication                | System user context        | API keys, OAuth             |
+| Performance                   | Low latency                | Network-dependent           |
+| Scalability                   | Single user                | Multi-tenant                |
+| Example Clients               | Claude Desktop             | Cursor, VS Code, Simple AI  |
+| Deployment Complexity         | Simple                     | Moderate                    |
+| Maintenance                   | User-managed               | Centrally managed           |
+| Data Privacy                 | Local only                 | Network transfer required   |
+
+## Legacy Configuration
+
+### Initial Setup and Configuration
 
 - **MCP Client Installation**:
   - User installs Claude Desktop with MCP Client capabilities
   - Configures connection to Dust platform using API credentials
-  - Sets up local cache and session storage preferences
+  - Sets up local cache and session storage preferences 
+  - no other external dependencies for the MCP Server
 
 - **Dust Account Integration**:
   - Authenticates with Dust platform via OAuth or API Key
@@ -70,6 +251,7 @@ The system is designed to process documents, extract relevant information, and u
   - Creates new MCP sessions tied to Dust conversation history
   - Resumes previous sessions with full context preservation
   - Manages multiple concurrent sessions for different tasks
+  - No external session or caching services for local installation
 
 - **Context Management**:
   - Leverages Dust's session history for context continuity

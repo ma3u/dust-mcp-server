@@ -2,9 +2,10 @@ import { Redis as IORedis, RedisOptions as IORedisOptions } from 'ioredis';
 import { getLogger } from '../utils/logger.js';
 
 // Use MemoryStore in test environment or when explicitly disabled
-const useMemoryStore = process.env.NODE_ENV === 'test' || 
-                      process.env.REDIS_DISABLED === 'true' ||
-                      process.env.USE_MEMORY_STORE === 'true';
+const useMemoryStore =
+  process.env.NODE_ENV === 'test' ||
+  process.env.REDIS_DISABLED === 'true' ||
+  process.env.USE_MEMORY_STORE === 'true';
 
 type Redis = IORedis;
 type RedisOptions = IORedisOptions;
@@ -13,7 +14,7 @@ type RedisOptions = IORedisOptions;
 const logger = getLogger({
   logFilePrefix: 'redis',
   includeTimestamps: true,
-  includeRequestId: true
+  includeRequestId: true,
 });
 
 type RedisConfig = RedisOptions & {
@@ -45,7 +46,10 @@ class RedisConnection {
    * Check if the Redis client is connected
    */
   public static isConnected(): boolean {
-    return RedisConnection._isConnected && RedisConnection._client?.status === 'ready';
+    return (
+      RedisConnection._isConnected &&
+      RedisConnection._client?.status === 'ready'
+    );
   }
 
   /**
@@ -54,7 +58,7 @@ class RedisConnection {
   public static isUsingMemoryStore(): boolean {
     return RedisConnection._useMemoryStore;
   }
-  
+
   /**
    * Close the Redis connection
    */
@@ -62,7 +66,7 @@ class RedisConnection {
     if (!RedisConnection._client) {
       return;
     }
-    
+
     try {
       await RedisConnection._client.quit();
       logger.info('Redis connection closed');
@@ -94,37 +98,51 @@ class RedisConnection {
         retryStrategy: (times: number) => {
           const delay = Math.min(times * 50, 2000);
           RedisConnection._connectionErrors++;
-          
+
           // Fallback to memory store after too many connection errors
-          if (RedisConnection._connectionErrors >= RedisConnection.MAX_CONNECTION_ERRORS) {
-            logger.warn('Too many Redis connection errors, falling back to memory store');
-            this._initializeMemoryStore().catch(err => {
-              logger.error('Failed to initialize memory store', { error: err.message });
+          if (
+            RedisConnection._connectionErrors >=
+            RedisConnection.MAX_CONNECTION_ERRORS
+          ) {
+            logger.warn(
+              'Too many Redis connection errors, falling back to memory store'
+            );
+            this._initializeMemoryStore().catch((err) => {
+              logger.error('Failed to initialize memory store', {
+                error: err.message,
+              });
             });
             return null; // Stop retrying
           }
-          
+
           return delay;
         },
         reconnectOnError: (err: Error) => {
           logger.error('Redis connection error', { error: err.message });
           RedisConnection._connectionErrors++;
-          
+
           // Fallback to memory store after too many connection errors
-          if (RedisConnection._connectionErrors >= RedisConnection.MAX_CONNECTION_ERRORS) {
-            logger.warn('Too many Redis connection errors, falling back to memory store');
-            this._initializeMemoryStore().catch(err => {
-              logger.error('Failed to initialize memory store', { error: err.message });
+          if (
+            RedisConnection._connectionErrors >=
+            RedisConnection.MAX_CONNECTION_ERRORS
+          ) {
+            logger.warn(
+              'Too many Redis connection errors, falling back to memory store'
+            );
+            this._initializeMemoryStore().catch((err) => {
+              logger.error('Failed to initialize memory store', {
+                error: err.message,
+              });
             });
             return false; // Stop reconnecting
           }
-          
+
           return true;
         },
       };
 
       const serverUrl = config.url || process.env.REDIS_URL;
-      RedisConnection._instance = serverUrl 
+      RedisConnection._instance = serverUrl
         ? new IORedis(serverUrl, redisOptions)
         : new IORedis(redisOptions);
 
@@ -138,7 +156,7 @@ class RedisConnection {
         if (!RedisConnection._instance) {
           return reject(new Error('Redis instance not initialized'));
         }
-        
+
         const onReady = () => {
           cleanup();
           RedisConnection._isConnected = true;
@@ -163,8 +181,11 @@ class RedisConnection {
       logger.info('Redis connection initialized');
       return RedisConnection._instance as Redis;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Failed to initialize Redis, falling back to memory store', { error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Failed to initialize Redis, falling back to memory store', {
+        error: errorMessage,
+      });
       return this._initializeMemoryStore();
     }
   }
@@ -172,19 +193,22 @@ class RedisConnection {
   private static async _initializeMemoryStore(): Promise<Redis> {
     try {
       logger.info('Initializing in-memory store');
-      
+
       // Import MemoryStore dynamically to avoid circular dependencies
       const { MemoryStore } = await import('./MemoryStore.js');
       RedisConnection._useMemoryStore = true;
       RedisConnection._instance = MemoryStore.getInstance() as unknown as Redis;
       RedisConnection._isConnected = true;
       RedisConnection._initialized = true;
-      
+
       logger.info('In-memory store initialized successfully');
       return RedisConnection._instance;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('Failed to initialize memory store', { error: errorMessage });
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      logger.error('Failed to initialize memory store', {
+        error: errorMessage,
+      });
       throw error;
     }
   }
@@ -199,7 +223,7 @@ class RedisConnection {
 
   public static async disconnect(): Promise<void> {
     if (!RedisConnection._instance) return;
-    
+
     try {
       // Both real and mock Redis use the same quit method
       await RedisConnection._instance.quit();
@@ -227,10 +251,17 @@ class RedisConnection {
       logger.error('Redis error:', { error });
 
       // After too many errors, fall back to memory store
-      if (RedisConnection._connectionErrors >= RedisConnection.MAX_CONNECTION_ERRORS) {
-        logger.warn('Too many Redis connection errors, falling back to memory store');
+      if (
+        RedisConnection._connectionErrors >=
+        RedisConnection.MAX_CONNECTION_ERRORS
+      ) {
+        logger.warn(
+          'Too many Redis connection errors, falling back to memory store'
+        );
         this._initializeMemoryStore().catch((err: Error) => {
-          logger.error('Failed to initialize memory store', { error: err.message });
+          logger.error('Failed to initialize memory store', {
+            error: err.message,
+          });
         });
       }
     });

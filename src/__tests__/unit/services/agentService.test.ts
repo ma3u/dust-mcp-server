@@ -1,13 +1,25 @@
-import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  jest,
+  afterEach,
+} from '@jest/globals';
 import { agentService } from '../../../services/agentService';
-import { DustApiService, DustAgent, DustSession, DustMessageResponse } from '../../../services/dustApiService';
+import {
+  DustApiService,
+  DustAgent,
+  DustSession,
+  DustMessageResponse,
+} from '../../../services/dustApiService';
 
 // Define mock data
 const mockAgent: DustAgent = {
   id: 'test1',
   name: 'Test Agent',
   description: 'A test agent',
-  capabilities: ['test']
+  capabilities: ['test'],
 };
 
 // Extend the DustAgent type to include our internal properties
@@ -17,7 +29,7 @@ type AgentWithStatus = DustAgent & {
 
 const mockAgentWithStatus: AgentWithStatus = {
   ...mockAgent,
-  isActive: true
+  isActive: true,
 };
 
 // Mock the logger
@@ -26,8 +38,8 @@ jest.mock('../../../utils/logger', () => ({
     info: jest.fn(),
     error: jest.fn(),
     debug: jest.fn(),
-    warn: jest.fn()
-  }
+    warn: jest.fn(),
+  },
 }));
 
 const mockSession = {
@@ -36,12 +48,12 @@ const mockSession = {
   context: { test: 'context' },
   isActive: true,
   createdAt: new Date().toISOString(),
-  lastActivity: new Date().toISOString()
+  lastActivity: new Date().toISOString(),
 };
 
 const mockMessageResponse: DustMessageResponse = {
   response: 'Test response',
-  context: { test: 'context' }
+  context: { test: 'context' },
 };
 
 // Mock the DustApiService
@@ -86,26 +98,34 @@ jest.mock('../../../services/agentService', () => {
 describe('AgentService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Set up default mock implementations for the API service
     mockDustApiService.listAgents.mockResolvedValue([mockAgent]);
-    mockDustApiService.getAgent.mockImplementation(async (id: string) => 
+    mockDustApiService.getAgent.mockImplementation(async (id: string) =>
       id === 'test1' ? mockAgent : Promise.reject(new Error('Agent not found'))
     );
     mockDustApiService.createSession.mockResolvedValue(mockSession);
     mockDustApiService.sendMessage.mockResolvedValue(mockMessageResponse);
     mockDustApiService.endSession.mockResolvedValue(undefined);
-    
+
     // Mock the agentService methods to use our mock implementations
-    jest.spyOn(agentService, 'getAgents').mockImplementation(async () => [{
-      ...mockAgent,
-      isActive: true
-    }]);
-    jest.spyOn(agentService, 'getAgent').mockImplementation(async (id: string) => 
-      id === 'test1' ? { ...mockAgent, isActive: true } : undefined
-    );
-    jest.spyOn(agentService, 'createSession').mockImplementation(async () => mockSession);
-    jest.spyOn(agentService, 'sendMessage').mockImplementation(async () => mockMessageResponse);
+    jest.spyOn(agentService, 'getAgents').mockImplementation(async () => [
+      {
+        ...mockAgent,
+        isActive: true,
+      },
+    ]);
+    jest
+      .spyOn(agentService, 'getAgent')
+      .mockImplementation(async (id: string) =>
+        id === 'test1' ? { ...mockAgent, isActive: true } : undefined
+      );
+    jest
+      .spyOn(agentService, 'createSession')
+      .mockImplementation(async () => mockSession);
+    jest
+      .spyOn(agentService, 'sendMessage')
+      .mockImplementation(async () => mockMessageResponse);
     jest.spyOn(agentService, 'endSession').mockImplementation(async () => {});
   });
 
@@ -128,7 +148,7 @@ describe('AgentService', () => {
     it('should return an empty array when no agents exist', async () => {
       // Override the default mock for this test
       jest.spyOn(agentService, 'getAgents').mockResolvedValueOnce([]);
-      
+
       const agents = await agentService.getAgents();
       expect(agents).toEqual([]);
     });
@@ -139,7 +159,7 @@ describe('AgentService', () => {
       expect(agents[0]).toMatchObject({
         id: 'test1',
         name: 'Test Agent',
-        isActive: true
+        isActive: true,
       });
     });
   });
@@ -150,7 +170,7 @@ describe('AgentService', () => {
       expect(agent).toMatchObject({
         id: 'test1',
         name: 'Test Agent',
-        isActive: true
+        isActive: true,
       });
     });
 
@@ -172,24 +192,37 @@ describe('AgentService', () => {
   describe('sendMessage', () => {
     it('should send a message to a session', async () => {
       // Spy on the actual implementation
-      const sendMessageSpy = jest.spyOn(agentService, 'sendMessage').mockImplementation(async () => mockMessageResponse);
-      
-      const response = await agentService.sendMessage('session1', 'Test message');
+      const sendMessageSpy = jest
+        .spyOn(agentService, 'sendMessage')
+        .mockImplementation(async () => mockMessageResponse);
+
+      const response = await agentService.sendMessage(
+        'session1',
+        'Test message'
+      );
       expect(response).toEqual(mockMessageResponse);
-      
+
       // The implementation might be calling the method internally, so we check the result
       // rather than the exact call arguments
       expect(sendMessageSpy).toHaveBeenCalled();
-      
+
       // Clean up
       sendMessageSpy.mockRestore();
     });
 
     it('should send a message with files', async () => {
       const files = [{ name: 'test.txt', content: 'test content' }];
-      const response = await agentService.sendMessage('session1', 'Test message', files);
+      const response = await agentService.sendMessage(
+        'session1',
+        'Test message',
+        files
+      );
       expect(response).toEqual(mockMessageResponse);
-      expect(agentService.sendMessage).toHaveBeenCalledWith('session1', 'Test message', files);
+      expect(agentService.sendMessage).toHaveBeenCalledWith(
+        'session1',
+        'Test message',
+        files
+      );
     });
   });
 
@@ -200,11 +233,13 @@ describe('AgentService', () => {
     });
 
     it('should handle errors when ending a session', async () => {
-      jest.spyOn(agentService, 'endSession').mockRejectedValueOnce(new Error('Failed to end session'));
-      
-      await expect(agentService.endSession('session1'))
-        .rejects
-        .toThrow('Failed to end session');
+      jest
+        .spyOn(agentService, 'endSession')
+        .mockRejectedValueOnce(new Error('Failed to end session'));
+
+      await expect(agentService.endSession('session1')).rejects.toThrow(
+        'Failed to end session'
+      );
     });
   });
 });

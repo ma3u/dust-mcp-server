@@ -19,10 +19,11 @@ const IGNORE_DIRS = [
   '.idea',
   'logs',
   'temp',
-  'tmp'
+  'tmp',
 ];
 
-const ABSOLUTE_PATH_REGEX = /(?:['"`]\s*)(\/|\\)(?!\/|\\)|(?:['"`]\s*)[A-Za-z]:[\\/]|(?:['"`]\s*)\\/g;
+const ABSOLUTE_PATH_REGEX =
+  /(?:['"`]\s*)(\/|\\)(?!\/|\\)|(?:['"`]\s*)[A-Za-z]:[\\/]|(?:['"`]\s*)\\/g;
 
 // Colors for console output
 const colors = {
@@ -34,7 +35,7 @@ const colors = {
   cyan: '\x1b[36m',
   reset: '\x1b[0m',
   bold: '\x1b[1m',
-  underline: '\x1b[4m'
+  underline: '\x1b[4m',
 };
 
 function logError(message) {
@@ -42,11 +43,15 @@ function logError(message) {
 }
 
 function logWarning(message) {
-  console.warn(`${colors.yellow}${colors.bold}WARNING:${colors.reset} ${message}`);
+  console.warn(
+    `${colors.yellow}${colors.bold}WARNING:${colors.reset} ${message}`
+  );
 }
 
 function logSuccess(message) {
-  console.log(`${colors.green}${colors.bold}SUCCESS:${colors.reset} ${message}`);
+  console.log(
+    `${colors.green}${colors.bold}SUCCESS:${colors.reset} ${message}`
+  );
 }
 
 function logInfo(message) {
@@ -57,7 +62,7 @@ function findFiles(dir, filePattern, ignoreDirs = []) {
   let results = [];
   const files = fs.readdirSync(dir);
 
-  files.forEach(file => {
+  files.forEach((file) => {
     const fullPath = path.join(dir, file);
     const stat = fs.statSync(fullPath);
 
@@ -88,7 +93,7 @@ function checkFileForAbsolutePaths(filePath) {
         line: index + 1,
         column: match.index + 1,
         match: match[0].trim(),
-        context: line.trim()
+        context: line.trim(),
       });
     }
     // Reset the lastIndex for the next iteration
@@ -96,8 +101,10 @@ function checkFileForAbsolutePaths(filePath) {
   });
 
   if (issues.length > 0) {
-    logWarning(`Found ${issues.length} potential absolute path(s) in ${relativePath}:`);
-    issues.forEach(issue => {
+    logWarning(
+      `Found ${issues.length} potential absolute path(s) in ${relativePath}:`
+    );
+    issues.forEach((issue) => {
       console.log(`  Line ${issue.line}:${issue.column} - ${issue.match}`);
       console.log(`    ${issue.context}`);
     });
@@ -108,17 +115,17 @@ function checkFileForAbsolutePaths(filePath) {
 
 function main() {
   logInfo('Scanning for absolute paths in the codebase...');
-  
+
   // Find all TypeScript and JavaScript files
   const files = [
     ...findFiles(ROOT_DIR, /\.(js|jsx|ts|tsx)$/, IGNORE_DIRS),
-    ...findFiles(ROOT_DIR, /\.json$/, IGNORE_DIRS)
+    ...findFiles(ROOT_DIR, /\.json$/, IGNORE_DIRS),
   ];
 
   logInfo(`Found ${files.length} files to check`);
-  
+
   let totalIssues = 0;
-  files.forEach(file => {
+  files.forEach((file) => {
     totalIssues += checkFileForAbsolutePaths(file);
   });
 

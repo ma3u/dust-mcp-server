@@ -20,9 +20,9 @@ export class SessionStoreFactory {
    */
   static createSessionRepository(redisClient?: Redis): SessionRepository {
     const storeType = process.env.SESSION_STORE_TYPE || 'memory';
-    const useMemoryStore = 
-      storeType === 'memory' || 
-      process.env.REDIS_DISABLED === 'true' || 
+    const useMemoryStore =
+      storeType === 'memory' ||
+      process.env.REDIS_DISABLED === 'true' ||
       process.env.USE_MEMORY_STORE === 'true' ||
       process.env.NODE_ENV === 'test';
 
@@ -32,7 +32,9 @@ export class SessionStoreFactory {
     }
 
     if (!redisClient) {
-      console.warn('Redis client not provided, falling back to in-memory store');
+      console.warn(
+        'Redis client not provided, falling back to in-memory store'
+      );
       return new MemorySessionRepository(MemoryStore.getInstance());
     }
 

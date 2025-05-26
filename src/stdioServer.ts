@@ -6,7 +6,7 @@ import logger from './utils/logger.js';
 async function startStdioServer() {
   try {
     logger.info('Starting MCP server with STDIO transport for Claude Desktop');
-    
+
     // Create and configure MCP server
     const mcpServer = new McpServer({
       name: 'dust-mcp-server',
@@ -22,7 +22,7 @@ async function startStdioServer() {
     await mcpServer.connect(transport);
 
     logger.info('MCP server is ready for Claude Desktop via STDIO');
-    
+
     // Handle process termination
     process.on('SIGTERM', () => {
       logger.info('Received SIGTERM. Shutting down gracefully...');
@@ -40,7 +40,7 @@ async function startStdioServer() {
 }
 
 // Start the server
-startStdioServer().catch(error => {
+startStdioServer().catch((error) => {
   logger.error('Unhandled error in STDIO server:', error);
   process.exit(1);
 });

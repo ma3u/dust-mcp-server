@@ -1,14 +1,14 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { getLogger } from '../utils/logger.js';
-import { 
-  McpRequest, 
-  McpResponse, 
-  validateMcpRequest, 
+import {
+  McpRequest,
+  McpResponse,
+  validateMcpRequest,
   createErrorResponse,
   createSession,
   updateSessionActivity,
   endSession,
-  mcpLogger
+  mcpLogger,
 } from '../utils/mcpUtils.js';
 import { toolRegistry } from '../tools/toolRegistry.js';
 
@@ -25,7 +25,7 @@ export async function handleHttpRequest(
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
+
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -38,7 +38,7 @@ export async function handleHttpRequest(
     return sendResponse(res, 405, {
       jsonrpc: '2.0',
       error: { code: -32601, message: 'Method not allowed' },
-      id: null
+      id: null,
     });
   }
 
@@ -51,12 +51,13 @@ export async function handleHttpRequest(
     logger.error('Request handling failed', { error });
     sendResponse(res, 500, {
       jsonrpc: '2.0',
-      error: { 
-        code: -32603, 
+      error: {
+        code: -32603,
         message: 'Internal error',
-        data: process.env.NODE_ENV === 'development' ? String(error) : undefined
+        data:
+          process.env.NODE_ENV === 'development' ? String(error) : undefined,
       },
-      id: null
+      id: null,
     });
   }
 }
@@ -73,12 +74,13 @@ export async function handleStdioRequest(data: string): Promise<string> {
     mcpLogger.error('STDIO request handling failed', { error });
     return JSON.stringify({
       jsonrpc: '2.0',
-      error: { 
-        code: -32603, 
+      error: {
+        code: -32603,
         message: 'Internal error',
-        data: process.env.NODE_ENV === 'development' ? String(error) : undefined
+        data:
+          process.env.NODE_ENV === 'development' ? String(error) : undefined,
       },
-      id: null
+      id: null,
     });
   }
 }
@@ -89,11 +91,11 @@ export async function handleStdioRequest(data: string): Promise<string> {
 async function parseRequestBody(req: IncomingMessage): Promise<McpRequest> {
   return new Promise((resolve, reject) => {
     let body = '';
-    
+
     req.on('data', (chunk) => {
       body += chunk.toString();
     });
-    
+
     req.on('end', () => {
       try {
         resolve(JSON.parse(body));
@@ -101,7 +103,7 @@ async function parseRequestBody(req: IncomingMessage): Promise<McpRequest> {
         reject(new Error('Invalid JSON'));
       }
     });
-    
+
     req.on('error', (error) => {
       reject(error);
     });
@@ -117,25 +119,25 @@ async function handleMcpRequest(request: unknown): Promise<McpResponse> {
   if (!validation.valid) {
     return createErrorResponse(null, -32600, validation.error!);
   }
-  
+
   const mcpRequest = request as McpRequest;
   const requestId = mcpRequest.id || null;
-  
+
   try {
     // Handle JSON-RPC methods
     switch (mcpRequest.method) {
       case 'initialize':
         return handleInitialize(mcpRequest);
-        
+
       case 'tools/execute':
         return handleToolExecution(mcpRequest);
-        
+
       case 'session/create':
         return handleCreateSession(mcpRequest);
-        
+
       case 'session/end':
         return handleEndSession(mcpRequest);
-        
+
       default:
         return createErrorResponse(
           requestId,
@@ -144,18 +146,18 @@ async function handleMcpRequest(request: unknown): Promise<McpResponse> {
         );
     }
   } catch (error) {
-    mcpLogger.error('Request processing failed', { 
+    mcpLogger.error('Request processing failed', {
       error: error instanceof Error ? error.message : String(error),
-      requestId 
+      requestId,
     });
-    
+
     return createErrorResponse(
       requestId,
       -32603,
       'Internal error',
-      process.env.NODE_ENV === 'development' ? 
-        { error: error instanceof Error ? error.message : String(error) } : 
-        undefined
+      process.env.NODE_ENV === 'development'
+        ? { error: error instanceof Error ? error.message : String(error) }
+        : undefined
     );
   }
 }
@@ -171,13 +173,13 @@ function handleInitialize(request: McpRequest): McpResponse {
       capabilities: {
         tools: true,
         sessions: true,
-        streaming: true
+        streaming: true,
       },
       serverInfo: {
         name: 'dust-mcp-server',
-        version: process.env.npm_package_version || '0.1.0'
-      }
-    }
+        version: process.env.npm_package_version || '0.1.0',
+      },
+    },
   };
 }
 
@@ -192,13 +194,13 @@ async function handleToolExecution(request: McpRequest): Promise<McpResponse> {
       'Missing parameters for tools/execute'
     );
   }
-  
+
   const { tool, params, sessionId } = request.params as {
     tool: string;
     params: unknown;
     sessionId?: string;
   };
-  
+
   if (!tool) {
     return createErrorResponse(
       request.id || null,
@@ -206,12 +208,12 @@ async function handleToolExecution(request: McpRequest): Promise<McpResponse> {
       'Missing required parameter: tool'
     );
   }
-  
+
   // Update session activity if session ID is provided
   if (sessionId) {
     updateSessionActivity(sessionId);
   }
-  
+
   // Execute the tool
   return toolRegistry.execute(tool, params, sessionId);
 }
@@ -220,13 +222,14 @@ async function handleToolExecution(request: McpRequest): Promise<McpResponse> {
  * Handle session creation
  */
 function handleCreateSession(request: McpRequest): McpResponse {
-  const metadata = (request.params as { metadata?: Record<string, unknown> })?.metadata;
+  const metadata = (request.params as { metadata?: Record<string, unknown> })
+    ?.metadata;
   const sessionId = createSession(metadata);
-  
+
   return {
     jsonrpc: '2.0',
     id: request.id || null,
-    result: { sessionId }
+    result: { sessionId },
   };
 }
 
@@ -235,7 +238,7 @@ function handleCreateSession(request: McpRequest): McpResponse {
  */
 function handleEndSession(request: McpRequest): McpResponse {
   const sessionId = (request.params as { sessionId: string })?.sessionId;
-  
+
   if (!sessionId) {
     return createErrorResponse(
       request.id || null,
@@ -243,13 +246,13 @@ function handleEndSession(request: McpRequest): McpResponse {
       'Missing required parameter: sessionId'
     );
   }
-  
+
   const success = endSession(sessionId);
-  
+
   return {
     jsonrpc: '2.0',
     id: request.id || null,
-    result: { success }
+    result: { success },
   };
 }
 
@@ -264,4 +267,3 @@ function sendResponse(
   res.writeHead(statusCode, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify(data));
 }
-

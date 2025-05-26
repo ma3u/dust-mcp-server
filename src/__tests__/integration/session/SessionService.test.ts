@@ -58,12 +58,16 @@ describe('SessionService Integration Tests', () => {
 
   describe('getSession', () => {
     it('should return a session if it exists', async () => {
-      (mockRedis.get as jest.Mock).mockResolvedValue(JSON.stringify(mockSession));
+      (mockRedis.get as jest.Mock).mockResolvedValue(
+        JSON.stringify(mockSession)
+      );
 
       const result = await sessionService.getSession(mockSession.sessionId);
 
       expect(result).toEqual(mockSession);
-      expect(mockRedis.get).toHaveBeenCalledWith(`session:${mockSession.sessionId}`);
+      expect(mockRedis.get).toHaveBeenCalledWith(
+        `session:${mockSession.sessionId}`
+      );
     });
 
     it('should return null if session does not exist', async () => {
@@ -78,7 +82,9 @@ describe('SessionService Integration Tests', () => {
   describe('updateSession', () => {
     it('should update an existing session', async () => {
       const updatedData = { role: 'user', newField: 'test' };
-      (mockRedis.get as jest.Mock).mockResolvedValue(JSON.stringify(mockSession));
+      (mockRedis.get as jest.Mock).mockResolvedValue(
+        JSON.stringify(mockSession)
+      );
       (mockRedis.set as jest.Mock).mockResolvedValue('OK');
 
       const result = await sessionService.updateSession(mockSession.sessionId, {
@@ -98,7 +104,9 @@ describe('SessionService Integration Tests', () => {
       const result = await sessionService.deleteSession(mockSession.sessionId);
 
       expect(result).toBe(true);
-      expect(mockRedis.del).toHaveBeenCalledWith(`session:${mockSession.sessionId}`);
+      expect(mockRedis.del).toHaveBeenCalledWith(
+        `session:${mockSession.sessionId}`
+      );
     });
   });
 

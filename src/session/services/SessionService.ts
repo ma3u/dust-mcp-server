@@ -1,12 +1,16 @@
 import type { Redis } from 'ioredis';
 import type { SessionRepository } from '../interfaces/ISession.js';
-import type { ISession, CreateSessionInput, UpdateSessionInput } from '../interfaces/ISession.js';
+import type {
+  ISession,
+  CreateSessionInput,
+  UpdateSessionInput,
+} from '../interfaces/ISession.js';
 import { SessionStoreFactory } from '../factories/SessionStoreFactory.js';
 
 export class SessionService {
   private static instance: SessionService;
   private readonly sessionRepository: SessionRepository;
-  
+
   /**
    * Private constructor to enforce singleton pattern
    * @param sessionRepository The session repository to use
@@ -14,7 +18,7 @@ export class SessionService {
   private constructor(sessionRepository: SessionRepository) {
     this.sessionRepository = sessionRepository;
   }
-  
+
   /**
    * Get or create a SessionService instance
    * @param redisClient Optional Redis client for Redis-based session storage
@@ -27,7 +31,8 @@ export class SessionService {
    */
   static getInstance(redisClient?: Redis): SessionService {
     if (!SessionService.instance) {
-      const repository = SessionStoreFactory.createSessionRepository(redisClient);
+      const repository =
+        SessionStoreFactory.createSessionRepository(redisClient);
       SessionService.instance = new SessionService(repository);
     }
     return SessionService.instance;
@@ -83,7 +88,10 @@ export class SessionService {
     return this.sessionRepository.update(sessionId, { data, ttl });
   }
 
-  async extendSession(sessionId: string, ttl: number): Promise<ISession | null> {
+  async extendSession(
+    sessionId: string,
+    ttl: number
+  ): Promise<ISession | null> {
     return this.sessionRepository.update(sessionId, { ttl });
   }
 }

@@ -1,6 +1,9 @@
 import type { Request, Response } from 'express';
 import { SessionService } from '../services/SessionService.js';
-import type { CreateSessionInput, UpdateSessionInput } from '../interfaces/ISession.js';
+import type {
+  CreateSessionInput,
+  UpdateSessionInput,
+} from '../interfaces/ISession.js';
 
 export class SessionController {
   constructor(private readonly sessionService: SessionService) {}
@@ -11,7 +14,7 @@ export class SessionController {
   createSession = async (req: Request, res: Response): Promise<void> => {
     try {
       const { userId, data, ttl } = req.body as CreateSessionInput;
-      
+
       if (!userId || typeof userId !== 'string') {
         res.status(400).json({ error: 'Valid user ID is required' });
         return;
@@ -27,13 +30,13 @@ export class SessionController {
         sessionId: session.sessionId,
         userId: session.userId,
         expiresAt: session.expiresAt,
-        data: session.data
+        data: session.data,
       });
     } catch (error) {
       console.error('Error creating session:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to create session',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   };
@@ -44,7 +47,7 @@ export class SessionController {
   getSession = async (req: Request, res: Response): Promise<void> => {
     try {
       const { sessionId } = req.params;
-      
+
       if (!sessionId || typeof sessionId !== 'string') {
         res.status(400).json({ error: 'Valid session ID is required' });
         return;
@@ -62,9 +65,9 @@ export class SessionController {
       res.json({ sessionId, userId, expiresAt, data });
     } catch (error) {
       console.error('Error getting session:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to get session',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   };
@@ -82,7 +85,10 @@ export class SessionController {
         return;
       }
 
-      const session = await this.sessionService.updateSession(sessionId, updateData);
+      const session = await this.sessionService.updateSession(
+        sessionId,
+        updateData
+      );
 
       if (!session) {
         res.status(404).json({ error: 'Session not found' });
@@ -94,9 +100,9 @@ export class SessionController {
       res.json({ sessionId, userId, expiresAt, data });
     } catch (error) {
       console.error('Error updating session:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to update session',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   };
@@ -107,7 +113,7 @@ export class SessionController {
   deleteSession = async (req: Request, res: Response): Promise<void> => {
     try {
       const { sessionId } = req.params;
-      
+
       if (!sessionId || typeof sessionId !== 'string') {
         res.status(400).json({ error: 'Valid session ID is required' });
         return;
@@ -123,9 +129,9 @@ export class SessionController {
       res.status(204).send();
     } catch (error) {
       console.error('Error deleting session:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to delete session',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   };
@@ -136,28 +142,30 @@ export class SessionController {
   getUserSessions = async (req: Request, res: Response): Promise<void> => {
     try {
       const { userId } = req.params;
-      
+
       if (!userId || typeof userId !== 'string') {
         res.status(400).json({ error: 'Valid user ID is required' });
         return;
       }
 
       const sessions = await this.sessionService.getUserSessions(userId);
-      
+
       // Sanitize session data before sending response
-      const sanitizedSessions = sessions.map(({ sessionId, userId, expiresAt, data }) => ({
-        sessionId,
-        userId,
-        expiresAt,
-        data
-      }));
-      
+      const sanitizedSessions = sessions.map(
+        ({ sessionId, userId, expiresAt, data }) => ({
+          sessionId,
+          userId,
+          expiresAt,
+          data,
+        })
+      );
+
       res.json(sanitizedSessions);
     } catch (error) {
       console.error('Error getting user sessions:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to get user sessions',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   };
@@ -168,22 +176,22 @@ export class SessionController {
   validateSession = async (req: Request, res: Response): Promise<void> => {
     try {
       const { sessionId } = req.params;
-      
+
       if (!sessionId || typeof sessionId !== 'string') {
-        res.status(400).json({ 
+        res.status(400).json({
           valid: false,
-          error: 'Valid session ID is required' 
+          error: 'Valid session ID is required',
         });
         return;
       }
 
       const session = await this.sessionService.getSession(sessionId);
-      
+
       if (!session) {
         res.json({ valid: false, reason: 'Session not found' });
         return;
       }
-      
+
       // Check if session is expired
       if (new Date(session.expiresAt) < new Date()) {
         // Clean up expired session
@@ -191,21 +199,21 @@ export class SessionController {
         res.json({ valid: false, reason: 'Session expired' });
         return;
       }
-      
-      res.json({ 
+
+      res.json({
         valid: true,
         session: {
           sessionId: session.sessionId,
           userId: session.userId,
-          expiresAt: session.expiresAt
-        }
+          expiresAt: session.expiresAt,
+        },
       });
     } catch (error) {
       console.error('Error validating session:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         valid: false,
         error: 'Failed to validate session',
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   };

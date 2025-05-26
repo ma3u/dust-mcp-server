@@ -25,11 +25,11 @@ global.console = {
 jest.mock('ioredis', () => {
   const MemoryStore = require('../../src/config/MemoryStore').MemoryStore;
   const mockRedis = MemoryStore.getInstance();
-  
+
   return {
     __esModule: true,
     default: jest.fn().mockImplementation(() => mockRedis),
-    Redis: jest.fn().mockImplementation(() => mockRedis)
+    Redis: jest.fn().mockImplementation(() => mockRedis),
   };
 });
 

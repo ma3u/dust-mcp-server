@@ -14,8 +14,16 @@ import logger from './utils/logger.js';
 // Debug environment variables
 console.error('Environment:');
 console.error('- NODE_ENV:', process.env.NODE_ENV || 'development');
-console.error('- DUST_API_KEY:', process.env.DUST_API_KEY ? '***' + process.env.DUST_API_KEY.slice(-4) : 'not set');
-console.error('- DUST_WORKSPACE_ID:', process.env.DUST_WORKSPACE_ID || 'not set');
+console.error(
+  '- DUST_API_KEY:',
+  process.env.DUST_API_KEY
+    ? '***' + process.env.DUST_API_KEY.slice(-4)
+    : 'not set'
+);
+console.error(
+  '- DUST_WORKSPACE_ID:',
+  process.env.DUST_WORKSPACE_ID || 'not set'
+);
 console.error('- DUST_AGENT_ID:', process.env.DUST_AGENT_ID || 'not set');
 console.error('- LOGS_DIR:', process.env.LOGS_DIR || 'not set');
 
@@ -27,15 +35,15 @@ async function startServer() {
     console.error('Server is already running');
     return;
   }
-  
+
   serverStarted = true;
-  
+
   try {
     console.error('Creating MCP server instance...');
     const server = new McpServer({
       name: 'dust-mcp-server',
       version: '1.0.0',
-      capabilities: ['tools']
+      capabilities: ['tools'],
     });
 
     console.error('Registering tools...');
@@ -51,7 +59,7 @@ async function startServer() {
 
     console.error('Connecting to MCP server...');
     await server.connect(transport);
-    
+
     console.error('MCP server is running in CLI/STDIO mode');
     logger.info('MCP server is running in CLI/STDIO mode');
 
@@ -61,7 +69,6 @@ async function startServer() {
     await new Promise(() => {
       // This promise never resolves, keeping the process alive
     });
-    
   } catch (error) {
     console.error('Failed to start MCP server:', error);
     process.exit(1);
@@ -92,7 +99,7 @@ process.on('unhandledRejection', (reason) => {
 });
 
 // Start the server
-startServer().catch(error => {
+startServer().catch((error) => {
   console.error('FATAL ERROR:', error);
   process.exit(1);
 });

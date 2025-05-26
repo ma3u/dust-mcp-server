@@ -20,7 +20,7 @@ const testAgent: dustService.AgentConfig = {
   tags: [],
   visualizationEnabled: true,
   timestamp: Date.now(),
-  instructions: 'Test instructions'
+  instructions: 'Test instructions',
 };
 
 // Test response data
@@ -29,21 +29,27 @@ const testResponse = {
   conversationId: 'conv1',
   messageId: 'msg1',
   result: 'Test response',
-  timestamp: new Date().toISOString()
+  timestamp: new Date().toISOString(),
 };
 
 // Type the mock functions
-const mockListDustAgents = dustService.listDustAgents as jest.MockedFunction<typeof dustService.listDustAgents>;
-const mockGetAgentConfig = dustService.getAgentConfig as jest.MockedFunction<typeof dustService.getAgentConfig>;
-const mockQueryDustAgent = dustService.queryDustAgent as jest.MockedFunction<typeof dustService.queryDustAgent>;
+const mockListDustAgents = dustService.listDustAgents as jest.MockedFunction<
+  typeof dustService.listDustAgents
+>;
+const mockGetAgentConfig = dustService.getAgentConfig as jest.MockedFunction<
+  typeof dustService.getAgentConfig
+>;
+const mockQueryDustAgent = dustService.queryDustAgent as jest.MockedFunction<
+  typeof dustService.queryDustAgent
+>;
 
 describe('Dust Service', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     // Setup default mock implementations with proper types
     mockListDustAgents.mockResolvedValue([testAgent]);
-    mockGetAgentConfig.mockImplementation((id) => 
+    mockGetAgentConfig.mockImplementation((id) =>
       Promise.resolve(id === 'agent1' ? testAgent : null)
     );
     mockQueryDustAgent.mockResolvedValue(testResponse);
@@ -80,7 +86,7 @@ describe('Dust Service', () => {
         { key: 'value' },
         'conv1'
       );
-      
+
       expect(response).toEqual(testResponse);
       expect(mockQueryDustAgent).toHaveBeenCalledWith(
         'agent1',

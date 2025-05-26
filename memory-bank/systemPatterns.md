@@ -107,7 +107,7 @@ For a comprehensive overview of our testing approach, see the [Test Strategy Epi
 
 - **MCP Server Architecture**: Following the Model Context Protocol specification
 - **Tool-Based Design**: Functionality exposed as tools to MCP clients
-- **Multi-Transport Support**: STDIO for Claude Desktop, HTTP/SSE for web clients
+- **Multi-Transport Support**: STDIO for Claude Desktop, HTTP/SSE for web clients (future releases)
 - **Pipeline Processing**: Three-stage pipeline for document handling (upload → process → query)
 - **Metadata Tracking**: JSON metadata files for tracking document status and properties
 - **Mock Implementation**: Using mock implementations for components that will be replaced with real implementations
@@ -116,10 +116,7 @@ For a comprehensive overview of our testing approach, see the [Test Strategy Epi
 - **Session Management**: Planned implementation for preserving context across interactions
 - **Multi-Agent Orchestration**: Design for coordinating multiple Dust agents
 
-
- 
 # Resources to Develop MCP Server in TypeScript for DUST.tt
-
 ## Best Practices
 
 - **Implement full MCP lifecycle** (initialize → message → terminate) with proper session cleanup
@@ -144,11 +141,12 @@ For a comprehensive overview of our testing approach, see the [Test Strategy Epi
 ### MCP Dust Server SDK
 - **Description**: Reference implementation for Dust API integration
 - **Resources**:
-  - [Dust SDK JS](https://github.com/dust-tt/dust-sdk-js)
-  - [Dust SDKs](https://github.com/dust-tt/dust/tree/main/sdks/js)
   - [Dust API Documentation](https://dust.tt/swagger.json)
   - [Postman Collection](https://www.postman.com/dust33/dust/collection/6nvk011/dust-api-documentation)
   - [Dust Labs Scripts](https://github.com/dust-tt/dust-labs)
+- **SDKs limited support - use is as blue print for the API wrapper **:
+  - [Dust SDK JS](https://github.com/dust-tt/dust-sdk-js)
+  - [Dust SDKs](https://github.com/dust-tt/dust/tree/main/sdks/js)
 - **Features**:
   - Preconfigured Dust API client
   - Session management utilities

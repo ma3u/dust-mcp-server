@@ -5,7 +5,14 @@
  * - /health HTTP endpoint
  * - /events SSE endpoint
  */
-import { jest, describe, test, expect, beforeAll, afterAll } from '@jest/globals';
+import {
+  jest,
+  describe,
+  test,
+  expect,
+  beforeAll,
+  afterAll,
+} from '@jest/globals';
 import http from 'http';
 import fetch from 'node-fetch';
 
@@ -26,7 +33,7 @@ describe('HTTP/SSE Integration', () => {
     let eventReceived = false;
     // Open SSE connection
     const res = await fetch(`${BASE_URL}/events`, {
-      headers: { 'Accept': 'text/event-stream' },
+      headers: { Accept: 'text/event-stream' },
     });
     expect(res.ok).toBe(true);
     const reader = res.body.getReader();

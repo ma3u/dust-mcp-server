@@ -36,7 +36,7 @@ export class MemoryStore implements RedisCompatible {
       ttl: 1000 * 60 * 60, // Default TTL: 1 hour
       updateAgeOnGet: true, // Update the TTL when the item is accessed
     });
-    
+
     this.ttlCache = new Map();
   }
 
@@ -51,16 +51,16 @@ export class MemoryStore implements RedisCompatible {
   public async set(key: string, value: any, ttl?: number): Promise<'OK'> {
     this.cache.set(key, value, { ttl: ttl ? ttl * 1000 : undefined });
     this.clearTtlTimeout(key);
-    
+
     if (ttl) {
       const timeout = setTimeout(() => {
         this.cache.delete(key);
         this.ttlCache.delete(key);
       }, ttl * 1000);
-      
+
       this.ttlCache.set(key, timeout);
     }
-    
+
     return 'OK';
   }
 
@@ -85,18 +85,18 @@ export class MemoryStore implements RedisCompatible {
   public async expire(key: string, ttl: number): Promise<number> {
     const value = this.cache.get(key);
     if (value === undefined) return 0;
-    
+
     await this.set(key, value, ttl);
     return 1;
   }
 
   public async quit(): Promise<'OK'> {
-    this.ttlCache.forEach(timeout => clearTimeout(timeout));
+    this.ttlCache.forEach((timeout) => clearTimeout(timeout));
     this.ttlCache.clear();
     this.cache.clear();
     // Emit end event for compatibility
     const endListeners = this.eventListeners.get('end') || [];
-    endListeners.forEach(callback => callback());
+    endListeners.forEach((callback) => callback());
     logger.info('MemoryStore connection closed');
     return 'OK';
   }
@@ -106,15 +106,15 @@ export class MemoryStore implements RedisCompatible {
     if (pattern === '*') {
       return allKeys;
     }
-    
+
     // Simple pattern matching (supports only * wildcard)
     const regexPattern = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`);
-    return allKeys.filter(key => regexPattern.test(key));
+    return allKeys.filter((key) => regexPattern.test(key));
   }
 
   public async flushall(): Promise<'OK'> {
     this.cache.clear();
-    this.ttlCache.forEach(timeout => clearTimeout(timeout));
+    this.ttlCache.forEach((timeout) => clearTimeout(timeout));
     this.ttlCache.clear();
     return 'OK';
   }
@@ -128,8 +128,10 @@ export class MemoryStore implements RedisCompatible {
   }
 
   async exists(...keys: string[]): Promise<number> {
-    return keys.reduce((count, key) => 
-      count + (this.cache.has(key.toString()) ? 1 : 0), 0);
+    return keys.reduce(
+      (count, key) => count + (this.cache.has(key.toString()) ? 1 : 0),
+      0
+    );
   }
 
   async ping(): Promise<string> {
@@ -139,12 +141,12 @@ export class MemoryStore implements RedisCompatible {
   async ttl(key: string): Promise<number> {
     const value = this.cache.get(key);
     if (value === undefined) return -2; // Key doesn't exist
-    
+
     // For simplicity, we'll return -1 (no expiry) for all existing keys
     // since lru-cache doesn't expose TTL directly in the public API
     return -1;
   }
-  
+
   // Implement the on method for event handling
   public on(event: string, callback: Function): void {
     if (!this.eventListeners.has(event)) {
@@ -152,10 +154,9 @@ export class MemoryStore implements RedisCompatible {
     }
     this.eventListeners.get(event)?.push(callback);
   }
-  
+
   // Implement the disconnect method
   public disconnect(): void {
     this.quit().catch(() => {});
   }
-  
 }

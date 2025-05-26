@@ -1,5 +1,10 @@
 import logger from '../utils/logger.js';
-import { DustApiService, DustAgent, DustSession, DustMessageResponse } from './dustApiService.js';
+import {
+  DustApiService,
+  DustAgent,
+  DustSession,
+  DustMessageResponse,
+} from './dustApiService.js';
 
 // Type definitions
 export interface AgentDescriptor extends DustAgent {
@@ -30,10 +35,10 @@ class AgentService {
   async initialize(): Promise<void> {
     try {
       const agents = await this.dustApiService.listAgents();
-      agents.forEach(agent => {
+      agents.forEach((agent) => {
         this.agents.set(agent.id, {
           ...agent,
-          isActive: true
+          isActive: true,
         });
       });
       logger.info(`Initialized with ${agents.length} agents`);
@@ -60,7 +65,10 @@ class AgentService {
   /**
    * Create a new session with an agent
    */
-  async createSession(agentId: string, context: Record<string, any> = {}): Promise<SessionDescriptor> {
+  async createSession(
+    agentId: string,
+    context: Record<string, any> = {}
+  ): Promise<SessionDescriptor> {
     try {
       const agent = await this.getAgent(agentId);
       if (!agent) {
@@ -73,7 +81,7 @@ class AgentService {
         ...session,
         isActive: true,
         createdAt: now,
-        lastActivity: now
+        lastActivity: now,
       };
 
       this.sessions.set(session.id, sessionDescriptor);
@@ -97,16 +105,23 @@ class AgentService {
       if (!session) {
         throw new Error(`Session with ID ${sessionId} not found`);
       }
-      
-      const response = await this.dustApiService.sendMessage(sessionId, message, files);
-      
+
+      const response = await this.dustApiService.sendMessage(
+        sessionId,
+        message,
+        files
+      );
+
       // Update last activity
       session.lastActivity = new Date().toISOString();
-      
+
       return response;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error(`Failed to send message in session ${sessionId}: ${errorMessage}`);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      logger.error(
+        `Failed to send message in session ${sessionId}: ${errorMessage}`
+      );
       throw error;
     }
   }
@@ -125,7 +140,8 @@ class AgentService {
       session.isActive = false;
       this.sessions.delete(sessionId);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       logger.error(`Failed to end session ${sessionId}: ${errorMessage}`);
       throw error;
     }
@@ -142,15 +158,19 @@ class AgentService {
    * Get all active sessions
    */
   async getActiveSessions(): Promise<SessionDescriptor[]> {
-    return Array.from(this.sessions.values()).filter(session => session.isActive);
+    return Array.from(this.sessions.values()).filter(
+      (session) => session.isActive
+    );
   }
 }
 
 // Create a singleton instance
-export const agentService = new AgentService(new DustApiService({
-  apiKey: process.env.DUST_API_KEY || '',
-  workspaceId: process.env.DUST_WORKSPACE_ID || ''
-}));
+export const agentService = new AgentService(
+  new DustApiService({
+    apiKey: process.env.DUST_API_KEY || '',
+    workspaceId: process.env.DUST_WORKSPACE_ID || '',
+  })
+);
 
 // Initialize the service when this module is loaded
 agentService.initialize().catch((error: Error) => {

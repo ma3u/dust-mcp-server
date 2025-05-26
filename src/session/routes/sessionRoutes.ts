@@ -1,4 +1,9 @@
-import { Router, type Request, type Response, type NextFunction } from 'express';
+import {
+  Router,
+  type Request,
+  type Response,
+  type NextFunction,
+} from 'express';
 import type { Redis } from 'ioredis';
 import { SessionController } from '../controllers/SessionController.js';
 import { SessionService } from '../services/SessionService.js';
@@ -10,7 +15,7 @@ import { SessionService } from '../services/SessionService.js';
  */
 export const createSessionRouter = (redisClient?: Redis): Router => {
   const router = Router();
-  
+
   // Initialize session service with the appropriate store
   const sessionService = SessionService.getInstance(redisClient);
   const sessionController = new SessionController(sessionService);
@@ -48,11 +53,7 @@ export const sessionMiddleware = (redisClient?: Redis) => {
   // Get the session service instance
   const sessionService = SessionService.getInstance(redisClient);
 
-  return async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     // Try to get session ID from Authorization header or cookie
     const authHeader = req.headers.authorization;
     let sessionId: string | undefined;

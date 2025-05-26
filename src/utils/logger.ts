@@ -21,11 +21,11 @@ const __dirname = getDirname(import.meta.url);
  * @enum {number}
  */
 export enum LogLevel {
-  ERROR = 0,  // System is in a critical state
-  WARN = 1,   // Unexpected but handled condition
-  INFO = 2,   // General operational messages
-  DEBUG = 3,  // Debug-level information
-  TRACE = 4   // Very detailed debugging
+  ERROR = 0, // System is in a critical state
+  WARN = 1, // Unexpected but handled condition
+  INFO = 2, // General operational messages
+  DEBUG = 3, // Debug-level information
+  TRACE = 4, // Very detailed debugging
 }
 
 // Map log levels to string representations
@@ -34,7 +34,7 @@ const LOG_LEVEL_STRINGS: Record<LogLevel, string> = {
   [LogLevel.WARN]: 'WARN',
   [LogLevel.INFO]: 'INFO',
   [LogLevel.DEBUG]: 'DEBUG',
-  [LogLevel.TRACE]: 'TRACE'
+  [LogLevel.TRACE]: 'TRACE',
 };
 
 /**
@@ -68,6 +68,9 @@ interface LoggerConfig {
 const PROJECT_ROOT = path.resolve(__dirname, '../..');
 const DEFAULT_LOGS_DIR = path.join(PROJECT_ROOT, 'logs');
 
+// Import os at the top with other imports
+import os from 'node:os';
+
 // Create logs directory if it doesn't exist
 const ensureLogsDir = (logDir: string): string => {
   try {
@@ -75,13 +78,19 @@ const ensureLogsDir = (logDir: string): string => {
     return logDir;
   } catch (error) {
     // Fallback to a safe directory if the default one fails
-    const fallbackDir = path.join(require('os').tmpdir(), 'dust-mcp-logs');
-    console.warn(`Failed to create logs directory at ${logDir}, using fallback: ${fallbackDir}`, error);
+    const fallbackDir = path.join(os.tmpdir(), 'dust-mcp-logs');
+    console.warn(
+      `Failed to create logs directory at ${logDir}, using fallback: ${fallbackDir}`,
+      error
+    );
     try {
       fs.mkdirSync(fallbackDir, { recursive: true });
       return fallbackDir;
     } catch (fallbackError) {
-      console.error('Critical: Failed to create fallback logs directory', fallbackError);
+      console.error(
+        'Critical: Failed to create fallback logs directory',
+        fallbackError
+      );
       throw new Error('Cannot create logs directory and fallback failed');
     }
   }
@@ -100,7 +109,7 @@ const DEFAULT_CONFIG: LoggerConfig = {
   maxLogFileSizeBytes: 10 * 1024 * 1024, // 10MB
   maxLogFiles: 10,
   includeTimestamps: true,
-  includeRequestId: true
+  includeRequestId: true,
 };
 
 /**
@@ -120,26 +129,29 @@ class Logger {
    */
   constructor(config: Partial<LoggerConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    
+
     // Ensure log directory exists if file logging is enabled
     if (this.config.logToFile) {
       try {
         fsPromises.mkdir(this.config.logDir, { recursive: true });
       } catch (error) {
         // If we can't create the log directory, disable file logging
-        console.error(`Failed to create log directory at ${this.config.logDir}, disabling file logging`, error);
+        console.error(
+          `Failed to create log directory at ${this.config.logDir}, disabling file logging`,
+          error
+        );
         this.config.logToFile = false;
       }
     }
-    
+
     this.currentLogFile = this.getLogFilePath();
-    
+
     // Initialize request ID for correlation
     this.requestId = this.config.includeRequestId ? uuidv4() : null;
-    
+
     // Log initialization
     if (this.config.logToFile) {
-      this.initializeLogger().catch(err => {
+      this.initializeLogger().catch((err) => {
         // If we can't initialize the logger, we'll log to stderr as a last resort
         process.stderr.write(`Failed to initialize logger: ${err.message}\n`);
       });
@@ -154,7 +166,7 @@ class Logger {
       return this.initPromise;
     }
     if (this.isInitialized) return;
-    
+
     this.initializing = true;
     this.initPromise = this.initializeLogger();
     try {
@@ -170,14 +182,14 @@ class Logger {
   private get isInitialized(): boolean {
     return !this.initializing && this.initPromise !== null;
   }
-  
+
   /**
    * Set request ID for correlation
    */
   public setRequestId(id: string): void {
     this.requestId = id;
   }
-  
+
   /**
    * Get current request ID
    */
@@ -189,7 +201,7 @@ class Logger {
     try {
       // Ensure log directory exists
       await fsPromises.mkdir(this.config.logDir, { recursive: true });
-      
+
       // Initialize write stream if logging to file
       if (this.config.logToFile) {
         this.openLogStream();
@@ -215,10 +227,12 @@ class Logger {
     if (this.writeStream) {
       this.writeStream.end();
     }
-    
-    this.writeStream = fs.createWriteStream(this.currentLogFile, { flags: 'a' });
-    
-    this.writeStream.on('error', (err) => {
+
+    this.writeStream = fs.createWriteStream(this.currentLogFile, {
+      flags: 'a',
+    });
+
+    this.writeStream.on('error', (_err) => {
       // [MCP POLICY] STDIO logging is disabled. Silently fail or handle as needed.
       // Optionally, could buffer errors to memory or ignore.
     });
@@ -227,15 +241,18 @@ class Logger {
   private getLogFilePath(): string {
     const date = new Date();
     const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD
-    return path.join(this.config.logDir, `${this.config.logFilePrefix}-${dateStr}.log`);
+    return path.join(
+      this.config.logDir,
+      `${this.config.logFilePrefix}-${dateStr}.log`
+    );
   }
 
   private async rotateLogsIfNeeded() {
     if (!this.config.logToFile) return;
-    
+
     try {
       const stats = await fsPromises.stat(this.currentLogFile);
-      
+
       // Check if log file exceeds max size
       if (stats.size >= this.config.maxLogFileSizeBytes) {
         // Close current stream
@@ -243,26 +260,33 @@ class Logger {
           this.writeStream.end();
           this.writeStream = null;
         }
-        
+
         // Rotate log files
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const rotatedFile = `${this.currentLogFile}.${timestamp}`;
-        
+
         await fsPromises.rename(this.currentLogFile, rotatedFile);
-        
+
         // Clean up old log files if we exceed the maximum
         const logFiles = await fsPromises.readdir(this.config.logDir);
         const rotatedLogs = logFiles
-          .filter(file => file.startsWith(`${this.config.logFilePrefix}-`) && file.includes('.log.'))
+          .filter(
+            (file) =>
+              file.startsWith(`${this.config.logFilePrefix}-`) &&
+              file.includes('.log.')
+          )
           .sort();
-        
+
         if (rotatedLogs.length > this.config.maxLogFiles) {
-          const filesToDelete = rotatedLogs.slice(0, rotatedLogs.length - this.config.maxLogFiles);
+          const filesToDelete = rotatedLogs.slice(
+            0,
+            rotatedLogs.length - this.config.maxLogFiles
+          );
           for (const file of filesToDelete) {
             await fsPromises.unlink(path.join(this.config.logDir, file));
           }
         }
-        
+
         // Open a new log stream
         this.openLogStream();
       }
@@ -275,38 +299,47 @@ class Logger {
   /**
    * Format a log message with metadata
    */
-  private formatLogMessage(level: LogLevel, message: string, meta?: Record<string, unknown>): string {
+  private formatLogMessage(
+    level: LogLevel,
+    message: string,
+    meta?: Record<string, unknown>
+  ): string {
     const timestamp = new Date().toISOString();
     const levelStr = LOG_LEVEL_STRINGS[level];
-    
+
     const logEntry: Record<string, unknown> = {
       timestamp: this.config.includeTimestamps ? timestamp : undefined,
       level: levelStr,
       message,
       ...(meta && Object.keys(meta).length > 0 && { meta }),
-      ...(this.config.includeRequestId && this.requestId && { requestId: this.requestId })
+      ...(this.config.includeRequestId &&
+        this.requestId && { requestId: this.requestId }),
     };
-    
+
     // Remove undefined values
-    Object.keys(logEntry).forEach(key => {
+    Object.keys(logEntry).forEach((key) => {
       if (logEntry[key] === undefined) {
         delete logEntry[key];
       }
     });
-    
+
     return JSON.stringify(logEntry);
   }
-  
+
   /**
    * Internal method to write a log entry
    */
-  private async writeLog(level: LogLevel, message: string, meta?: Record<string, unknown>): Promise<void> {
+  private async writeLog(
+    level: LogLevel,
+    message: string,
+    meta?: Record<string, unknown>
+  ): Promise<void> {
     if (level > this.config.level) return;
-    
+
     try {
       await this.ensureInitialized();
       const logLine = this.formatLogMessage(level, message, meta) + '\n';
-      
+
       // Write to file if enabled
       if (this.config.logToFile && this.writeStream) {
         try {
@@ -322,14 +355,15 @@ class Logger {
           process.stderr.write(`[${LOG_LEVEL_STRINGS[level]}] ${message}\n`);
         }
       }
-      
+
       // Write to console if enabled (avoid in production)
       if (this.config.logToConsole) {
-        const consoleMethod = level === LogLevel.ERROR ? process.stderr : process.stdout;
-        const formatted = this.config.includeTimestamps 
+        const consoleMethod =
+          level === LogLevel.ERROR ? process.stderr : process.stdout;
+        const formatted = this.config.includeTimestamps
           ? `[${new Date().toISOString()}] [${LOG_LEVEL_STRINGS[level]}] ${message}`
           : `[${LOG_LEVEL_STRINGS[level]}] ${message}`;
-          
+
         consoleMethod.write(`${formatted}\n`);
         if (meta && Object.keys(meta).length > 0) {
           consoleMethod.write(`${JSON.stringify(meta, null, 2)}\n`);
@@ -337,13 +371,16 @@ class Logger {
       }
     } catch (error) {
       // Last resort error handling
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      process.stderr.write(`[LOGGER_ERROR] Failed to write log: ${errorMessage}\n`);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      process.stderr.write(
+        `[LOGGER_ERROR] Failed to write log: ${errorMessage}\n`
+      );
     }
   }
 
   // Public logging methods
-  
+
   /**
    * Log an error message
    */

@@ -1,5 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
-import type { ISession, CreateSessionInput, UpdateSessionInput } from '../interfaces/ISession.js';
+import type {
+  ISession,
+  CreateSessionInput,
+  UpdateSessionInput,
+} from '../interfaces/ISession.js';
 import { MemoryStore } from '../../../config/MemoryStore.js';
 import type { SessionRepository } from '../interfaces/ISession.js';
 
@@ -19,11 +23,15 @@ export class MemorySessionRepository implements SessionRepository {
     return `${this.prefix}${sessionId}`;
   }
 
-  async create({ userId, data = {}, ttl = this.defaultTTL }: CreateSessionInput): Promise<ISession> {
+  async create({
+    userId,
+    data = {},
+    ttl = this.defaultTTL,
+  }: CreateSessionInput): Promise<ISession> {
     const sessionId = uuidv4();
     const now = new Date();
     const expiresAt = new Date(now.getTime() + ttl * 1000);
-    
+
     const session: ISession = {
       sessionId,
       userId,
@@ -40,19 +48,22 @@ export class MemorySessionRepository implements SessionRepository {
   async findById(sessionId: string): Promise<ISession | null> {
     const data = await this.store.get(this.getKey(sessionId));
     if (!data) return null;
-    
+
     const session = JSON.parse(data) as ISession;
-    
+
     // Check if session is expired
     if (new Date(session.expiresAt) < new Date()) {
       await this.delete(sessionId);
       return null;
     }
-    
+
     return session;
   }
 
-  async update(sessionId: string, updates: UpdateSessionInput): Promise<ISession | null> {
+  async update(
+    sessionId: string,
+    updates: UpdateSessionInput
+  ): Promise<ISession | null> {
     const existing = await this.findById(sessionId);
     if (!existing) return null;
 
@@ -64,13 +75,13 @@ export class MemorySessionRepository implements SessionRepository {
 
     // Get remaining TTL
     const ttl = await this.store.ttl(this.getKey(sessionId));
-    
+
     await this.store.set(
-      this.getKey(sessionId), 
-      JSON.stringify(updatedSession), 
+      this.getKey(sessionId),
+      JSON.stringify(updatedSession),
       ttl > 0 ? ttl : this.defaultTTL
     );
-    
+
     return updatedSession;
   }
 
@@ -84,7 +95,7 @@ export class MemorySessionRepository implements SessionRepository {
     // Consider using a secondary index if this is a common operation
     const keys = await this.store.keys(`${this.prefix}*`);
     const sessions: ISession[] = [];
-    
+
     for (const key of keys) {
       const data = await this.store.get(key);
       if (data) {
@@ -94,7 +105,7 @@ export class MemorySessionRepository implements SessionRepository {
         }
       }
     }
-    
+
     return sessions;
   }
 
@@ -103,7 +114,7 @@ export class MemorySessionRepository implements SessionRepository {
     // But we can implement a manual check if needed
     const keys = await this.store.keys(`${this.prefix}*`);
     let deleted = 0;
-    
+
     for (const key of keys) {
       const data = await this.store.get(key);
       if (data) {
@@ -114,7 +125,7 @@ export class MemorySessionRepository implements SessionRepository {
         }
       }
     }
-    
+
     return deleted;
   }
 

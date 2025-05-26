@@ -23,7 +23,9 @@ class ToolRegistry {
    */
   register<T>(definition: ToolDefinition<T>): void {
     if (this.tools.has(definition.name)) {
-      throw new Error(`Tool with name '${definition.name}' is already registered`);
+      throw new Error(
+        `Tool with name '${definition.name}' is already registered`
+      );
     }
 
     this.tools.set(definition.name, definition as ToolDefinition<unknown>);
@@ -34,58 +36,48 @@ class ToolRegistry {
    * Execute a tool
    */
   async execute(
-    toolName: string, 
+    toolName: string,
     params: unknown,
     sessionId?: string
   ): Promise<McpResponse> {
     const tool = this.tools.get(toolName);
     if (!tool) {
-      return createErrorResponse(
-        null, 
-        404, 
-        `Tool '${toolName}' not found`
-      );
+      return createErrorResponse(null, 404, `Tool '${toolName}' not found`);
     }
 
     // Validate input parameters
     const validation = tool.parameters.safeParse(params);
     if (!validation.success) {
-      return createErrorResponse(
-        null,
-        400,
-        'Invalid parameters',
-        { errors: validation.error.errors }
-      );
+      return createErrorResponse(null, 400, 'Invalid parameters', {
+        errors: validation.error.errors,
+      });
     }
 
     try {
       // Execute the tool handler
       const result = await tool.handler(validation.data, sessionId);
-      
+
       // Log successful execution
-      logger.debug('Tool executed successfully', { 
+      logger.debug('Tool executed successfully', {
         tool: toolName,
-        sessionId 
+        sessionId,
       });
-      
+
       return {
         jsonrpc: '2.0',
         id: null,
-        result
+        result,
       };
     } catch (error) {
-      logger.error('Tool execution failed', { 
+      logger.error('Tool execution failed', {
         tool: toolName,
         error: error instanceof Error ? error.message : String(error),
-        sessionId
+        sessionId,
       });
-      
-      return createErrorResponse(
-        null,
-        500,
-        'Tool execution failed',
-        { error: error instanceof Error ? error.message : String(error) }
-      );
+
+      return createErrorResponse(null, 500, 'Tool execution failed', {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -94,16 +86,16 @@ class ToolRegistry {
    */
   getOpenAPISchema() {
     const schemas: Record<string, unknown> = {};
-    
+
     for (const [name, tool] of this.tools.entries()) {
       schemas[name] = {
         name: tool.name,
         description: tool.description,
         parameters: tool.parameters._def,
-        requiresAuth: tool.requiresAuth ?? false
+        requiresAuth: tool.requiresAuth ?? false,
       };
     }
-    
+
     return schemas;
   }
 
@@ -112,21 +104,21 @@ class ToolRegistry {
    */
   initialize() {
     if (this.initialized) return;
-    
+
     // Register built-in tools here
     this.register({
       name: 'list_tools',
       description: 'List all available tools',
       parameters: z.object({}),
       handler: async () => {
-        return Array.from(this.tools.values()).map(tool => ({
+        return Array.from(this.tools.values()).map((tool) => ({
           name: tool.name,
           description: tool.description,
-          requiresAuth: tool.requiresAuth
+          requiresAuth: tool.requiresAuth,
         }));
-      }
+      },
     });
-    
+
     this.initialized = true;
     logger.info('Tool registry initialized');
   }
@@ -137,8 +129,8 @@ export const toolRegistry = new ToolRegistry();
 
 // Helper function to create tool definitions
 export function defineTool<T>(
-  name: string, 
-  description: string, 
+  name: string,
+  description: string,
   parameters: z.ZodSchema<T>,
   handler: ToolHandler<T>,
   options: { requiresAuth?: boolean } = {}
@@ -148,6 +140,6 @@ export function defineTool<T>(
     description,
     parameters,
     handler,
-    requiresAuth: options.requiresAuth
+    requiresAuth: options.requiresAuth,
   };
 }

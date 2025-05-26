@@ -1,4 +1,11 @@
-import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import {
+  jest,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 import axios from 'axios';
 import { DustApiService } from '../../../services/dustApiService';
 
@@ -22,14 +29,19 @@ describe('DustApiService', () => {
     it('should return a list of agents', async () => {
       const mockAgents = {
         agents: [
-          { id: 'agent1', name: 'Agent 1', description: 'Test Agent', capabilities: ['test'] }
-        ]
+          {
+            id: 'agent1',
+            name: 'Agent 1',
+            description: 'Test Agent',
+            capabilities: ['test'],
+          },
+        ],
       };
-      
+
       mockedAxios.get.mockResolvedValueOnce({ data: mockAgents });
-      
+
       const agents = await dustApiService.listAgents();
-      
+
       expect(agents).toEqual(mockAgents.agents);
       expect(mockedAxios.get).toHaveBeenCalledWith(
         `/workspaces/${config.workspaceId}/agents`,
@@ -39,12 +51,12 @@ describe('DustApiService', () => {
 
     it('should throw an error when the request fails', async () => {
       mockedAxios.get.mockRejectedValueOnce({
-        response: { status: 500, data: { error: 'Server Error' } }
+        response: { status: 500, data: { error: 'Server Error' } },
       });
-      
-      await expect(dustApiService.listAgents())
-        .rejects
-        .toThrow('Failed to list agents');
+
+      await expect(dustApiService.listAgents()).rejects.toThrow(
+        'Failed to list agents'
+      );
     });
   });
 
@@ -56,14 +68,14 @@ describe('DustApiService', () => {
           id: agentId,
           name: 'Test Agent',
           description: 'Test Agent',
-          capabilities: ['test']
-        }
+          capabilities: ['test'],
+        },
       };
-      
+
       mockedAxios.get.mockResolvedValueOnce({ data: mockAgent });
-      
+
       const agent = await dustApiService.getAgent(agentId);
-      
+
       expect(agent).toEqual(mockAgent.agent);
       expect(mockedAxios.get).toHaveBeenCalledWith(
         `/workspaces/${config.workspaceId}/agents/${agentId}`,
@@ -73,14 +85,14 @@ describe('DustApiService', () => {
 
     it('should throw an error when agent is not found', async () => {
       const agentId = 'nonexistent';
-      
+
       mockedAxios.get.mockRejectedValueOnce({
-        response: { status: 404, data: { error: 'Not Found' } }
+        response: { status: 404, data: { error: 'Not Found' } },
       });
-      
-      await expect(dustApiService.getAgent(agentId))
-        .rejects
-        .toThrow(`Failed to get agent: ${agentId}`);
+
+      await expect(dustApiService.getAgent(agentId)).rejects.toThrow(
+        `Failed to get agent: ${agentId}`
+      );
     });
   });
 
@@ -94,14 +106,14 @@ describe('DustApiService', () => {
           agentId,
           context,
           createdAt: new Date().toISOString(),
-          lastActivity: new Date().toISOString()
-        }
+          lastActivity: new Date().toISOString(),
+        },
       };
-      
+
       mockedAxios.post.mockResolvedValueOnce({ data: mockSession });
-      
+
       const session = await dustApiService.createSession(agentId, context);
-      
+
       expect(session).toEqual(mockSession.session);
       expect(mockedAxios.post).toHaveBeenCalledWith(
         `/workspaces/${config.workspaceId}/sessions`,
@@ -118,15 +130,19 @@ describe('DustApiService', () => {
       const files = [{ name: 'test.txt', content: 'Test content' }];
       const mockResponse = {
         response: 'Hello, user!',
-        context: { lastMessage: message }
+        context: { lastMessage: message },
       };
-      
-      mockedAxios.post.mockResolvedValueOnce({ 
-        data: { response: mockResponse } 
+
+      mockedAxios.post.mockResolvedValueOnce({
+        data: { response: mockResponse },
       });
-      
-      const response = await dustApiService.sendMessage(sessionId, message, files);
-      
+
+      const response = await dustApiService.sendMessage(
+        sessionId,
+        message,
+        files
+      );
+
       expect(response).toEqual(mockResponse);
       expect(mockedAxios.post).toHaveBeenCalledWith(
         `/workspaces/${config.workspaceId}/sessions/${sessionId}/messages`,
@@ -139,9 +155,9 @@ describe('DustApiService', () => {
   describe('endSession', () => {
     it('should end a session', async () => {
       const sessionId = 'session1';
-      
+
       mockedAxios.delete.mockResolvedValueOnce({ data: {} });
-      
+
       await expect(dustApiService.endSession(sessionId)).resolves.not.toThrow();
       expect(mockedAxios.delete).toHaveBeenCalledWith(
         `/workspaces/${config.workspaceId}/sessions/${sessionId}`,

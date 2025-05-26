@@ -49,7 +49,10 @@ export const createSessionTool: Tool = {
   description: 'Create a new session with a DUST agent',
   parameters: z.object({
     agentId: z.string().describe('ID of the agent to create a session with'),
-    context: z.record(z.unknown()).optional().describe('Initial session context'),
+    context: z
+      .record(z.unknown())
+      .optional()
+      .describe('Initial session context'),
   }),
   handler: async ({ agentId, context = {} }) => {
     try {
@@ -87,8 +90,12 @@ export const sendMessageTool: Tool = {
         name: file.name,
         content: Buffer.from(file.content, 'base64'),
       }));
-      
-      const result = await agentService.sendMessage(sessionId, message, processedFiles);
+
+      const result = await agentService.sendMessage(
+        sessionId,
+        message,
+        processedFiles
+      );
       return result;
     } catch (error) {
       logger.error(`Failed to send message in session ${sessionId}`, { error });
@@ -129,10 +136,10 @@ export function registerAgentTools(server: any) {
     getAgentTool,
     createSessionTool,
     sendMessageTool,
-    endSessionTool
+    endSessionTool,
   ];
 
-  tools.forEach(tool => {
+  tools.forEach((tool) => {
     if (!registeredTools.has(tool.name)) {
       server.tool(tool);
       registeredTools.add(tool.name);
@@ -141,9 +148,9 @@ export function registerAgentTools(server: any) {
       logger.debug(`Tool already registered, skipping: ${tool.name}`);
     }
   });
-  
+
   logger.info(`Registered ${registeredTools.size} agent tools`);
-};
+}
 
 export const agentTools = {
   listAgentsTool,

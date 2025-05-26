@@ -1,11 +1,11 @@
 /**
  * Main test file for Dust MCP Server
- * 
+ *
  * This file imports and runs all the test files for the Dust MCP methods:
  * - dust_agent_query
  * - dust_list_agents
  * - dust_get_agent_config
- * 
+ *
  * It also includes integration tests that verify the complete flow.
  */
 

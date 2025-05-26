@@ -23,7 +23,10 @@ export interface UpdateSessionInput {
 export interface SessionRepository {
   create(input: CreateSessionInput): Promise<ISession>;
   findById(sessionId: string): Promise<ISession | null>;
-  update(sessionId: string, input: UpdateSessionInput): Promise<ISession | null>;
+  update(
+    sessionId: string,
+    input: UpdateSessionInput
+  ): Promise<ISession | null>;
   delete(sessionId: string): Promise<boolean>;
   deleteExpired(): Promise<number>;
   findByUserId(userId: string): Promise<ISession[]>;

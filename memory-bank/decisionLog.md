@@ -19,7 +19,7 @@ This file records architectural and implementation decisions using a list format
 * **Performance**: In-memory store offers the best possible performance for single-instance deployments
 * **Simplicity**: No external dependencies required for basic functionality
 
-### Implementation Details
+### Memory Store Implementation
 
 #### Memory Store Framework
 
@@ -86,7 +86,7 @@ REDIS_URL=redis://localhost:6379
 * **Pub/Sub**: Built-in support for real-time features
 * **Atomic Operations**: Ensures data consistency in distributed environments
 
-### Implementation Details
+### Redis Implementation
 
 #### Redis Components
 
@@ -154,7 +154,7 @@ REDIS_URL=redis://localhost:6379
 
 #### Configuration
 
-* `SESSION_STORE_TYPE`: 'memory' | 'redis' (default: 'memory' in development, 'redis' in production)
+* `SESSION_STORE_TYPE`: 'memory' | 'redis' (default: 'memory' in development (default), 'redis' in production)
 * `REDIS_URL`: Only required when using Redis store
 * `SESSION_TTL`: Session time-to-live (applies to both stores)
 
@@ -166,40 +166,43 @@ REDIS_URL=redis://localhost:6379
 
 ---
 
-"2025-05-24 18:56:32" - Server-Sent Events (SSE) Support Implementation
+"2025-05-26 09:52:41" - Defer HTTP/SSE Implementation to Future Release
 
-## Decision 10: Implement SSE for Real-time Updates
+## Decision 10: Defer HTTP/SSE Implementation
 
-* Added support for Server-Sent Events (SSE) to enable real-time updates
-* Created new SSE endpoint at `/api/sse` for MCP clients
-* Integrated with existing session management system
-* Implemented connection management and keep-alive mechanism
-* Added rate limiting and connection limits
-* Documented SSE API for client integration
+* Deferred implementation of Server-Sent Events (SSE) to a future release
+* Removed SSE-related code and endpoints to simplify current implementation
+* Will revisit SSE implementation when real-time updates become a priority
+* Current focus remains on core MCP protocol functionality over STDIO
 
 ### Decision 10 Rationale
 
-* Enable real-time updates for MCP clients like Windsurf
-* Reduce server load by eliminating polling
-* Improve user experience with instant updates
-* Support Smithery and Pipedream integration
-* Maintain backward compatibility with existing clients
+* HTTP/SSE support is not required for initial MVP
+* Simplifies the current codebase and reduces maintenance overhead
+* Allows focusing on core MCP protocol functionality
+* Will implement when there's a clear requirement from clients
+* Reduces initial complexity and potential security surface
 
-### Decision 10 Implementation
+### Future Implementation Notes
 
-#### SSE Components
+When implementing in the future, consider:
 
-* `SSEController`: Handles SSE connections and events
-* `SSEService`: Manages active connections and broadcasting
-* `SSETypes`: TypeScript types for SSE events
-* `sseRoutes`: Express routes for SSE endpoint
-* `sseMiddleware`: Handles SSE connection setup and teardown
+* **SSE Components**
+  * `SSEController`: For handling SSE connections and events
+  * `SSEService`: For managing active connections and broadcasting
+  * `sseRoutes`: Express routes for SSE endpoint
+  * `sseMiddleware`: For connection management
 
-#### Configuration
+* **Configuration**
+  * `SSE_KEEP_ALIVE_INTERVAL`: For keep-alive messages
+  * `SSE_MAX_CONNECTIONS_PER_IP`: For connection limits
+  * `SSE_RECONNECTION_TIMEOUT`: For client reconnection handling
 
-* `SSE_KEEP_ALIVE_INTERVAL`: Interval for keep-alive messages (default: 30s)
-* `SSE_MAX_CONNECTIONS_PER_IP`: Maximum concurrent connections per IP (default: 5)
-* `SSE_RECONNECTION_TIMEOUT`: Client reconnection timeout (default: 30s)
+* **Integration Points**
+  * Session management system
+  * Authentication/authorization
+  * Rate limiting
+  * Logging and monitoring
 
 #### Security
 
@@ -306,7 +309,7 @@ REDIS_URL=redis://localhost:6379
   * Structure in place for protocol version validation
   * Documentation template for client-specific requirements
 
-#### Implementation Details
+### Test Implementation Details
 
 * **Test Coverage Requirements**:
   * Unit Tests: 90%+ coverage for all core modules
@@ -463,7 +466,7 @@ REDIS_URL=redis://localhost:6379
 ## Decision 1: MCP Server Architecture
 
 * Implement MCP server using the official MCP TypeScript SDK
-* Support both STDIO and HTTP/SSE transport modes
+* Support both STDIO and HTTP/SSE (later release) transport modes
 * Modular tool-based architecture for extensibility
 
 ### Decision 1 Rationale

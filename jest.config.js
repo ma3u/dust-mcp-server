@@ -34,20 +34,16 @@ export default {
     collectCoverage: true,
     coverageDirectory: 'coverage',
     coverageReporters: ['text', 'lcov'],
-    coveragePathIgnorePatterns: [
-        '/node_modules/'
-    ],
+    coveragePathIgnorePatterns: ['/node_modules/'],
     verbose: true,
     testEnvironmentOptions: {
         NODE_ENV: 'test',
-        url: 'http://localhost:3000'
+        url: 'http://localhost:3000',
     },
     setupFiles: ['<rootDir>/jest.setup.js'],
     setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
     testTimeout: 30000,
-    testPathIgnorePatterns: [
-        '/node_modules/'
-    ],
+    testPathIgnorePatterns: ['/node_modules/'],
     globals: {
         'ts-jest': {
             isolatedModules: true,
