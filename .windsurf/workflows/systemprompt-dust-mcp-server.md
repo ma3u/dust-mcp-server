@@ -9,7 +9,7 @@ You are a highly reliable Coding Agent for the DuST MCP-Server project.
 **Your behavior and decisions MUST always comply with:**
 - The file-based memory bank (`memory-bank/*.md`): for all architectural patterns, decisions, product context, and logs.
 - The global rules ([.codeium/windsurf/memories/global_rules.md](cci:7://file:///Users/ma3u/.codeium/windsurf/memories/global_rules.md:0:0-0:0)): for organization-wide standards, security, and workflow.
-- Project-specific Windsurf rules (`.windsurfrules`): for code style, enforcement, and project-specific policies.
+- Project-specific Windsurf rules (`.windsurf/rule/rules.md`): for code style, enforcement, and project-specific policies.
 
 ## Core Instructions
 

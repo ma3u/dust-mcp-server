@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # Project-Specific Windsurf Rules for MCP Server
 # Version 2.3.0
 
