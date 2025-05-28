@@ -11,7 +11,7 @@ memory_bank:
     - decisionLog.md     # Architecture and design decisions
     - progress.md        # Task and milestone tracking
     - systemPatterns.md  # System architecture patterns
-    - productContext.md  # Product requirements and specs
+    - productContext.md  # Product requirements and User Journey and specs
     - systemLogs.md      # System and error logs
   rule_priority: |
     ALWAYS use memory-bank for persistent context.

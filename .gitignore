@@ -23,6 +23,9 @@ debug/
 .env.development.local
 .env.test.local
 .env.production.local
+# Env backup files
+.env.backup
+*.env.backup
 
 # IDE and editor files
 .idea/

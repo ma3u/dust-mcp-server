@@ -3,6 +3,19 @@
 This file documents recurring patterns and standards used in the project.
 It is intended to be updated as the project evolves.
 
+---
+
+**2025-05-28**
+
+### Environment File Safety Rule
+
+- Never create backup files from `.env` (e.g., `.env.backup`, `*.env.backup`).
+- Never commit any `.env` backup or derivative files to the repository.
+- `.gitignore` must always include rules to ignore `.env.backup` and similar patterns.
+- Rationale: Prevent accidental exposure of sensitive configuration and simplify repository hygiene. See `.gitignore` for enforced patterns.
+
+---
+
 - "2025-04-10 17:06:31" - Updated based on code review and todo.md analysis.
 - "2025-05-19 10:45:00" - Added VS Code debugging configuration and patterns.
 - "2025-05-19 10:50:00" - Added testing patterns and updated debugging patterns.
